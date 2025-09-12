@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * Represents a single chess piece
@@ -10,7 +11,13 @@ import java.util.Collection;
  */
 public class ChessPiece {
 
+    public final ChessGame.TeamColor pieceColor;
+    public final ChessPiece.PieceType type;
+
+
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
+        this.pieceColor = pieceColor;
+        this.type = type;
     }
 
     /**
@@ -29,14 +36,24 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        throw new RuntimeException("Not implemented");
+        return pieceColor;
     }
 
     /**
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-        throw new RuntimeException("Not implemented");
+        return type;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        ChessPiece otherChessPiece = (ChessPiece) obj;
+        return type == otherChessPiece.getPieceType();
+        // return true if same piece type
     }
 
     /**
@@ -47,6 +64,17 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        var moves = new HashSet<ChessMove>();
+        // hardcode moves.add() things to test
+        ChessPosition endPosition = new ChessPosition(myPosition.getRow() + 3, myPosition.getColumn() - 2);
+        if (type.equals(ChessPiece.PieceType.BISHOP)) {
+            if (ChessMove.isLegal(myPosition.getRow() + 3, myPosition.getColumn() - 2)) {
+                ChessMove move = new ChessMove(myPosition, endPosition, null);
+                moves.add(move);
+            }
+        }
+        return moves;
     }
+
+
 }
