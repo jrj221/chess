@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -40,22 +41,26 @@ public class ChessMove {
         return promotionPiece;
     }
 
-    public static boolean outOfBounds(ChessPosition endPosition) {
+
+    public static List<Boolean> isLegal (ChessBoard board, ChessPosition endPosition, ChessPiece piece) {
+        // returns bool List(isLegal, enemyOccupied)
+        // check out of bounds
         int row = endPosition.getRow();
         int col = endPosition.getColumn();
-
         if (row < 1 || row > 8 || col < 1 || col > 8) {
-            return true; // out of bounds
+            return List.of(false, false); // out of bounds
         }
-        return false;
+        // check if occupied
+        ChessPiece otherPiece = board.getPiece(endPosition);
+        if (otherPiece != null) {
+            if (otherPiece.getTeamColor() != piece.getTeamColor()) {
+                return List.of(false, true); // add the endpoint, but don't keep searching the path
+            }
+            return List.of(false, false); // our team, path not legal
+        }
+        return List.of(true, false); // path clear
     }
 
-    public static boolean isOccupied(ChessBoard board, ChessPosition endPosition) {
-        if (board.getPiece(endPosition) != null) {
-            return true;
-        }
-        return false;
-    }
 
     @Override
     public String toString() {

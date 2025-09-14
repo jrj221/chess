@@ -73,63 +73,61 @@ public class ChessPiece {
         var piece = board.getPiece(myPosition);
         if (piece.getPieceType() == PieceType.BISHOP) {
             var endPositions = new ArrayList<ChessPosition>();
+            // how might I refactor so I'm not repeating same code 4 times?
+            // Queen is going to be the same but x6
 
             for (int i = 1; i < 8; i++) { //up-right
                 var endPosition = new ChessPosition(myPosition.getRow() + i, myPosition.getColumn() + i);
-                if (ChessMove.outOfBounds(endPosition)) {
-                    break; //path is out of bounds
+                List<Boolean> isLegal = ChessMove.isLegal(board, endPosition, piece);
+                if (isLegal.get(0)) { // legal move
+                    endPositions.add(endPosition);
+                    continue;
                 }
-                if (ChessMove.isOccupied(board, endPosition)) {
-                    var ex = board.getPiece(endPosition).getTeamColor();
-                    if (board.getPiece(endPosition).getTeamColor() != pieceColor) {
-                        endPositions.add(endPosition); // there's got to be a cleaner way of doing this
-                    }
-                    break; //occupied, path not clear
+                if (isLegal.get(1)) { // enemy present
+                    endPositions.add(endPosition);
                 }
-                endPositions.add(endPosition);
+                break;
             }
 
             for (int i = 1; i < 8; i++) { //up-left
                 var endPosition = new ChessPosition(myPosition.getRow() + i, myPosition.getColumn() - i);
-                if (ChessMove.outOfBounds(endPosition)) {
-                    break; //path is out of bounds
+                List<Boolean> isLegal = ChessMove.isLegal(board, endPosition, piece);
+                if (isLegal.get(0)) { // legal move
+                    endPositions.add(endPosition);
+                    continue;
                 }
-                if (ChessMove.isOccupied(board, endPosition)) {
-                    if (board.getPiece(endPosition).getTeamColor() != pieceColor) {
-                        endPositions.add(endPosition); // there's got to be a cleaner way of doing this
-                    }
-                    break; //occupied, path not clear
+                if (isLegal.get(1)) { // enemy present
+                    endPositions.add(endPosition);
                 }
-                endPositions.add(endPosition);
+                break;
             }
 
             for (int i = 1; i < 8; i++) { //down-right
                 var endPosition = new ChessPosition(myPosition.getRow() - i, myPosition.getColumn() + i);
-                if (ChessMove.outOfBounds(endPosition)) {
-                    break; //path is out of bounds
+                List<Boolean> isLegal = ChessMove.isLegal(board, endPosition, piece);
+                if (isLegal.get(0)) { // legal move
+                    endPositions.add(endPosition);
+                    continue;
                 }
-                if (ChessMove.isOccupied(board, endPosition)) {
-                    if (board.getPiece(endPosition).getTeamColor() != pieceColor) {
-                        endPositions.add(endPosition); // there's got to be a cleaner way of doing this
-                    }
-                    break; //occupied, path not clear
+                if (isLegal.get(1)) { // enemy present
+                    endPositions.add(endPosition);
                 }
-                endPositions.add(endPosition);
+                break;
             }
 
             for (int i = 1; i < 8; i++) { //down-left
                 var endPosition = new ChessPosition(myPosition.getRow() - i, myPosition.getColumn() - i);
-                if (ChessMove.outOfBounds(endPosition)) {
-                    break; //path is out of bounds
+                List<Boolean> isLegal = ChessMove.isLegal(board, endPosition, piece);
+                if (isLegal.get(0)) { // legal move
+                    endPositions.add(endPosition);
+                    continue;
                 }
-                if (ChessMove.isOccupied(board, endPosition)) {
-                    if (board.getPiece(endPosition).getTeamColor() != pieceColor) {
-                        endPositions.add(endPosition); // there's got to be a cleaner way of doing this
-                    }
-                    break; //occupied, path not clear
+                if (isLegal.get(1)) { // enemy present
+                    endPositions.add(endPosition);
                 }
-                endPositions.add(endPosition);
+                break;
             }
+
             endPositions.sort(Comparator.comparing(ChessPosition::toString));
 
 //            for (int col = 1; col < 9; col++) {
