@@ -1,7 +1,9 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * Represents a single chess piece
@@ -66,13 +68,39 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         var moves = new HashSet<ChessMove>();
         // hardcode moves.add() things to test
-        ChessPosition endPosition = new ChessPosition(myPosition.getRow() + 3, myPosition.getColumn() - 2);
-        if (type.equals(ChessPiece.PieceType.BISHOP)) {
-            if (ChessMove.isLegal(myPosition.getRow() + 3, myPosition.getColumn() - 2)) {
-                ChessMove move = new ChessMove(myPosition, endPosition, null);
-                moves.add(move);
+        var piece = board.getPiece(myPosition);
+        if (piece.getPieceType() == PieceType.BISHOP) {
+            var endPositions = new ArrayList<ChessPosition>();
+//            for (int i = 1; i < 8; i++) {
+//                endPositions.add(new ChessPosition(myPosition.getRow() + i, myPosition.getColumn() + i));
+//                endPositions.add(new ChessPosition(myPosition.getRow() - i, myPosition.getColumn() + i));
+//                endPositions.add(new ChessPosition(myPosition.getRow() + i, myPosition.getColumn() - i));
+//                endPositions.add(new ChessPosition(myPosition.getRow() - i, myPosition.getColumn() - i));
+//            } // my method seems more efficient (no secondary loop)
+            // but test won't recognize valid moves if they aren't in a specific order
+
+            for (int col = 1; col < 9; col++) {
+                for (int row = 1; row < 9; row++) {
+                    int diff_row = myPosition.getRow() - row;
+                    int diff_col = myPosition.getColumn() - col;
+                    if (Math.abs(diff_row) == Math.abs(diff_col)) {
+                        endPositions.add(new ChessPosition(row, col));
+                    }
+                }
+            }
+
+            for (var endPosition : endPositions) {
+                if (myPosition.equals(endPosition)) {
+                    continue; // refactor to isLegal if this is a problem for pieces beyond Bishop
+                }
+                if (ChessMove.isLegal(endPosition)) {
+                    var move = new ChessMove(myPosition, endPosition, null);
+                    moves.add(move);
+                }
             }
         }
+
+
         return moves;
     }
 

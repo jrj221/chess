@@ -19,7 +19,7 @@ public class ChessPosition {
 
     /**
      * @return which row this position is in
-     * 1 codes for the bottom row
+     * #1 is the bottom row
      */
     public int getRow() {
         return row;
@@ -27,7 +27,7 @@ public class ChessPosition {
 
     /**
      * @return which column this position is in
-     * 1 codes for the left row
+     * #1 is the leftmost col
      */
     public int getColumn() {
         return col;

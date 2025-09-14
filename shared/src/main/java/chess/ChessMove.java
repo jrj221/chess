@@ -40,8 +40,11 @@ public class ChessMove {
         return promotionPiece;
     }
 
-    public static boolean isLegal(int row, int col) {
-        if (row < 0 || row > 7 || col < 0 || col > 7) {
+    public static boolean isLegal(ChessPosition endPosition) {
+        int row = endPosition.getRow();
+        int col = endPosition.getColumn();
+
+        if (row < 0 || row > 8 || col < 0 || col > 8) {
             return false; // out of bounds
         }
         // implement if occupied
@@ -50,7 +53,9 @@ public class ChessMove {
 
     @Override
     public String toString() {
-        return String.format("Start: %s, End: %s", startPosition, endPosition);
+        //return String.format("Start: %s, End: %s", startPosition, endPosition);
+        return String.format("End: %s", endPosition);
+
     }
 
     //TODO edit equals and hashcode
