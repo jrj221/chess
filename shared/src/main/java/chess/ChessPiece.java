@@ -1,9 +1,6 @@
 package chess;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 /**
  * Represents a single chess piece
@@ -58,6 +55,11 @@ public class ChessPiece {
         // return true if same piece type
     }
 
+    @Override
+    public String toString() {
+        return String.format("%s %s", pieceColor, type);
+    }
+
     /**
      * Calculates all the positions a chess piece can move to
      * Does not take into account moves that are illegal due to leaving the king in
@@ -71,32 +73,78 @@ public class ChessPiece {
         var piece = board.getPiece(myPosition);
         if (piece.getPieceType() == PieceType.BISHOP) {
             var endPositions = new ArrayList<ChessPosition>();
-//            for (int i = 1; i < 8; i++) {
-//                endPositions.add(new ChessPosition(myPosition.getRow() + i, myPosition.getColumn() + i));
-//                endPositions.add(new ChessPosition(myPosition.getRow() - i, myPosition.getColumn() + i));
-//                endPositions.add(new ChessPosition(myPosition.getRow() + i, myPosition.getColumn() - i));
-//                endPositions.add(new ChessPosition(myPosition.getRow() - i, myPosition.getColumn() - i));
-//            } // my method seems more efficient (no secondary loop)
-            // but test won't recognize valid moves if they aren't in a specific order
 
-            for (int col = 1; col < 9; col++) {
-                for (int row = 1; row < 9; row++) {
-                    int diff_row = myPosition.getRow() - row;
-                    int diff_col = myPosition.getColumn() - col;
-                    if (Math.abs(diff_row) == Math.abs(diff_col)) {
-                        endPositions.add(new ChessPosition(row, col));
-                    }
+            for (int i = 1; i < 8; i++) { //up-right
+                var endPosition = new ChessPosition(myPosition.getRow() + i, myPosition.getColumn() + i);
+                if (ChessMove.outOfBounds(endPosition)) {
+                    break; //path is out of bounds
                 }
+                if (ChessMove.isOccupied(board, endPosition)) {
+                    var ex = board.getPiece(endPosition).getTeamColor();
+                    if (board.getPiece(endPosition).getTeamColor() != pieceColor) {
+                        endPositions.add(endPosition); // there's got to be a cleaner way of doing this
+                    }
+                    break; //occupied, path not clear
+                }
+                endPositions.add(endPosition);
             }
 
+            for (int i = 1; i < 8; i++) { //up-left
+                var endPosition = new ChessPosition(myPosition.getRow() + i, myPosition.getColumn() - i);
+                if (ChessMove.outOfBounds(endPosition)) {
+                    break; //path is out of bounds
+                }
+                if (ChessMove.isOccupied(board, endPosition)) {
+                    if (board.getPiece(endPosition).getTeamColor() != pieceColor) {
+                        endPositions.add(endPosition); // there's got to be a cleaner way of doing this
+                    }
+                    break; //occupied, path not clear
+                }
+                endPositions.add(endPosition);
+            }
+
+            for (int i = 1; i < 8; i++) { //down-right
+                var endPosition = new ChessPosition(myPosition.getRow() - i, myPosition.getColumn() + i);
+                if (ChessMove.outOfBounds(endPosition)) {
+                    break; //path is out of bounds
+                }
+                if (ChessMove.isOccupied(board, endPosition)) {
+                    if (board.getPiece(endPosition).getTeamColor() != pieceColor) {
+                        endPositions.add(endPosition); // there's got to be a cleaner way of doing this
+                    }
+                    break; //occupied, path not clear
+                }
+                endPositions.add(endPosition);
+            }
+
+            for (int i = 1; i < 8; i++) { //down-left
+                var endPosition = new ChessPosition(myPosition.getRow() - i, myPosition.getColumn() - i);
+                if (ChessMove.outOfBounds(endPosition)) {
+                    break; //path is out of bounds
+                }
+                if (ChessMove.isOccupied(board, endPosition)) {
+                    if (board.getPiece(endPosition).getTeamColor() != pieceColor) {
+                        endPositions.add(endPosition); // there's got to be a cleaner way of doing this
+                    }
+                    break; //occupied, path not clear
+                }
+                endPositions.add(endPosition);
+            }
+            endPositions.sort(Comparator.comparing(ChessPosition::toString));
+
+//            for (int col = 1; col < 9; col++) {
+//                for (int row = 1; row < 9; row++) {
+//                    int diff_row = myPosition.getRow() - row;
+//                    int diff_col = myPosition.getColumn() - col;
+//                    if (Math.abs(diff_row) == Math.abs(diff_col)) {
+//                        endPositions.add(new ChessPosition(row, col));
+//                    }
+//                }
+//            }
+
             for (var endPosition : endPositions) {
-                if (myPosition.equals(endPosition)) {
-                    continue; // refactor to isLegal if this is a problem for pieces beyond Bishop
-                }
-                if (ChessMove.isLegal(endPosition)) {
-                    var move = new ChessMove(myPosition, endPosition, null);
-                    moves.add(move);
-                }
+                var move = new ChessMove(myPosition, endPosition, null);
+                moves.add(move);
             }
         }
 

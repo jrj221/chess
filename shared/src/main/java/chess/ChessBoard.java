@@ -31,6 +31,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
+        var piece = board[position.getRow() - 1][position.getColumn() - 1];
         return board[position.getRow() - 1][position.getColumn() - 1];
     }
 

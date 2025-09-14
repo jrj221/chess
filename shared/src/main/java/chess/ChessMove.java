@@ -40,15 +40,21 @@ public class ChessMove {
         return promotionPiece;
     }
 
-    public static boolean isLegal(ChessPosition endPosition) {
+    public static boolean outOfBounds(ChessPosition endPosition) {
         int row = endPosition.getRow();
         int col = endPosition.getColumn();
 
-        if (row < 0 || row > 8 || col < 0 || col > 8) {
-            return false; // out of bounds
+        if (row < 1 || row > 8 || col < 1 || col > 8) {
+            return true; // out of bounds
         }
-        // implement if occupied
-        return true;
+        return false;
+    }
+
+    public static boolean isOccupied(ChessBoard board, ChessPosition endPosition) {
+        if (board.getPiece(endPosition) != null) {
+            return true;
+        }
+        return false;
     }
 
     @Override
