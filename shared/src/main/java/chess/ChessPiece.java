@@ -121,6 +121,10 @@ public class ChessPiece {
             List<List<Integer>> directions = Arrays.asList(Arrays.asList(1, 2), Arrays.asList(1, -2), Arrays.asList(-1, 2), Arrays.asList(-1, -2), Arrays.asList(2, 1), Arrays.asList(2, -1), Arrays.asList(-2, 1), Arrays.asList(-2, -1));
             endPositions = getEndPositions(false, directions, board, piece, myPosition);
         }
+        if (piece.getPieceType() == PieceType.KING) {
+            List<List<Integer>> directions = Arrays.asList(Arrays.asList(1, 1), Arrays.asList(1, -1), Arrays.asList(-1, 1), Arrays.asList(-1, -1), Arrays.asList(-1, 0), Arrays.asList(1, 0), Arrays.asList(0, -1), Arrays.asList(0, 1));
+            endPositions = getEndPositions(false, directions, board, piece, myPosition);
+        }
 
         endPositions.sort(Comparator.comparing(ChessPosition::toString));
         for (var endPosition : endPositions) {
