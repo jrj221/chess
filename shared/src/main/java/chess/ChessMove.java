@@ -41,7 +41,6 @@ public class ChessMove {
         return promotionPiece;
     }
 
-
     public static List<Boolean> isLegal (ChessBoard board, ChessPosition endPosition, ChessPiece piece) {
         // returns bool List(isLegal, enemyOccupied)
         // check out of bounds
