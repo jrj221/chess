@@ -71,10 +71,11 @@ public class ChessPiece {
         var moves = new HashSet<ChessMove>();
         // hardcode moves.add() things to test
         var piece = board.getPiece(myPosition);
+        var endPositions = new ArrayList<ChessPosition>();
         if (piece.getPieceType() == PieceType.BISHOP) {
-            var endPositions = new ArrayList<ChessPosition>();
             // how might I refactor so I'm not repeating same code 4 times?
             // Queen is going to be the same but x6
+            // make a structure with each direction (+1, -1) and then scale it in a for statement
 
             for (int i = 1; i < 8; i++) { //up-right
                 var endPosition = new ChessPosition(myPosition.getRow() + i, myPosition.getColumn() + i);
@@ -127,26 +128,174 @@ public class ChessPiece {
                 }
                 break;
             }
+        }
 
-            endPositions.sort(Comparator.comparing(ChessPosition::toString));
+        if (piece.getPieceType() == PieceType.QUEEN) {
+            for (int i = 1; i < 8; i++) { //left
+                var endPosition = new ChessPosition(myPosition.getRow(), myPosition.getColumn() - i);
+                List<Boolean> isLegal = ChessMove.isLegal(board, endPosition, piece);
+                if (isLegal.get(0)) { // legal move
+                    endPositions.add(endPosition);
+                    continue;
+                }
+                if (isLegal.get(1)) { // enemy present
+                    endPositions.add(endPosition);
+                }
+                break;
+            }
 
-//            for (int col = 1; col < 9; col++) {
-//                for (int row = 1; row < 9; row++) {
-//                    int diff_row = myPosition.getRow() - row;
-//                    int diff_col = myPosition.getColumn() - col;
-//                    if (Math.abs(diff_row) == Math.abs(diff_col)) {
-//                        endPositions.add(new ChessPosition(row, col));
-//                    }
-//                }
-//            }
+            for (int i = 1; i < 8; i++) { //down
+                var endPosition = new ChessPosition(myPosition.getRow() - i, myPosition.getColumn());
+                List<Boolean> isLegal = ChessMove.isLegal(board, endPosition, piece);
+                if (isLegal.get(0)) { // legal move
+                    endPositions.add(endPosition);
+                    continue;
+                }
+                if (isLegal.get(1)) { // enemy present
+                    endPositions.add(endPosition);
+                }
+                break;
+            }
 
-            for (var endPosition : endPositions) {
-                var move = new ChessMove(myPosition, endPosition, null);
-                moves.add(move);
+            for (int i = 1; i < 8; i++) { //right
+                var endPosition = new ChessPosition(myPosition.getRow(), myPosition.getColumn() + i);
+                List<Boolean> isLegal = ChessMove.isLegal(board, endPosition, piece);
+                if (isLegal.get(0)) { // legal move
+                    endPositions.add(endPosition);
+                    continue;
+                }
+                if (isLegal.get(1)) { // enemy present
+                    endPositions.add(endPosition);
+                }
+                break;
+            }
+
+            for (int i = 1; i < 8; i++) { //up
+                var endPosition = new ChessPosition(myPosition.getRow() + i, myPosition.getColumn());
+                List<Boolean> isLegal = ChessMove.isLegal(board, endPosition, piece);
+                if (isLegal.get(0)) { // legal move
+                    endPositions.add(endPosition);
+                    continue;
+                }
+                if (isLegal.get(1)) { // enemy present
+                    endPositions.add(endPosition);
+                }
+                break;
+            }
+
+            for (int i = 1; i < 8; i++) { //up-right
+                var endPosition = new ChessPosition(myPosition.getRow() + i, myPosition.getColumn() + i);
+                List<Boolean> isLegal = ChessMove.isLegal(board, endPosition, piece);
+                if (isLegal.get(0)) { // legal move
+                    endPositions.add(endPosition);
+                    continue;
+                }
+                if (isLegal.get(1)) { // enemy present
+                    endPositions.add(endPosition);
+                }
+                break;
+            }
+
+            for (int i = 1; i < 8; i++) { //up-left
+                var endPosition = new ChessPosition(myPosition.getRow() + i, myPosition.getColumn() - i);
+                List<Boolean> isLegal = ChessMove.isLegal(board, endPosition, piece);
+                if (isLegal.get(0)) { // legal move
+                    endPositions.add(endPosition);
+                    continue;
+                }
+                if (isLegal.get(1)) { // enemy present
+                    endPositions.add(endPosition);
+                }
+                break;
+            }
+
+            for (int i = 1; i < 8; i++) { //down-right
+                var endPosition = new ChessPosition(myPosition.getRow() - i, myPosition.getColumn() + i);
+                List<Boolean> isLegal = ChessMove.isLegal(board, endPosition, piece);
+                if (isLegal.get(0)) { // legal move
+                    endPositions.add(endPosition);
+                    continue;
+                }
+                if (isLegal.get(1)) { // enemy present
+                    endPositions.add(endPosition);
+                }
+                break;
+            }
+
+            for (int i = 1; i < 8; i++) { //down-left
+                var endPosition = new ChessPosition(myPosition.getRow() - i, myPosition.getColumn() - i);
+                List<Boolean> isLegal = ChessMove.isLegal(board, endPosition, piece);
+                if (isLegal.get(0)) { // legal move
+                    endPositions.add(endPosition);
+                    continue;
+                }
+                if (isLegal.get(1)) { // enemy present
+                    endPositions.add(endPosition);
+                }
+                break;
             }
         }
 
+        if (piece.getPieceType() == PieceType.ROOK) {
+            for (int i = 1; i < 8; i++) { //left
+                var endPosition = new ChessPosition(myPosition.getRow(), myPosition.getColumn() - i);
+                List<Boolean> isLegal = ChessMove.isLegal(board, endPosition, piece);
+                if (isLegal.get(0)) { // legal move
+                    endPositions.add(endPosition);
+                    continue;
+                }
+                if (isLegal.get(1)) { // enemy present
+                    endPositions.add(endPosition);
+                }
+                break;
+            }
 
+            for (int i = 1; i < 8; i++) { //down
+                var endPosition = new ChessPosition(myPosition.getRow() - i, myPosition.getColumn());
+                List<Boolean> isLegal = ChessMove.isLegal(board, endPosition, piece);
+                if (isLegal.get(0)) { // legal move
+                    endPositions.add(endPosition);
+                    continue;
+                }
+                if (isLegal.get(1)) { // enemy present
+                    endPositions.add(endPosition);
+                }
+                break;
+            }
+
+            for (int i = 1; i < 8; i++) { //right
+                var endPosition = new ChessPosition(myPosition.getRow(), myPosition.getColumn() + i);
+                List<Boolean> isLegal = ChessMove.isLegal(board, endPosition, piece);
+                if (isLegal.get(0)) { // legal move
+                    endPositions.add(endPosition);
+                    continue;
+                }
+                if (isLegal.get(1)) { // enemy present
+                    endPositions.add(endPosition);
+                }
+                break;
+            }
+
+            for (int i = 1; i < 8; i++) { //up
+                var endPosition = new ChessPosition(myPosition.getRow() + i, myPosition.getColumn());
+                List<Boolean> isLegal = ChessMove.isLegal(board, endPosition, piece);
+                if (isLegal.get(0)) { // legal move
+                    endPositions.add(endPosition);
+                    continue;
+                }
+                if (isLegal.get(1)) { // enemy present
+                    endPositions.add(endPosition);
+                }
+                break;
+            }
+
+        }
+
+        endPositions.sort(Comparator.comparing(ChessPosition::toString));
+        for (var endPosition : endPositions) {
+            var move = new ChessMove(myPosition, endPosition, null);
+            moves.add(move);
+        }
         return moves;
     }
 
