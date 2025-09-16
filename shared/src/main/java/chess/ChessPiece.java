@@ -63,6 +63,17 @@ public class ChessPiece {
     public List<ChessPosition> getEndPositions(boolean recursion, List<List<Integer>> directions, ChessBoard board, ChessPiece piece, ChessPosition myPosition) {
         var endPositions = new ArrayList<ChessPosition>();
         // moves for not recursion not implemented
+        if (!recursion) {
+            for (List<Integer> direction : directions) {
+                var endPosition = new ChessPosition(myPosition.getRow() + direction.get(0), myPosition.getColumn() + direction.get(1));
+                List<Boolean> isLegal = ChessMove.isLegal(board, endPosition, piece);
+                if (isLegal.get(0) || isLegal.get(1)) { // legal move
+                    endPositions.add(endPosition);
+                }
+            }
+            return endPositions;
+        }
+
         for (List<Integer> direction : directions) {
             for (int i = 1; i < 8; i++) {
                 var endPosition = new ChessPosition(myPosition.getRow() + (i * direction.get(0)), myPosition.getColumn() + (i * direction.get(1)));
@@ -105,6 +116,10 @@ public class ChessPiece {
         if (piece.getPieceType() == PieceType.ROOK) {
             List<List<Integer>> directions = Arrays.asList(Arrays.asList(0, -1), Arrays.asList(-1, 0), Arrays.asList(0, 1), Arrays.asList(1, 0));
             endPositions = getEndPositions(true, directions, board, piece, myPosition);
+        }
+        if (piece.getPieceType() == PieceType.KNIGHT) {
+            List<List<Integer>> directions = Arrays.asList(Arrays.asList(1, 2), Arrays.asList(1, -2), Arrays.asList(-1, 2), Arrays.asList(-1, -2), Arrays.asList(2, 1), Arrays.asList(2, -1), Arrays.asList(-2, 1), Arrays.asList(-2, -1));
+            endPositions = getEndPositions(false, directions, board, piece, myPosition);
         }
 
         endPositions.sort(Comparator.comparing(ChessPosition::toString));
