@@ -164,8 +164,23 @@ public class ChessPiece {
 
         endPositions.sort(Comparator.comparing(ChessPosition::toString));
         for (var endPosition : endPositions) {
-            var move = new ChessMove(myPosition, endPosition, null);
-            moves.add(move);
+            if (piece.getPieceType() == PieceType.PAWN) {
+                if (piece.getTeamColor() == ChessGame.TeamColor.WHITE && endPosition.getRow() == 8) {
+                    moves.add(new ChessMove(myPosition, endPosition, PieceType.KNIGHT));
+                    moves.add(new ChessMove(myPosition, endPosition, PieceType.QUEEN));
+                    moves.add(new ChessMove(myPosition, endPosition, PieceType.ROOK));
+                    moves.add(new ChessMove(myPosition, endPosition, PieceType.BISHOP));
+                    continue;
+                }
+                if (piece.getTeamColor() == ChessGame.TeamColor.BLACK && endPosition.getRow() == 1) {
+                    moves.add(new ChessMove(myPosition, endPosition, PieceType.KNIGHT));
+                    moves.add(new ChessMove(myPosition, endPosition, PieceType.QUEEN));
+                    moves.add(new ChessMove(myPosition, endPosition, PieceType.ROOK));
+                    moves.add(new ChessMove(myPosition, endPosition, PieceType.BISHOP));
+                    continue;
+                }
+            } // promotion moves
+            moves.add(new ChessMove(myPosition, endPosition, null));
         }
         return moves;
     }

@@ -66,7 +66,6 @@ public class ChessMove {
     public String toString() {
         //return String.format("Start: %s, End: %s", startPosition, endPosition);
         return String.format("End: %s", endPosition);
-
     }
 
     //TODO edit equals and hashcode
