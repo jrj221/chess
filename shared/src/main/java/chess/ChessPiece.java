@@ -62,7 +62,7 @@ public class ChessPiece {
 
     public List<ChessPosition> getEndPositions(boolean recursion, List<List<Integer>> directions, ChessBoard board, ChessPiece piece, ChessPosition myPosition) {
         var endPositions = new ArrayList<ChessPosition>();
-        // moves for not recursion not implemented
+
         if (!recursion) {
             for (List<Integer> direction : directions) {
                 var endPosition = new ChessPosition(myPosition.getRow() + direction.get(0), myPosition.getColumn() + direction.get(1));
@@ -91,6 +91,38 @@ public class ChessPiece {
         return endPositions;
     }
 
+    public List<ChessPosition> getPawnEndPositions(List<List<Integer>> directions, ChessBoard board, ChessPiece piece, ChessPosition myPosition) {
+        var endPositions = new ArrayList<ChessPosition>();
+        if (pieceColor == ChessGame.TeamColor.WHITE) {
+            var upPosition = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn());
+            if (board.getPiece(upPosition) == null) {endPositions.add(upPosition);}
+            if (myPosition.getRow() == 2) {
+                var upTwicePosition = new ChessPosition(myPosition.getRow() + 2, myPosition.getColumn());
+                if (board.getPiece(upTwicePosition) == null && board.getPiece(upPosition) == null) {endPositions.add(upTwicePosition);}
+                //both forward spaces unoccupied
+            }
+            var upLeftPosition = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() - 1);
+            // do i need to check both null and enemy? will attempting to check teamColor of null be bad?
+            if (board.getPiece(upLeftPosition) != null && board.getPiece(upLeftPosition).getTeamColor() != pieceColor) {endPositions.add(upLeftPosition);}
+            var upRightPosition = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() + 1);
+            if (board.getPiece(upRightPosition) != null && board.getPiece(upRightPosition).getTeamColor() != pieceColor) {endPositions.add(upRightPosition);}
+        }
+        if (pieceColor == ChessGame.TeamColor.BLACK) {
+            var downPosition = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn());
+            if (board.getPiece(downPosition) == null) {endPositions.add(downPosition);}
+            if (myPosition.getRow() == 7) {
+                var downTwicePosition = new ChessPosition(myPosition.getRow() - 2, myPosition.getColumn());
+                if (board.getPiece(downTwicePosition) == null && board.getPiece(downPosition) == null) {endPositions.add(downTwicePosition);}
+                // both downward spaces unoccupied
+            }
+            var downLeftPosition = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() - 1);
+            // do i need to check both null and enemy? will attempting to check teamColor of null be bad?
+            if (board.getPiece(downLeftPosition) != null && board.getPiece(downLeftPosition).getTeamColor() != pieceColor) {endPositions.add(downLeftPosition);}
+            var downRightPosition = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() + 1);
+            if (board.getPiece(downRightPosition) != null && board.getPiece(downRightPosition).getTeamColor() != pieceColor) {endPositions.add(downRightPosition);}
+        }
+        return endPositions;
+    }
 
     /**
      * Calculates all the positions a chess piece can move to
@@ -124,6 +156,10 @@ public class ChessPiece {
         if (piece.getPieceType() == PieceType.KING) {
             List<List<Integer>> directions = Arrays.asList(Arrays.asList(1, 1), Arrays.asList(1, -1), Arrays.asList(-1, 1), Arrays.asList(-1, -1), Arrays.asList(-1, 0), Arrays.asList(1, 0), Arrays.asList(0, -1), Arrays.asList(0, 1));
             endPositions = getEndPositions(false, directions, board, piece, myPosition);
+        }
+        if (piece.getPieceType() == PieceType.PAWN) {
+            List<List<Integer>> directions = Arrays.asList(Arrays.asList(1, 0), Arrays.asList(2, 0), Arrays.asList(1, 1), Arrays.asList(1, -1));
+            endPositions = getPawnEndPositions(directions, board, piece, myPosition);
         }
 
         endPositions.sort(Comparator.comparing(ChessPosition::toString));

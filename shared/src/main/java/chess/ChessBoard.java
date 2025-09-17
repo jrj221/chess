@@ -31,8 +31,12 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        var piece = board[position.getRow() - 1][position.getColumn() - 1];
-        return board[position.getRow() - 1][position.getColumn() - 1];
+        int row = position.getRow();
+        int col = position.getColumn();
+        if (row < 1 || row > 8 || col < 1 || col > 8) {
+            return null;
+        }
+        return board[row - 1][col - 1];
     }
 
     /**
