@@ -38,8 +38,6 @@ public class ChessPosition {
         return String.format("%d:%d", row, col);
     }
 
-    //TODO edit equals and hashcode
-
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {

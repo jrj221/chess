@@ -51,8 +51,13 @@ public class ChessPiece {
             return false;
         }
         ChessPiece otherChessPiece = (ChessPiece) obj;
-        return type == otherChessPiece.getPieceType();
+        return (type == otherChessPiece.getPieceType() && pieceColor == otherChessPiece.getTeamColor());
         // return true if same piece type
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pieceColor, type);
     }
 
     @Override

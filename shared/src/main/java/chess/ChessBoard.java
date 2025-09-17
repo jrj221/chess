@@ -1,6 +1,8 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -42,12 +44,39 @@ public class ChessBoard {
         return board[row - 1][col - 1];
     }
 
+    public void createTeam(ChessGame.TeamColor color) {
+        var rook = new ChessPiece(color, ChessPiece.PieceType.ROOK);
+        var knight = new ChessPiece(color, ChessPiece.PieceType.KNIGHT);
+        var bishop = new ChessPiece(color, ChessPiece.PieceType.BISHOP);
+        var queen = new ChessPiece(color, ChessPiece.PieceType.QUEEN);
+        var king = new ChessPiece(color, ChessPiece.PieceType.KING);
+        var pawn = new ChessPiece(color, ChessPiece.PieceType.PAWN);
+        var pieces = new ArrayList<>(Arrays.asList(rook, knight, bishop, queen, king, bishop, knight, rook));
+        if (color == ChessGame.TeamColor.WHITE) {
+            int i = 1;
+            for (ChessPiece piece : pieces) {
+                addPiece(new ChessPosition(1, i), piece);
+                addPiece(new ChessPosition(2, i), pawn);
+                i++;
+            }
+        }
+        if (color == ChessGame.TeamColor.BLACK) {
+            int i = 1;
+            for (ChessPiece piece : pieces) {
+                addPiece(new ChessPosition(8, i), piece);
+                addPiece(new ChessPosition(7, i), pawn);
+                i++;
+            }
+        }
+    }
+
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        createTeam(ChessGame.TeamColor.WHITE);
+        createTeam(ChessGame.TeamColor.BLACK);
     }
 
     @Override
