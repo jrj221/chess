@@ -41,26 +41,26 @@ public class ChessMove {
         return promotionPiece;
     }
 
-    public static List<Boolean> isLegal (ChessBoard board, ChessPosition endPosition, ChessPiece piece) {
-        // returns bool List(isLegal, enemyOccupied)
-
-        // check out of bounds
-        int row = endPosition.getRow();
-        int col = endPosition.getColumn();
-        if (row < 1 || row > 8 || col < 1 || col > 8) {
-            return List.of(false, false); // out of bounds
+    public static int isLegal(ChessBoard board, ChessPosition endPosition, ChessGame.TeamColor pieceColor) {
+        if (outOfBounds(endPosition)) {
+            return 1; // completely out of bounds
         }
-        // check if occupied
-        ChessPiece otherPiece = board.getPiece(endPosition);
-        if (otherPiece != null) {
-            if (otherPiece.getTeamColor() != piece.getTeamColor()) {
-                return List.of(false, true); // add the endpoint, but don't keep searching the path
-            }
-            return List.of(false, false); // our team, path not legal
+        else if (board.getPiece(endPosition) == null) {
+            return 2; // available space
         }
-        return List.of(true, false); // path clear
+        else if (board.getPiece(endPosition) != null && board.getPiece(endPosition).getTeamColor() != pieceColor) {
+            return 3; // enemy occupied
+        }
+        else {
+            return 4; // teammate occupied
+        }
     }
 
+    public static boolean outOfBounds(ChessPosition endPosition) {
+        int row = endPosition.getRow();
+        int col = endPosition.getColumn();
+        return row < 1 || row > 8 || col < 1 || col > 8;
+    }
 
     @Override
     public String toString() {
@@ -68,7 +68,7 @@ public class ChessMove {
         return String.format("End: %s", endPosition);
     }
 
-    //TODO edit equals and hashcode
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {

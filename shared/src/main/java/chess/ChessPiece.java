@@ -65,126 +65,136 @@ public class ChessPiece {
         return String.format("%s %s", pieceColor, type);
     }
 
-    public List<ChessPosition> getEndPositions(boolean recursion, List<List<Integer>> directions, ChessBoard board, ChessPiece piece, ChessPosition myPosition) {
-        var endPositions = new ArrayList<ChessPosition>();
-
-        if (!recursion) {
-            for (List<Integer> direction : directions) {
-                var endPosition = new ChessPosition(myPosition.getRow() + direction.get(0), myPosition.getColumn() + direction.get(1));
-                List<Boolean> isLegal = ChessMove.isLegal(board, endPosition, piece);
-                if (isLegal.get(0) || isLegal.get(1)) { // legal move
+    public HashSet<ChessPosition> getEndPositions(boolean recursion, ChessBoard board, ChessPosition myPosition, HashSet<ChessPosition> directions) {
+        var endPositions = new HashSet<ChessPosition>();
+        if (recursion) {
+            for (ChessPosition direction : directions) {
+                for (int i = 1; i <= 8; i++) {
+                    var endPosition = new ChessPosition(myPosition.getRow() + (i * direction.getRow()), myPosition.getColumn() + (i * direction.getColumn()));
+                    var legality = ChessMove.isLegal(board, endPosition, pieceColor);
+                    if (legality == 2) { // available spot
+                        endPositions.add(endPosition);
+                    }
+                    else if (legality == 3) { // enemy occupied, but don't recurse further
+                        endPositions.add(endPosition);
+                        break;
+                    }
+                    else { // path blocked by edge or teammate
+                        break;
+                    }
+                }
+            }
+        }
+        else { // no recursion
+            for (ChessPosition direction : directions) {
+                var endPosition = new ChessPosition(myPosition.getRow() + direction.getRow(), myPosition.getColumn() + direction.getColumn());
+                var legality = ChessMove.isLegal(board, endPosition, pieceColor);
+                if (legality == 2 || legality == 3) { // available or enemy capture
                     endPositions.add(endPosition);
                 }
             }
-            return endPositions;
         }
 
-        for (List<Integer> direction : directions) {
-            for (int i = 1; i < 8; i++) {
-                var endPosition = new ChessPosition(myPosition.getRow() + (i * direction.get(0)), myPosition.getColumn() + (i * direction.get(1)));
-                List<Boolean> isLegal = ChessMove.isLegal(board, endPosition, piece);
-                if (isLegal.get(0)) { // legal move
-                    endPositions.add(endPosition);
-                    continue;
-                }
-                if (isLegal.get(1)) { // enemy present
-                    endPositions.add(endPosition);
-                }
-                break;
-            }
-        }
         return endPositions;
     }
 
-    public List<ChessPosition> getPawnEndPositions(List<List<Integer>> directions, ChessBoard board, ChessPiece piece, ChessPosition myPosition) {
-        var endPositions = new ArrayList<ChessPosition>();
+    public HashSet<ChessPosition> getPawnEndPositions(ChessBoard board, ChessPosition myPosition) {
+        var endPositions = new HashSet<ChessPosition>();
         if (pieceColor == ChessGame.TeamColor.WHITE) {
-            var upPosition = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn());
-            if (board.getPiece(upPosition) == null) {endPositions.add(upPosition);}
-            if (myPosition.getRow() == 2) {
-                var upTwicePosition = new ChessPosition(myPosition.getRow() + 2, myPosition.getColumn());
-                if (board.getPiece(upTwicePosition) == null && board.getPiece(upPosition) == null) {endPositions.add(upTwicePosition);}
-                //both forward spaces unoccupied
-            }
-            var upLeftPosition = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() - 1);
-            // do i need to check both null and enemy? will attempting to check teamColor of null be bad?
-            if (board.getPiece(upLeftPosition) != null && board.getPiece(upLeftPosition).getTeamColor() != pieceColor) {endPositions.add(upLeftPosition);}
-            var upRightPosition = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() + 1);
-            if (board.getPiece(upRightPosition) != null && board.getPiece(upRightPosition).getTeamColor() != pieceColor) {endPositions.add(upRightPosition);}
+            var forward = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn());
+            if (board.getPiece(forward) == null) {endPositions.add(forward);}
+            var twiceForward = new ChessPosition(myPosition.getRow() + 2, myPosition.getColumn());
+            if (myPosition.getRow() == 2 && board.getPiece(twiceForward) == null && board.getPiece(forward) == null) {endPositions.add(twiceForward);}
+            var leftDiagonal = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn()-1);
+            var rightDiagonal = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn()+1);
+            if (!ChessMove.outOfBounds(leftDiagonal) && board.getPiece(leftDiagonal) != null && board.getPiece(leftDiagonal).getTeamColor() != pieceColor) {endPositions.add(leftDiagonal);}
+            if (!ChessMove.outOfBounds(rightDiagonal) && board.getPiece(rightDiagonal) != null && board.getPiece(rightDiagonal).getTeamColor() != pieceColor) {endPositions.add(rightDiagonal);}
         }
         if (pieceColor == ChessGame.TeamColor.BLACK) {
-            var downPosition = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn());
-            if (board.getPiece(downPosition) == null) {endPositions.add(downPosition);}
-            if (myPosition.getRow() == 7) {
-                var downTwicePosition = new ChessPosition(myPosition.getRow() - 2, myPosition.getColumn());
-                if (board.getPiece(downTwicePosition) == null && board.getPiece(downPosition) == null) {endPositions.add(downTwicePosition);}
-                // both downward spaces unoccupied
-            }
-            var downLeftPosition = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() - 1);
-            // do i need to check both null and enemy? will attempting to check teamColor of null be bad?
-            if (board.getPiece(downLeftPosition) != null && board.getPiece(downLeftPosition).getTeamColor() != pieceColor) {endPositions.add(downLeftPosition);}
-            var downRightPosition = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() + 1);
-            if (board.getPiece(downRightPosition) != null && board.getPiece(downRightPosition).getTeamColor() != pieceColor) {endPositions.add(downRightPosition);}
+            var downward = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn());
+            if (board.getPiece(downward) == null) {endPositions.add(downward);}
+            var twiceDownward = new ChessPosition(myPosition.getRow() - 2, myPosition.getColumn());
+            if (myPosition.getRow() == 7 && board.getPiece(twiceDownward) == null && board.getPiece(downward) == null) {endPositions.add(twiceDownward);}
+            var leftDiagonal = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn()-1);
+            var rightDiagonal = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn()+1);
+            if (!ChessMove.outOfBounds(leftDiagonal) && board.getPiece(leftDiagonal) != null && board.getPiece(leftDiagonal).getTeamColor() != pieceColor) {endPositions.add(leftDiagonal);}
+            if (!ChessMove.outOfBounds(rightDiagonal) && board.getPiece(rightDiagonal) != null && board.getPiece(rightDiagonal).getTeamColor() != pieceColor) {endPositions.add(rightDiagonal);}
         }
         return endPositions;
     }
-
     /**
      * Calculates all the positions a chess piece can move to
      * Does not take into account moves that are illegal due to leaving the king in
      * danger
-     *
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         var moves = new HashSet<ChessMove>();
-        // hardcode moves.add() things to test
-        var piece = board.getPiece(myPosition);
-        List<ChessPosition> endPositions = null;
-
-        if (piece.getPieceType() == PieceType.BISHOP) {
-            List<List<Integer>> directions = Arrays.asList(Arrays.asList(1, 1),Arrays.asList(-1, 1),Arrays.asList(1, -1),Arrays.asList(-1, -1));
-            endPositions = getEndPositions(true, directions, board, piece, myPosition);
+        var directions = new HashSet<ChessPosition>();
+        var endPositions = new HashSet<ChessPosition>();
+        if (board.getPiece(myPosition).getPieceType() == PieceType.BISHOP) {
+            directions.add(new ChessPosition(1,1));
+            directions.add(new ChessPosition(1,-1));
+            directions.add(new ChessPosition(-1,1));
+            directions.add(new ChessPosition(-1,-1));
+            endPositions = getEndPositions(true, board, myPosition, directions);
         }
-        if (piece.getPieceType() == PieceType.QUEEN) {
-            List<List<Integer>> directions = Arrays.asList(Arrays.asList(0, -1), Arrays.asList(-1, 0), Arrays.asList(0, 1), Arrays.asList(1, 0), Arrays.asList(1, 1),Arrays.asList(-1, 1),Arrays.asList(1, -1),Arrays.asList(-1, -1));
-            endPositions = getEndPositions(true, directions, board, piece, myPosition);
+        if (board.getPiece(myPosition).getPieceType() == PieceType.ROOK) {
+            directions.add(new ChessPosition(1,0));
+            directions.add(new ChessPosition(0,-1));
+            directions.add(new ChessPosition(-1,0));
+            directions.add(new ChessPosition(0,1));
+            endPositions = getEndPositions(true, board, myPosition, directions);
         }
-        if (piece.getPieceType() == PieceType.ROOK) {
-            List<List<Integer>> directions = Arrays.asList(Arrays.asList(0, -1), Arrays.asList(-1, 0), Arrays.asList(0, 1), Arrays.asList(1, 0));
-            endPositions = getEndPositions(true, directions, board, piece, myPosition);
+        if (board.getPiece(myPosition).getPieceType() == PieceType.QUEEN) {
+            directions.add(new ChessPosition(1,1));
+            directions.add(new ChessPosition(1,-1));
+            directions.add(new ChessPosition(-1,1));
+            directions.add(new ChessPosition(-1,-1));
+            directions.add(new ChessPosition(1,0));
+            directions.add(new ChessPosition(0,-1));
+            directions.add(new ChessPosition(-1,0));
+            directions.add(new ChessPosition(0,1));
+            endPositions = getEndPositions(true, board, myPosition, directions);
         }
-        if (piece.getPieceType() == PieceType.KNIGHT) {
-            List<List<Integer>> directions = Arrays.asList(Arrays.asList(1, 2), Arrays.asList(1, -2), Arrays.asList(-1, 2), Arrays.asList(-1, -2), Arrays.asList(2, 1), Arrays.asList(2, -1), Arrays.asList(-2, 1), Arrays.asList(-2, -1));
-            endPositions = getEndPositions(false, directions, board, piece, myPosition);
+        if (board.getPiece(myPosition).getPieceType() == PieceType.KING) {
+            directions.add(new ChessPosition(1,1));
+            directions.add(new ChessPosition(1,-1));
+            directions.add(new ChessPosition(-1,1));
+            directions.add(new ChessPosition(-1,-1));
+            directions.add(new ChessPosition(1,0));
+            directions.add(new ChessPosition(0,-1));
+            directions.add(new ChessPosition(-1,0));
+            directions.add(new ChessPosition(0,1));
+            endPositions = getEndPositions(false, board, myPosition, directions);
         }
-        if (piece.getPieceType() == PieceType.KING) {
-            List<List<Integer>> directions = Arrays.asList(Arrays.asList(1, 1), Arrays.asList(1, -1), Arrays.asList(-1, 1), Arrays.asList(-1, -1), Arrays.asList(-1, 0), Arrays.asList(1, 0), Arrays.asList(0, -1), Arrays.asList(0, 1));
-            endPositions = getEndPositions(false, directions, board, piece, myPosition);
+        if (board.getPiece(myPosition).getPieceType() == PieceType.KNIGHT) {
+            directions.add(new ChessPosition(2,1));
+            directions.add(new ChessPosition(2,-1));
+            directions.add(new ChessPosition(-2,1));
+            directions.add(new ChessPosition(-2,-1));
+            directions.add(new ChessPosition(1,2));
+            directions.add(new ChessPosition(1,-2));
+            directions.add(new ChessPosition(-1,2));
+            directions.add(new ChessPosition(-1,-2));
+            endPositions = getEndPositions(false, board, myPosition, directions);
         }
-        if (piece.getPieceType() == PieceType.PAWN) {
-            List<List<Integer>> directions = Arrays.asList(Arrays.asList(1, 0), Arrays.asList(2, 0), Arrays.asList(1, 1), Arrays.asList(1, -1));
-            endPositions = getPawnEndPositions(directions, board, piece, myPosition);
-        }
-
-        endPositions.sort(Comparator.comparing(ChessPosition::toString));
-        for (var endPosition : endPositions) {
-            if (piece.getPieceType() == PieceType.PAWN) {
-                if (piece.getTeamColor() == ChessGame.TeamColor.WHITE && endPosition.getRow() == 8) {
+        if (board.getPiece(myPosition).getPieceType() == PieceType.PAWN) {
+            endPositions = getPawnEndPositions(board, myPosition);
+            for (ChessPosition endPosition : endPositions) {
+                if (endPosition.getRow() == 1 || endPosition.getRow() == 8) {
                     moves.add(new ChessMove(myPosition, endPosition, PieceType.KNIGHT));
-                    moves.add(new ChessMove(myPosition, endPosition, PieceType.QUEEN));
                     moves.add(new ChessMove(myPosition, endPosition, PieceType.ROOK));
                     moves.add(new ChessMove(myPosition, endPosition, PieceType.BISHOP));
-                    continue;
-                }
-                if (piece.getTeamColor() == ChessGame.TeamColor.BLACK && endPosition.getRow() == 1) {
-                    moves.add(new ChessMove(myPosition, endPosition, PieceType.KNIGHT));
                     moves.add(new ChessMove(myPosition, endPosition, PieceType.QUEEN));
-                    moves.add(new ChessMove(myPosition, endPosition, PieceType.ROOK));
-                    moves.add(new ChessMove(myPosition, endPosition, PieceType.BISHOP));
-                    continue;
                 }
-            } // promotion moves
+                else {
+                    moves.add(new ChessMove(myPosition, endPosition, null));
+                }
+            }
+            return moves;
+        }
+        for (ChessPosition endPosition : endPositions) {
             moves.add(new ChessMove(myPosition, endPosition, null));
         }
         return moves;

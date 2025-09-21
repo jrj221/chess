@@ -1,9 +1,6 @@
 package chess;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * A chessboard that can hold and rearrange chess pieces.
@@ -44,39 +41,27 @@ public class ChessBoard {
         return board[row - 1][col - 1];
     }
 
-    public void createTeam(ChessGame.TeamColor color) {
-        var rook = new ChessPiece(color, ChessPiece.PieceType.ROOK);
-        var knight = new ChessPiece(color, ChessPiece.PieceType.KNIGHT);
-        var bishop = new ChessPiece(color, ChessPiece.PieceType.BISHOP);
-        var queen = new ChessPiece(color, ChessPiece.PieceType.QUEEN);
-        var king = new ChessPiece(color, ChessPiece.PieceType.KING);
-        var pawn = new ChessPiece(color, ChessPiece.PieceType.PAWN);
-        var pieces = new ArrayList<>(Arrays.asList(rook, knight, bishop, queen, king, bishop, knight, rook));
-        if (color == ChessGame.TeamColor.WHITE) {
-            int i = 1;
-            for (ChessPiece piece : pieces) {
-                addPiece(new ChessPosition(1, i), piece);
-                addPiece(new ChessPosition(2, i), pawn);
-                i++;
-            }
-        }
-        if (color == ChessGame.TeamColor.BLACK) {
-            int i = 1;
-            for (ChessPiece piece : pieces) {
-                addPiece(new ChessPosition(8, i), piece);
-                addPiece(new ChessPosition(7, i), pawn);
-                i++;
-            }
-        }
-    }
-
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        createTeam(ChessGame.TeamColor.WHITE);
-        createTeam(ChessGame.TeamColor.BLACK);
+        for (int i = 1; i <= 8; i++) {
+            addPiece(new ChessPosition(2, i), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+            addPiece(new ChessPosition(7, i), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+        }
+        var teams = List.of(ChessGame.TeamColor.WHITE, ChessGame.TeamColor.BLACK);
+        for (ChessGame.TeamColor team : teams) {
+            int row = (team == ChessGame.TeamColor.WHITE ?  1 : 8);
+            addPiece(new ChessPosition(row, 1), new ChessPiece(team, ChessPiece.PieceType.ROOK));
+            addPiece(new ChessPosition(row, 2), new ChessPiece(team, ChessPiece.PieceType.KNIGHT));
+            addPiece(new ChessPosition(row, 3), new ChessPiece(team, ChessPiece.PieceType.BISHOP));
+            addPiece(new ChessPosition(row, 4), new ChessPiece(team, ChessPiece.PieceType.QUEEN));
+            addPiece(new ChessPosition(row, 5), new ChessPiece(team, ChessPiece.PieceType.KING));
+            addPiece(new ChessPosition(row, 6), new ChessPiece(team, ChessPiece.PieceType.BISHOP));
+            addPiece(new ChessPosition(row, 7), new ChessPiece(team, ChessPiece.PieceType.KNIGHT));
+            addPiece(new ChessPosition(row, 8), new ChessPiece(team, ChessPiece.PieceType.ROOK));
+        }
     }
 
     @Override
