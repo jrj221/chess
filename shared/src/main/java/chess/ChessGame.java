@@ -59,11 +59,13 @@ public class ChessGame {
         var validMoves = new HashSet<ChessMove>();
         for (ChessMove possibleMove : possibleMoves) { // test move, add if safe
             board.removePiece(startPosition, piece);
-            board.addPiece(possibleMove.endPosition, piece);
+            var currPiece = board.getPiece(possibleMove.getEndPosition()); // test move might eliminate an enemy
+            board.addPiece(possibleMove.getEndPosition(), piece);
             if (!isInCheck(piece.getTeamColor())) {
                 validMoves.add(possibleMove);
             }
-            board.removePiece(possibleMove.endPosition, piece);
+            board.removePiece(possibleMove.getEndPosition(), piece);
+            board.addPiece(possibleMove.getEndPosition(), currPiece);
             board.addPiece(startPosition, piece);
         }
         return validMoves;
@@ -107,11 +109,12 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
         var enemyPositions = new HashSet<ChessPosition>();
         ChessPosition kingPosition = null;
-        for (int i = 0; i < 8; i++) { // find king and also all enemy pieces
-            for (int j = 0; j < 8; j++) {
+        for (int i = 1; i < 9; i++) { // find king and also all enemy pieces
+            for (int j = 1; j < 9; j++) {
                 var piece = board.getPiece(new ChessPosition(i, j));
                 if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING &&  piece.getTeamColor() == teamColor) {
                     kingPosition = new ChessPosition(i, j);
+                    break;
                 }
                 else if (piece != null && piece.getTeamColor() != teamColor) { // enemy piece
                     enemyPositions.add(new ChessPosition(i, j));
