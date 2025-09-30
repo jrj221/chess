@@ -65,7 +65,7 @@ public class ChessPiece {
         return String.format("%s %s", pieceColor, type);
     }
 
-    public static HashSet<ChessPosition> getEndPositions(boolean recursion, ChessBoard board, ChessPosition myPosition, HashSet<ChessPosition> directions) {
+    public HashSet<ChessPosition> getEndPositions(boolean recursion, ChessBoard board, ChessPosition myPosition, HashSet<ChessPosition> directions) {
         var endPositions = new HashSet<ChessPosition>();
         if (recursion) {
             for (ChessPosition direction : directions) {
@@ -98,7 +98,7 @@ public class ChessPiece {
         return endPositions;
     }
 
-    public static HashSet<ChessPosition> getPawnEndPositions(ChessBoard board, ChessPosition myPosition) {
+    public HashSet<ChessPosition> getPawnEndPositions(ChessBoard board, ChessPosition myPosition) {
         var endPositions = new HashSet<ChessPosition>();
         if (pieceColor == ChessGame.TeamColor.WHITE) {
             var forward = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn());
@@ -128,7 +128,7 @@ public class ChessPiece {
      * danger
      * @return Collection of valid moves
      */
-    public static Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         var moves = new HashSet<ChessMove>();
         var directions = new HashSet<ChessPosition>();
         var endPositions = new HashSet<ChessPosition>();

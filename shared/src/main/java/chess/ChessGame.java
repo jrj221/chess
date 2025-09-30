@@ -53,7 +53,8 @@ public class ChessGame {
         if (board.getPiece(startPosition) == null) {
             return null;
         }
-        Collection<ChessMove> possibleMoves = ChessPiece.pieceMoves(board, startPosition);
+        ChessPiece piece = board.getPiece(startPosition);
+        Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition);
         var validMoves = new HashSet<ChessMove>();
         for (ChessMove possibleMove : possibleMoves) {
             // if doesn't put king in check
@@ -69,15 +70,20 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        // throw exception if it's not your turn
         ChessPosition startPosition = move.startPosition;
         ChessPosition endPosition = move.endPosition;
+        var piece = board.getPiece(startPosition);
+        if (piece.getTeamColor() != currentTurn) {
+            throw new InvalidMoveException(); // not your turn
+        }
         var validMoves = validMoves(startPosition);
         for (ChessMove validMove : validMoves) {
             if (validMove  == move) {
-                board.removePiece(startPosition, ); // how am i supposed to know what the piece is?
+                board.removePiece(startPosition, piece);
+                board.addPiece(endPosition, piece);
             }
         }
+        throw new InvalidMoveException(); // not valid move
 
     }
 
@@ -118,7 +124,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        this.board = board;
     }
 
     /**
