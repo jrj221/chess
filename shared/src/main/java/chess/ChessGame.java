@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -9,6 +10,8 @@ import java.util.Collection;
  * signature of the existing methods.
  */
 public class ChessGame {
+    ChessBoard board; // should this be instantiazed?
+    ChessGame.TeamColor currentTurn = TeamColor.WHITE;
 
     public ChessGame() {
 
@@ -18,7 +21,7 @@ public class ChessGame {
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        throw new RuntimeException("Not implemented");
+        return currentTurn;
     }
 
     /**
@@ -27,7 +30,8 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        throw new RuntimeException("Not implemented");
+        currentTurn = currentTurn == TeamColor.WHITE ? TeamColor.WHITE : TeamColor.BLACK;
+        //switches turn
     }
 
     /**
@@ -46,7 +50,16 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        if (board.getPiece(startPosition) == null) {
+            return null;
+        }
+        Collection<ChessMove> possibleMoves = ChessPiece.pieceMoves(board, startPosition);
+        var validMoves = new HashSet<ChessMove>();
+        for (ChessMove possibleMove : possibleMoves) {
+            // if doesn't put king in check
+            validMoves.add(possibleMove);
+        }
+        return validMoves;
     }
 
     /**
@@ -56,7 +69,16 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        // throw exception if it's not your turn
+        ChessPosition startPosition = move.startPosition;
+        ChessPosition endPosition = move.endPosition;
+        var validMoves = validMoves(startPosition);
+        for (ChessMove validMove : validMoves) {
+            if (validMove  == move) {
+                board.removePiece(startPosition, ); // how am i supposed to know what the piece is?
+            }
+        }
+
     }
 
     /**
