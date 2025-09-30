@@ -57,9 +57,14 @@ public class ChessGame {
         ChessPiece piece = board.getPiece(startPosition);
         Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition);
         var validMoves = new HashSet<ChessMove>();
-        for (ChessMove possibleMove : possibleMoves) {
-            // if doesn't put king in check
-            validMoves.add(possibleMove);
+        for (ChessMove possibleMove : possibleMoves) { // test move, add if safe
+            board.removePiece(startPosition, piece);
+            board.addPiece(possibleMove.endPosition, piece);
+            if (!isInCheck(piece.getTeamColor())) {
+                validMoves.add(possibleMove);
+            }
+            board.removePiece(possibleMove.endPosition, piece);
+            board.addPiece(startPosition, piece);
         }
         return validMoves;
     }
@@ -100,7 +105,30 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        var enemyPositions = new HashSet<ChessPosition>();
+        ChessPosition kingPosition = null;
+        for (int i = 0; i < 8; i++) { // find king and also all enemy pieces
+            for (int j = 0; j < 8; j++) {
+                var piece = board.getPiece(new ChessPosition(i, j));
+                if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING &&  piece.getTeamColor() == teamColor) {
+                    kingPosition = new ChessPosition(i, j);
+                }
+                else if (piece != null && piece.getTeamColor() != teamColor) { // enemy piece
+                    enemyPositions.add(new ChessPosition(i, j));
+                }
+            }
+        }
+
+        for (ChessPosition enemyPosition : enemyPositions) {
+            var enemyPiece = board.getPiece(enemyPosition);
+            var enemyMoves = enemyPiece.pieceMoves(board, enemyPosition);
+            for (ChessMove enemyMove : enemyMoves) {
+                if (enemyMove.endPosition.equals(kingPosition)) {
+                    return true; // in check
+                }
+            }
+        }
+        return false; // not in check
     }
 
     /**
