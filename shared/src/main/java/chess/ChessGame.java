@@ -11,11 +11,12 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessGame {
-    ChessBoard board; // should this be instantiazed?
+    ChessBoard board;
     ChessGame.TeamColor currentTurn = TeamColor.WHITE;
 
     public ChessGame() {
-
+        this.board = new ChessBoard();
+        board.resetBoard(); //creating a game object will start with a default board
     }
 
     /**
@@ -144,7 +145,7 @@ public class ChessGame {
         for (int i = 1; i < 9; i++) { // find ally pieces
             for (int j = 1; j < 9; j++) {
                 var piece = board.getPiece(new ChessPosition(i, j));
-                if (piece != null && piece.getTeamColor() == teamColor) { // enemy piece
+                if (piece != null && piece.getTeamColor() == teamColor) { // ally piece
                     allyPositions.add(new ChessPosition(i, j));
                 }
             }
@@ -177,7 +178,27 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if (isInCheck(teamColor)) {
+            return false; // no stalemate if in danger
+        }
+        var allyPositions = new HashSet<ChessPosition>();
+        //TODO: refactor getting team positions or something?
+        for (int i = 1; i < 9; i++) { // find ally pieces
+            for (int j = 1; j < 9; j++) {
+                var piece = board.getPiece(new ChessPosition(i, j));
+                if (piece != null && piece.getTeamColor() == teamColor) { // ally piece
+                    allyPositions.add(new ChessPosition(i, j));
+                }
+            }
+        }
+
+        for (ChessPosition allyPosition : allyPositions) {
+            var allyMoves = validMoves(allyPosition);
+                if (allyMoves.size() > 0) {
+                    return false; // possible moves, no stalemate
+                }
+        }
+        return true; // no moves, no danger = stalemate
     }
 
     /**
