@@ -114,7 +114,6 @@ public class ChessGame {
                 var piece = board.getPiece(new ChessPosition(i, j));
                 if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING &&  piece.getTeamColor() == teamColor) {
                     kingPosition = new ChessPosition(i, j);
-                    break;
                 }
                 else if (piece != null && piece.getTeamColor() != teamColor) { // enemy piece
                     enemyPositions.add(new ChessPosition(i, j));
@@ -141,7 +140,33 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        var allyPositions = new HashSet<ChessPosition>();
+        for (int i = 1; i < 9; i++) { // find ally pieces
+            for (int j = 1; j < 9; j++) {
+                var piece = board.getPiece(new ChessPosition(i, j));
+                if (piece != null && piece.getTeamColor() == teamColor) { // enemy piece
+                    allyPositions.add(new ChessPosition(i, j));
+                }
+            }
+        }
+
+        for (ChessPosition allyPosition : allyPositions) {
+            var allyPiece = board.getPiece(allyPosition);
+            var allyMoves = allyPiece.pieceMoves(board, allyPosition);
+            for (ChessMove allyMove : allyMoves) {
+                var startPosition = allyMove.getStartPosition();
+                board.removePiece(startPosition, allyPiece);
+                var currPiece = board.getPiece(allyMove.getEndPosition()); // test move might eliminate an enemy
+                board.addPiece(allyMove.getEndPosition(), allyPiece);
+                if (!isInCheck(allyPiece.getTeamColor())) {
+                    return false; // there exists a move where you aren't in check
+                }
+                board.removePiece(allyMove.getEndPosition(), allyPiece);
+                board.addPiece(allyMove.getEndPosition(), currPiece);
+                board.addPiece(startPosition, allyPiece);
+            }
+        }
+        return true; // no move found that doesn't put you in check
     }
 
     /**
