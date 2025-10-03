@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -87,7 +88,7 @@ public class ChessGame {
         }
         var validMoves = validMoves(startPosition);
         for (ChessMove validMove : validMoves) {
-            if (validMove.equals(move)) {
+            if (validMove.equals(move)) { // if valid, make move
                 board.removePiece(startPosition, piece);
                 board.addPiece(endPosition, piece);
                 if (piece.getPieceType() == ChessPiece.PieceType.PAWN && move.getPromotionPiece() != null) {
@@ -101,26 +102,36 @@ public class ChessGame {
 
     }
 
-    /**
-     * Determines if the given team is in check
+
+    public List<Object> getTeam(ChessGame.TeamColor myTeamColor, boolean wantAllies) {
+        ChessPosition kingPosition = null;
+        var teamPositions = new HashSet<ChessPosition>();
+        for (int i = 1; i < 9; i++) { // find king and also all pieces (enemy or allies)
+            for (int j = 1; j < 9; j++) {
+                var piece = board.getPiece(new ChessPosition(i, j));
+                if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING &&  piece.getTeamColor() == myTeamColor) {
+                    kingPosition = new ChessPosition(i, j);
+                }
+                else if (wantAllies && piece != null && piece.getTeamColor() == myTeamColor) { // ally piece
+                    teamPositions.add(new ChessPosition(i, j));
+                }
+                else if (!wantAllies && piece != null && piece.getTeamColor() != myTeamColor) { // enemy piece
+                    teamPositions.add(new ChessPosition(i, j));
+                }
+            }
+        }
+        return List.of(kingPosition, teamPositions);
+    }
+    /**Determines if the given team is in check
      *
      * @param teamColor which team to check for check
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        var enemyPositions = new HashSet<ChessPosition>();
-        ChessPosition kingPosition = null;
-        for (int i = 1; i < 9; i++) { // find king and also all enemy pieces
-            for (int j = 1; j < 9; j++) {
-                var piece = board.getPiece(new ChessPosition(i, j));
-                if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING &&  piece.getTeamColor() == teamColor) {
-                    kingPosition = new ChessPosition(i, j);
-                }
-                else if (piece != null && piece.getTeamColor() != teamColor) { // enemy piece
-                    enemyPositions.add(new ChessPosition(i, j));
-                }
-            }
-        }
+        // find king and also all enemy pieces
+        var kingAndEnemies = getTeam(teamColor, false);
+        var kingPosition = (ChessPosition) kingAndEnemies.get(0);
+        var enemyPositions = (HashSet<ChessPosition>) kingAndEnemies.get(1);
 
         for (ChessPosition enemyPosition : enemyPositions) {
             var enemyPiece = board.getPiece(enemyPosition);
@@ -141,15 +152,8 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        var allyPositions = new HashSet<ChessPosition>();
-        for (int i = 1; i < 9; i++) { // find ally pieces
-            for (int j = 1; j < 9; j++) {
-                var piece = board.getPiece(new ChessPosition(i, j));
-                if (piece != null && piece.getTeamColor() == teamColor) { // ally piece
-                    allyPositions.add(new ChessPosition(i, j));
-                }
-            }
-        }
+        var kingAndAllies = getTeam(teamColor, true);
+        var allyPositions = (HashSet<ChessPosition>) kingAndAllies.get(1);
 
         for (ChessPosition allyPosition : allyPositions) {
             var allyPiece = board.getPiece(allyPosition);
@@ -181,16 +185,8 @@ public class ChessGame {
         if (isInCheck(teamColor)) {
             return false; // no stalemate if in danger
         }
-        var allyPositions = new HashSet<ChessPosition>();
-        //TODO: refactor getting team positions or something?
-        for (int i = 1; i < 9; i++) { // find ally pieces
-            for (int j = 1; j < 9; j++) {
-                var piece = board.getPiece(new ChessPosition(i, j));
-                if (piece != null && piece.getTeamColor() == teamColor) { // ally piece
-                    allyPositions.add(new ChessPosition(i, j));
-                }
-            }
-        }
+        var kingAndAllies = getTeam(teamColor, true);
+        var allyPositions = (HashSet<ChessPosition>) kingAndAllies.get(1);
 
         for (ChessPosition allyPosition : allyPositions) {
             var allyMoves = validMoves(allyPosition);
