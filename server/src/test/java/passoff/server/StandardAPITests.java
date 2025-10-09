@@ -20,15 +20,10 @@ public class StandardAPITests {
 
     // ### TESTING SETUP/CLEANUP ###
 
-    @AfterAll
-    static void stopServer() {
-        server.stop();
-    }
-
     @BeforeAll
     public static void init() {
         server = new Server();
-        var port = server.run(0);
+        var port = server.run(0); // 0 means find any available port
         System.out.println("Started test HTTP server on " + port);
 
         serverFacade = new TestServerFacade("localhost", Integer.toString(port));
@@ -44,6 +39,11 @@ public class StandardAPITests {
         //one user already logged in
         TestAuthResult regResult = serverFacade.register(existingUser);
         existingAuth = regResult.getAuthToken();
+    }
+
+    @AfterAll
+    static void stopServer() {
+        server.stop();
     }
 
     // ### SERVER-LEVEL API TESTS ###
