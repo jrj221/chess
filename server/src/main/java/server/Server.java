@@ -1,16 +1,23 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccess;
+import dataaccess.MemoryDataAccess;
+import datamodel.*;
 import io.javalin.*;
 import io.javalin.http.Context;
+import service.*;
 
 import java.util.Map;
 
 public class Server {
 
     private final Javalin server;
+    private final UserService userService;
 
     public Server() {
+        var dataAccess = new MemoryDataAccess();
+        userService = new UserService(dataAccess);
         server = Javalin.create(config -> config.staticFiles.add("web"));
         server.delete("db", ctx -> ctx.result("{}"));
         server.post("user", ctx -> register(ctx));
@@ -18,17 +25,21 @@ public class Server {
 
 
     }
+    // start with the simplest method (functions) and later on rework into
+    // classes or interfaces to see if it needs to change
+    private void register(Context ctx)  {
+        try {
+            var serializer = new Gson();
+            String requestJson = ctx.body();
+            var user = serializer.fromJson(requestJson, UserData.class); // "username":"john" looks like a map so lets convert to that
 
-    private void register(Context ctx) {
-        var serializer = new Gson();
-        String requestJson = ctx.body();
-        var request = serializer.fromJson(requestJson, Map.class); // "username":"john" looks like a map so lets convert to that
-
-        // call to service and actually register
-        var response = Map.of("username", request.get("username"), "authToken", "1234"); // you'd actually want to grab a real authtoken
-        var responseJson = serializer.toJson(response);
-        ctx.result(responseJson);
-
+            var authData = userService.register(user);
+            ctx.result(serializer.toJson(authData));
+        } catch (Exception ex) {
+            // when userService throws an exception>
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(403).result(message);
+        }
     }
 
     public int run(int desiredPort) {
