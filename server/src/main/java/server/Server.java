@@ -21,6 +21,7 @@ public class Server {
         server = Javalin.create(config -> config.staticFiles.add("web"));
         server.delete("db", ctx -> ctx.result("{}"));
         server.post("user", ctx -> register(ctx));
+        server.post("session", ctx -> login(ctx));
         // Register your endpoints and exception handlers here.
 
 
@@ -31,14 +32,26 @@ public class Server {
         try {
             var serializer = new Gson();
             String requestJson = ctx.body();
-            var user = serializer.fromJson(requestJson, UserData.class); // "username":"john" looks like a map so lets convert to that
-
+            var user = serializer.fromJson(requestJson, RegisterRequest.class);
             var authData = userService.register(user);
-            ctx.result(serializer.toJson(authData));
+            ctx.result(serializer.toJson(authData)); // response
         } catch (Exception ex) {
             // when userService throws an exception>
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(403).result(message);
+        }
+    }
+
+    private void login(Context ctx) {
+        try {
+            var serializer = new Gson();
+            String requestJson = ctx.body();
+            var user = serializer.fromJson(requestJson, LoginRequest.class);
+            var authData = userService.login(user);
+            ctx.result(serializer.toJson(authData));
+        } catch (Exception ex) {
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(401).result(message);
         }
     }
 

@@ -1,5 +1,6 @@
 package service;
 
+import java.util.Objects;
 import java.util.UUID;
 import dataaccess.*;
 import datamodel.*; // AuthData and UserData and the like
@@ -13,17 +14,23 @@ public class UserService {
         //var authData = new AuthData(user.username(), generateAuthToken());
     }
 
-    public AuthData register(UserData user) throws Exception {
+    public AuthData register(RegisterRequest user) throws Exception {
         if (dataAccess.getUser(user.username()) != null) {
             throw new Exception("Already exists");
         }
-        dataAccess.createUser(user);
-        return new AuthData(user.username(), generateAuthToken());
+        dataAccess.createUser(new UserData(user.username(), user.email(), user.password()));
+        return dataAccess.createAuth(user.username());
     }
 
-    private String generateAuthToken() {
-
-        return UUID.randomUUID().toString(); //hardcoded for now
+    public AuthData login(LoginRequest user) throws Exception {
+        UserData userData = dataAccess.getUser(user.username());
+        if (userData == null) {
+            throw new Exception("Unauthorized Login"); // no existing user
+        }
+        if (!Objects.equals(user.password(), userData.password())) { // bad match
+            throw new Exception("Unauthorized Login"); // wrong password
+        }
+        return dataAccess.createAuth(user.username());
     }
 
 
