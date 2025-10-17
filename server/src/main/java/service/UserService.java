@@ -1,5 +1,6 @@
 package service;
 
+import java.util.UUID;
 import dataaccess.*;
 import datamodel.*; // AuthData and UserData and the like
 import io.javalin.http.UnauthorizedResponse;
@@ -21,7 +22,8 @@ public class UserService {
     }
 
     private String generateAuthToken() {
-        return "xyz"; //hardcoded for now
+
+        return UUID.randomUUID().toString(); //hardcoded for now
     }
 
 
