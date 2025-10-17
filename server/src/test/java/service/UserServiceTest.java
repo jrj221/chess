@@ -3,6 +3,7 @@ package service;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
 import datamodel.LoginRequest;
+import datamodel.LogoutRequest;
 import datamodel.RegisterRequest;
 import datamodel.UserData;
 import org.junit.jupiter.api.Test;
@@ -14,33 +15,33 @@ class UserServiceTest {
     @Test
     void registerSuccessful() throws Exception {
         DataAccess db = new MemoryDataAccess();
-        var user = new RegisterRequest("joe", "joe@email.com", "password");
+        var registerRequest = new RegisterRequest("joe", "joe@email.com", "password");
         var userService = new UserService(db);
-        var authData = userService.register(user);
+        var authData = userService.register(registerRequest);
         assertNotNull(authData);
-        assertEquals(user.username(), authData.username());
+        assertEquals(registerRequest.username(), authData.username());
         assertTrue(!authData.authToken().isEmpty()); // non empty string
     }
 
     @Test
     void registerUserTaken() throws Exception { // why are these throwing exceptions
         DataAccess db = new MemoryDataAccess();
-        var user = new RegisterRequest("joe", "joe@email.com", "password");
+        var registerRequest = new RegisterRequest("joe", "joe@email.com", "password");
         var userService = new UserService(db);
-        userService.register(user);
-        assertThrows(Exception.class, () -> userService.register(user));
+        userService.register(registerRequest);
+        assertThrows(Exception.class, () -> userService.register(registerRequest));
     }
 
     @Test
     void loginSuccessful() throws Exception {
         DataAccess db = new MemoryDataAccess();
         var userService = new UserService(db);
-        var registerUser = new RegisterRequest("joe", "joe@email.com", "password");
-        var loginUser = new LoginRequest("joe", "password");
-        userService.register(registerUser);
-        var authData = userService.login(loginUser);
+        var registerRequest = new RegisterRequest("joe", "joe@email.com", "password");
+        var loginRequest = new LoginRequest("joe", "password");
+        userService.register(registerRequest);
+        var authData = userService.login(loginRequest);
         assertNotNull(authData);
-        assertEquals(loginUser.username(), authData.username());
+        assertEquals(loginRequest.username(), authData.username());
         assertTrue(!authData.authToken().isEmpty()); // non empty string
     }
 
@@ -48,19 +49,45 @@ class UserServiceTest {
     void loginNoExistingUser() throws Exception {
         DataAccess db = new MemoryDataAccess();
         var userService = new UserService(db);
-        var loginUser = new LoginRequest("joe", "password");
-        assertThrows(Exception.class, () -> userService.login(loginUser));
+        var loginRequest = new LoginRequest("joe", "password");
+        assertThrows(Exception.class, () -> userService.login(loginRequest));
     }
 
     @Test
     void loginWrongPassword() throws Exception {
         DataAccess db = new MemoryDataAccess();
         var userService = new UserService(db);
-        var loginUser = new LoginRequest("joe", "BADpassword");
-        var registerUser = new RegisterRequest("joe", "joe@email.com", "password");
-        userService.register(registerUser);
-        assertThrows(Exception.class, () -> userService.login(loginUser));
+        var registerRequest = new RegisterRequest("joe", "joe@email.com", "password");
+        userService.register(registerRequest);
+        var loginRequest = new LoginRequest("joe", "BADpassword");
+        assertThrows(Exception.class, () -> userService.login(loginRequest));
     }
+
+    @Test
+    void logoutSuccessful() throws Exception {
+        DataAccess db = new MemoryDataAccess();
+        var userService = new UserService(db);
+        var registerRequest = new RegisterRequest("joe", "joe@email.com", "password");
+        var authData = userService.register(registerRequest);
+        var loginRequest = new LoginRequest("joe", "password");
+        userService.login(loginRequest);
+        var logoutRequest = new LogoutRequest(authData.authToken());
+        assertDoesNotThrow(() -> userService.logout(logoutRequest));
+    }
+
+    @Test
+    void logoutBadAuthToken() throws Exception {
+        DataAccess db = new MemoryDataAccess();
+        var userService = new UserService(db);
+        var registerRequest = new RegisterRequest("joe", "joe@email.com", "password");
+        userService.register(registerRequest);
+        var loginRequest = new LoginRequest("joe", "password");
+        userService.login(loginRequest);
+        String badAuthToken = "bad";
+        var logoutRequest = new LogoutRequest(badAuthToken);
+        assertThrows(Exception.class, () -> userService.logout(logoutRequest));
+    }
+
 
     @Test
     void clear() {

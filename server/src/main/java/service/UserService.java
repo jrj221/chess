@@ -33,5 +33,13 @@ public class UserService {
         return dataAccess.createAuth(user.username());
     }
 
+    public void logout(LogoutRequest logoutRequest) throws Exception {
+        var authData = dataAccess.getAuth(logoutRequest.authToken());
+        if (authData == null) {
+            throw new Exception("Unauthorized Logout");
+        }
+        dataAccess.deleteAuth(logoutRequest.authToken());
+    }
+
 
 }

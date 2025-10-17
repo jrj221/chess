@@ -22,6 +22,7 @@ public class Server {
         server.delete("db", ctx -> ctx.result("{}"));
         server.post("user", ctx -> register(ctx));
         server.post("session", ctx -> login(ctx));
+        server.delete("session", ctx -> logout(ctx));
         // Register your endpoints and exception handlers here.
 
 
@@ -49,6 +50,19 @@ public class Server {
             var user = serializer.fromJson(requestJson, LoginRequest.class);
             var authData = userService.login(user);
             ctx.result(serializer.toJson(authData));
+        } catch (Exception ex) {
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(401).result(message);
+        }
+    }
+
+    private void logout(Context ctx) {
+        try {
+            var serializer = new Gson();
+            String requestJson = ctx.body();
+            var logoutRequest = serializer.fromJson(requestJson, LogoutRequest.class);
+            userService.logout(logoutRequest);
+            ctx.result();
         } catch (Exception ex) {
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(401).result(message);
