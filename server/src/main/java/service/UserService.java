@@ -69,7 +69,7 @@ public class UserService {
         if (gameData == null) {
             throw new NoExistingGameException("No game found");
         }
-        if ((joinGameRequest.playerColor().equals("BLACK") && gameData.blackUsername() == null) || (joinGameRequest.playerColor().equals("WHITE") && gameData.whiteUsername() == null)) {
+        if ((joinGameRequest.playerColor().equals("BLACK") && gameData.blackUsername() != null) || (joinGameRequest.playerColor().equals("WHITE") && gameData.whiteUsername() != null)) {
             throw new AlreadyTakenException("Color not available");
         }
         String username = authData.username();

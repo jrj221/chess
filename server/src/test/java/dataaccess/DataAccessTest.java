@@ -55,7 +55,12 @@ class DataAccessTest {
 
     @Test
     void createGameData() {
-        //Implement
+        DataAccess db = new MemoryDataAccess();
+        var myGameID = db.createGameData("myGame");
+        assertEquals("myGame", db.getGame(myGameID).gameName());
+        assertNull(db.getGame(myGameID).whiteUsername());
+        assertNull(db.getGame(myGameID).blackUsername());
+        assertNull(db.getGame(myGameID).game());
     }
 
     @Test
@@ -82,7 +87,11 @@ class DataAccessTest {
 
     @Test
     void joinGame() {
-        //IMPLEMENT
+        DataAccess db = new MemoryDataAccess();
+        var game1ID = db.createGameData("game1");
+        db.joinGame("joe", game1ID, "WHITE");
+        var gameData = db.getGame(game1ID);
+        assertEquals("joe", gameData.whiteUsername());
     }
 
     @Test
