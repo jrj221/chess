@@ -1,11 +1,7 @@
 package service;
 
-import dataaccess.DataAccess;
-import dataaccess.MemoryDataAccess;
-import datamodel.LoginRequest;
-import datamodel.LogoutRequest;
-import datamodel.RegisterRequest;
-import datamodel.UserData;
+import dataaccess.*;
+import datamodel.*;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -87,8 +83,6 @@ class UserServiceTest {
         var logoutRequest = new LogoutRequest(badAuthToken);
         assertThrows(Exception.class, () -> userService.logout(logoutRequest));
     }
-
-    @Test
 
 
     @Test

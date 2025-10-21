@@ -52,13 +52,13 @@ public class UserService {
         return gameID;
     }
 
-    public ArrayList listGames(ListGamesRequest listGamesRequest) throws Exception {
-        var authData = dataAccess.getAuth(listGamesRequest.authToken());
-        if (authData == null) {
-            throw new Exception("Unauthorized Logout");
-        }
-
-    }
+//    public ArrayList listGames(ListGamesRequest listGamesRequest) throws Exception {
+//        var authData = dataAccess.getAuth(listGamesRequest.authToken());
+//        if (authData == null) {
+//            throw new Exception("Unauthorized Logout");
+//        }
+//        return
+//    }
 
 
 }
