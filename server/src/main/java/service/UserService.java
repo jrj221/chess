@@ -76,5 +76,7 @@ public class UserService {
         dataAccess.joinGame(username, joinGameRequest.gameID(), joinGameRequest.playerColor());
     }
 
-
+    public void clear() {
+        dataAccess.clear();
+    }
 }

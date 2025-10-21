@@ -98,7 +98,11 @@ class DataAccessTest {
     void clear() {
         DataAccess db = new MemoryDataAccess();
         db.createUser(new UserData("joe", "joe@email.com", "password"));
+        AuthData authData = db.createAuth("joe");
+        int myGameID = db.createGameData("myGame");
         db.clear();
         assertNull(db.getUser("joe"));
+        assertNull(db.getAuth(authData.authToken()));
+        assertNull(db.getGame(myGameID));
     }
 }

@@ -33,7 +33,6 @@ public class GameServiceTest {
         assertThrows(Exception.class, () -> userService.createGame(createGameRequest));
     }
 
-
     @Test
     void listGamesSuccessful() throws Exception {
         DataAccess db = new MemoryDataAccess();
@@ -111,5 +110,21 @@ public class GameServiceTest {
         var joinGameRequest = new JoinGameRequest(authData.authToken(), "WHITE", gameID);
         userService.joinGame(joinGameRequest);
         assertThrows(AlreadyTakenException.class, () -> userService.joinGame(joinGameRequest));
+    }
+
+    @Test
+    void clear() throws Exception {
+        DataAccess db = new MemoryDataAccess();
+        var userService = new UserService(db);
+        // Create UserData and AuthData
+        var registerRequest = new RegisterRequest("joe", "joe@email.com", "password");
+        AuthData authData = userService.register(registerRequest);
+        // Create GameData
+        var createGameRequest = new CreateGameRequest(authData.authToken(), "testGame");
+        userService.createGame(createGameRequest);
+
+        userService.clear();
+        AuthData newAuthData = assertDoesNotThrow(() -> userService.register(registerRequest)); // no user or auth in order for this to work
+        assertTrue(userService.listGames(new ListGamesRequest(newAuthData.authToken())).isEmpty());
     }
 }
