@@ -1,15 +1,15 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.DataAccess;
+import dataaccess.AlreadyTakenException;
 import dataaccess.MemoryDataAccess;
+import dataaccess.NoExistingGameException;
 import datamodel.*;
 import io.javalin.*;
 import io.javalin.http.Context;
 import service.*;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 public class Server {
 
@@ -26,6 +26,7 @@ public class Server {
         server.delete("session", ctx -> logout(ctx));
         server.get("game", ctx -> listGames(ctx));
         server.post("game", ctx -> createGame(ctx));
+        server.put("game", ctx -> joinGame(ctx));
         // Register your endpoints and exception handlers here.
 
 
@@ -96,6 +97,26 @@ public class Server {
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(401).result(message);
         }
+    }
+
+    private void joinGame(Context ctx) {
+        try {
+            var serializer = new Gson();
+            String requestJson = ctx.body();
+            var joinGameRequest = serializer.fromJson(requestJson, JoinGameRequest.class);
+            userService.joinGame(joinGameRequest);
+
+        } catch (NoExistingGameException ex) {
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(500).result(message);
+        } catch (AlreadyTakenException ex) {
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(401).result(message);
+        } catch (Exception ex) {
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(403).result(message);
+        }
+        ctx.result();
     }
 
     public int run(int desiredPort) {

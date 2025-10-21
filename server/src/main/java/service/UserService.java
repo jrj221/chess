@@ -2,10 +2,10 @@ package service;
 
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.UUID;
+
 import dataaccess.*;
 import datamodel.*; // AuthData and UserData and the like
-import io.javalin.http.UnauthorizedResponse;
+
 
 public class UserService {
     private final DataAccess dataAccess;
@@ -58,6 +58,22 @@ public class UserService {
             throw new Exception("Unauthorized Logout");
         }
         return dataAccess.getAllGames();
+    }
+
+    public void joinGame(JoinGameRequest joinGameRequest) throws Exception {
+        var authData = dataAccess.getAuth(joinGameRequest.authToken());
+        if (authData == null) {
+            throw new Exception("Unauthorized Logout");
+        }
+        var gameData = dataAccess.getGame(joinGameRequest.gameID());
+        if (gameData == null) {
+            throw new NoExistingGameException("No game found");
+        }
+        if ((joinGameRequest.playerColor().equals("BLACK") && gameData.blackUsername() == null) || (joinGameRequest.playerColor().equals("WHITE") && gameData.whiteUsername() == null)) {
+            throw new AlreadyTakenException("Color not available");
+        }
+        String username = authData.username();
+        dataAccess.joinGame(username, joinGameRequest.gameID(), joinGameRequest.playerColor());
     }
 
 

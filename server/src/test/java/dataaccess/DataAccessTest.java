@@ -81,6 +81,11 @@ class DataAccessTest {
     }
 
     @Test
+    void joinGame() {
+        //IMPLEMENT
+    }
+
+    @Test
     void clear() {
         DataAccess db = new MemoryDataAccess();
         db.createUser(new UserData("joe", "joe@email.com", "password"));

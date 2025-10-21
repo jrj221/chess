@@ -75,6 +75,18 @@ public class MemoryDataAccess implements DataAccess {
         return allGames;
     }
 
+    @Override
+    public void joinGame(String username, int gameID, String playerColor) {
+        var gameData = games.get(gameID);
+        if (playerColor.equals("WHITE")) {
+            gameData = new GameData(gameID, username, gameData.blackUsername(), gameData.gameName(), gameData.game());
+        }
+        else {
+            gameData = new GameData(gameID, gameData.whiteUsername(), username, gameData.gameName(), gameData.game());
+        }
+        games.put(gameID, gameData);
+    }
+
     private String generateAuthToken() {
         return UUID.randomUUID().toString();
     }
