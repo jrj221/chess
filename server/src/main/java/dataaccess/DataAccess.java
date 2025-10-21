@@ -2,6 +2,8 @@ package dataaccess;
 
 import datamodel.*;
 
+import java.util.ArrayList;
+
 public interface DataAccess {
     UserData getUser(String username);
     void createUser(UserData user);
@@ -10,4 +12,5 @@ public interface DataAccess {
     AuthData getAuth(String authToken);
     void deleteAuth(String authToken);
     int createGameData(String gameName);
+    ArrayList<GameData> getAllGames();
 }

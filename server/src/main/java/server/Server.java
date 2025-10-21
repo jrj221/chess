@@ -8,6 +8,7 @@ import io.javalin.*;
 import io.javalin.http.Context;
 import service.*;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 public class Server {
@@ -23,7 +24,7 @@ public class Server {
         server.post("user", ctx -> register(ctx));
         server.post("session", ctx -> login(ctx));
         server.delete("session", ctx -> logout(ctx));
-//        server.get("game", ctx -> listGames(ctx));
+        server.get("game", ctx -> listGames(ctx));
         server.post("game", ctx -> createGame(ctx));
         // Register your endpoints and exception handlers here.
 
@@ -71,18 +72,18 @@ public class Server {
         }
     }
 
-//    private void listGames(Context ctx) {
-//        try {
-//            var serializer = new Gson();
-//            String requestJson = ctx.body();
-//            var listGamesRequest = serializer.fromJson(requestJson, ListGamesRequest.class);
-//            userService.listGames(listGamesRequest);
-//            ctx.result(); // UNFINISHED
-//        } catch (Exception ex) {
-//            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
-//            ctx.status(401).result(message);
-//        }
-//    }
+    private void listGames(Context ctx) {
+        try {
+            var serializer = new Gson();
+            String requestJson = ctx.body();
+            var listGamesRequest = serializer.fromJson(requestJson, ListGamesRequest.class);
+            ArrayList<GameData> allGames = userService.listGames(listGamesRequest);
+            ctx.result(serializer.toJson(allGames));
+        } catch (Exception ex) {
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(401).result(message);
+        }
+    }
 
     private void createGame(Context ctx) {
         try {

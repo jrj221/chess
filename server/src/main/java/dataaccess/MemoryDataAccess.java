@@ -2,6 +2,7 @@ package dataaccess;
 
 import datamodel.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 // if a DataAccess method fails, it should throw a DataAccessException
@@ -49,6 +50,16 @@ public class MemoryDataAccess implements DataAccess {
         int gameID = 124;
         games.put(gameID, new GameData(gameID, null, null, gameName, null));
         return gameID;
+    }
+
+    @Override
+    public ArrayList<GameData> getAllGames() {
+        var allGames = new ArrayList<GameData>();
+        var keys = games.keySet();
+        for (var key : keys) {
+            allGames.add(games.get(key));
+        }
+        return allGames;
     }
 
     private String generateAuthToken() {
