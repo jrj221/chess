@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import javax.xml.crypto.Data;
 
+import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class DataAccessTest {
@@ -56,6 +58,27 @@ class DataAccessTest {
         //Implement
     }
 
+    @Test
+    void getGame() {
+        DataAccess db = new MemoryDataAccess();
+        var game1ID = db.createGameData("game1");
+        assertNotNull(db.getGame(game1ID));
+        assertEquals("game1", db.getGame(game1ID).gameName());
+    }
+
+    @Test
+    void getAllGames() {
+        DataAccess db = new MemoryDataAccess();
+        var game1 = db.createGameData("game1");
+        var game2 = db.createGameData("game2");
+        var game3 = db.createGameData("game3");
+        var myGames = new ArrayList<GameData>();
+        myGames.add(db.getGame(game1));
+        myGames.add(db.getGame(game2));
+        myGames.add(db.getGame(game3));
+        ArrayList<GameData> allGames = db.getAllGames();
+        assertEquals(myGames, allGames);
+    }
 
     @Test
     void clear() {

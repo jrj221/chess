@@ -12,5 +12,6 @@ public interface DataAccess {
     AuthData getAuth(String authToken);
     void deleteAuth(String authToken);
     int createGameData(String gameName);
+    GameData getGame(int gameID);
     ArrayList<GameData> getAllGames();
 }
