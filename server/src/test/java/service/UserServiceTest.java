@@ -88,6 +88,8 @@ class UserServiceTest {
         assertThrows(Exception.class, () -> userService.logout(logoutRequest));
     }
 
+    @Test
+
 
     @Test
     void clear() {

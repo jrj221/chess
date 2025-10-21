@@ -9,4 +9,5 @@ public interface DataAccess {
     AuthData createAuth(String username);
     AuthData getAuth(String authToken);
     void deleteAuth(String authToken);
+    int createGameData(String gameName);
 }

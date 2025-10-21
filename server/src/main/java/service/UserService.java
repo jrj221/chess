@@ -1,5 +1,6 @@
 package service;
 
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.UUID;
 import dataaccess.*;
@@ -39,6 +40,24 @@ public class UserService {
             throw new Exception("Unauthorized Logout");
         }
         dataAccess.deleteAuth(logoutRequest.authToken());
+    }
+
+    public int createGame(CreateGameRequest createGameRequest) throws Exception {
+        var authData = dataAccess.getAuth(createGameRequest.authToken());
+        if (authData == null) {
+            throw new Exception("Unauthorized Logout");
+        }
+        String gameName = createGameRequest.gameName();
+        int gameID = dataAccess.createGameData(gameName);
+        return gameID;
+    }
+
+    public ArrayList listGames(ListGamesRequest listGamesRequest) throws Exception {
+        var authData = dataAccess.getAuth(listGamesRequest.authToken());
+        if (authData == null) {
+            throw new Exception("Unauthorized Logout");
+        }
+
     }
 
 

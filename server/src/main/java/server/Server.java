@@ -23,6 +23,8 @@ public class Server {
         server.post("user", ctx -> register(ctx));
         server.post("session", ctx -> login(ctx));
         server.delete("session", ctx -> logout(ctx));
+        server.get("game", ctx -> listGames(ctx));
+        server.post("game", ctx -> createGame(ctx));
         // Register your endpoints and exception handlers here.
 
 
@@ -63,6 +65,32 @@ public class Server {
             var logoutRequest = serializer.fromJson(requestJson, LogoutRequest.class);
             userService.logout(logoutRequest);
             ctx.result();
+        } catch (Exception ex) {
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(401).result(message);
+        }
+    }
+
+    private void listGames(Context ctx) {
+        try {
+            var serializer = new Gson();
+            String requestJson = ctx.body();
+            var listGamesRequest = serializer.fromJson(requestJson, ListGamesRequest.class);
+            userService.listGames(listGamesRequest);
+            ctx.result(); // UNFINISHED
+        } catch (Exception ex) {
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(401).result(message);
+        }
+    }
+
+    private void createGame(Context ctx) {
+        try {
+            var serializer = new Gson();
+            String requestJson = ctx.body();
+            var createGameRequest = serializer.fromJson(requestJson, CreateGameRequest.class);
+            int gameID = userService.createGame(createGameRequest);
+            ctx.result(serializer.toJson(gameID));
         } catch (Exception ex) {
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(401).result(message);
