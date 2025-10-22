@@ -1,15 +1,18 @@
 package server;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import dataaccess.AlreadyTakenException;
 import dataaccess.MemoryDataAccess;
 import dataaccess.NoExistingGameException;
+import dataaccess.UnauthorizedException;
 import datamodel.*;
 import io.javalin.*;
 import io.javalin.http.Context;
 import service.*;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class Server {
 
@@ -20,7 +23,6 @@ public class Server {
         var dataAccess = new MemoryDataAccess();
         userService = new UserService(dataAccess);
         server = Javalin.create(config -> config.staticFiles.add("web"));
-        server.delete("db", ctx -> ctx.result("{}"));
         server.post("user", ctx -> register(ctx));
         server.post("session", ctx -> login(ctx));
         server.delete("session", ctx -> logout(ctx));
@@ -34,17 +36,20 @@ public class Server {
     }
     // start with the simplest method (functions) and later on rework into
     // classes or interfaces to see if it needs to change
-    private void register(Context ctx)  {
+    private void register(Context ctx) {
         try {
             var serializer = new Gson();
             String requestJson = ctx.body();
             var user = serializer.fromJson(requestJson, RegisterRequest.class);
             var authData = userService.register(user);
             ctx.result(serializer.toJson(authData)); // response
-        } catch (Exception ex) {
+        } catch (AlreadyTakenException ex) {
             // when userService throws an exception>
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(403).result(message);
+        } catch (Exception ex) { // bad request
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(400).result(message);
         }
     }
 
@@ -55,9 +60,12 @@ public class Server {
             var user = serializer.fromJson(requestJson, LoginRequest.class);
             var authData = userService.login(user);
             ctx.result(serializer.toJson(authData));
-        } catch (Exception ex) {
+        } catch (UnauthorizedException ex) {
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(401).result(message);
+        } catch (Exception ex) { // bad request
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(400).result(message);
         }
     }
 
@@ -65,12 +73,15 @@ public class Server {
         try {
             var serializer = new Gson();
             String requestJson = ctx.body();
-            var logoutRequest = serializer.fromJson(requestJson, LogoutRequest.class);
+            var logoutRequest = new LogoutRequest(ctx.header("authorization"));
             userService.logout(logoutRequest);
             ctx.result();
-        } catch (Exception ex) {
+        } catch (UnauthorizedException ex) {
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(401).result(message);
+        } catch (Exception ex) { // bad request
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(400).result(message);
         }
     }
 
@@ -78,12 +89,15 @@ public class Server {
         try {
             var serializer = new Gson();
             String requestJson = ctx.body();
-            var listGamesRequest = serializer.fromJson(requestJson, ListGamesRequest.class);
+            var listGamesRequest = new ListGamesRequest(ctx.header("authorization"));
             ArrayList<GameData> allGames = userService.listGames(listGamesRequest);
-            ctx.result(serializer.toJson(allGames));
-        } catch (Exception ex) {
+            ctx.result(serializer.toJson(Map.of("games", allGames)));
+        } catch (UnauthorizedException ex) {
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(401).result(message);
+        } catch (Exception ex) { // bad request
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(400).result(message);
         }
     }
 
@@ -92,11 +106,14 @@ public class Server {
             var serializer = new Gson();
             String requestJson = ctx.body();
             var createGameRequest = serializer.fromJson(requestJson, CreateGameRequest.class);
-            int gameID = userService.createGame(createGameRequest);
-            ctx.result(serializer.toJson(gameID));
-        } catch (Exception ex) {
+            int gameID = userService.createGame(createGameRequest, ctx.header("authorization"));
+            ctx.result(serializer.toJson(Map.of("gameID", gameID)));
+        } catch (UnauthorizedException ex) {
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(401).result(message);
+        } catch (Exception ex) { // bad request
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(400).result(message);
         }
     }
 
@@ -105,16 +122,19 @@ public class Server {
             var serializer = new Gson();
             String requestJson = ctx.body();
             var joinGameRequest = serializer.fromJson(requestJson, JoinGameRequest.class);
-            userService.joinGame(joinGameRequest);
+            userService.joinGame(joinGameRequest, ctx.header("authorization"));
         } catch (NoExistingGameException ex) {
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(500).result(message);
         } catch (AlreadyTakenException ex) {
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
-            ctx.status(401).result(message);
-        } catch (Exception ex) {
-            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(403).result(message);
+        } catch (UnauthorizedException ex) {
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(401).result(message);
+        } catch (Exception ex) { // bad request
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(400).result(message);
         }
         ctx.result();
     }

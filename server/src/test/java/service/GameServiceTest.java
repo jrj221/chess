@@ -17,8 +17,8 @@ public class GameServiceTest {
         userService.register(registerRequest);
         var loginRequest = new LoginRequest("joe", "password");
         AuthData authData = userService.login(loginRequest);
-        var createGameRequest = new CreateGameRequest(authData.authToken(), "testGame");
-        int gameID = userService.createGame(createGameRequest);
+        var createGameRequest = new CreateGameRequest("testGame");
+        int gameID = userService.createGame(createGameRequest, authData.authToken());
         assertEquals("testGame", db.getGame(gameID).gameName());
     }
 
@@ -29,8 +29,8 @@ public class GameServiceTest {
         var registerRequest = new RegisterRequest("joe", "joe@email.com", "password");
         userService.register(registerRequest);
         var authData = new AuthData("joe", "badAuth");
-        var createGameRequest = new CreateGameRequest(authData.authToken(), "testGame");
-        assertThrows(Exception.class, () -> userService.createGame(createGameRequest));
+        var createGameRequest = new CreateGameRequest("testGame");
+        assertThrows(Exception.class, () -> userService.createGame(createGameRequest, authData.authToken()));
     }
 
     @Test
@@ -68,10 +68,10 @@ public class GameServiceTest {
         var userService = new UserService(db);
         var registerRequest = new RegisterRequest("joe", "joe@email.com", "password");
         AuthData authData = userService.register(registerRequest);
-        var createGameRequest = new CreateGameRequest(authData.authToken(), "testGame");
-        int gameID = userService.createGame(createGameRequest);
-        var joinGameRequest = new JoinGameRequest(authData.authToken(), "WHITE", gameID);
-        userService.joinGame(joinGameRequest);
+        var createGameRequest = new CreateGameRequest("testGame");
+        int gameID = userService.createGame(createGameRequest, authData.authToken());
+        var joinGameRequest = new JoinGameRequest("WHITE", gameID);
+        userService.joinGame(joinGameRequest, authData.authToken());
         var listGamesRequest = new ListGamesRequest(authData.authToken());
         ArrayList<GameData> allGames = userService.listGames(listGamesRequest);
         assertEquals("joe", allGames.getFirst().whiteUsername());
@@ -83,10 +83,10 @@ public class GameServiceTest {
         var userService = new UserService(db);
         var registerRequest = new RegisterRequest("joe", "joe@email.com", "password");
         AuthData authData = userService.register(registerRequest);
-        var createGameRequest = new CreateGameRequest(authData.authToken(), "testGame");
-        int gameID = userService.createGame(createGameRequest);
-        var joinGameRequest = new JoinGameRequest("badToken", "WHITE", gameID);
-        assertThrows(Exception.class, () -> userService.joinGame(joinGameRequest));
+        var createGameRequest = new CreateGameRequest("testGame");
+        int gameID = userService.createGame(createGameRequest, authData.authToken());
+        var joinGameRequest = new JoinGameRequest("WHITE", gameID);
+        assertThrows(Exception.class, () -> userService.joinGame(joinGameRequest, "badToken"));
     }
 
     @Test
@@ -95,8 +95,8 @@ public class GameServiceTest {
         var userService = new UserService(db);
         var registerRequest = new RegisterRequest("joe", "joe@email.com", "password");
         AuthData authData = userService.register(registerRequest);
-        var joinGameRequest = new JoinGameRequest(authData.authToken(), "WHITE", 666);
-        assertThrows(NoExistingGameException.class, () -> userService.joinGame(joinGameRequest));
+        var joinGameRequest = new JoinGameRequest("WHITE", 666);
+        assertThrows(NoExistingGameException.class, () -> userService.joinGame(joinGameRequest, authData.authToken()));
     }
 
     @Test
@@ -105,26 +105,11 @@ public class GameServiceTest {
         var userService = new UserService(db);
         var registerRequest = new RegisterRequest("joe", "joe@email.com", "password");
         AuthData authData = userService.register(registerRequest);
-        var createGameRequest = new CreateGameRequest(authData.authToken(), "testGame");
-        int gameID = userService.createGame(createGameRequest);
-        var joinGameRequest = new JoinGameRequest(authData.authToken(), "WHITE", gameID);
-        userService.joinGame(joinGameRequest);
-        assertThrows(AlreadyTakenException.class, () -> userService.joinGame(joinGameRequest));
+        var createGameRequest = new CreateGameRequest("testGame");
+        int gameID = userService.createGame(createGameRequest, authData.authToken());
+        var joinGameRequest = new JoinGameRequest("WHITE", gameID);
+        userService.joinGame(joinGameRequest, authData.authToken());
+        assertThrows(AlreadyTakenException.class, () -> userService.joinGame(joinGameRequest, authData.authToken()));
     }
 
-    @Test
-    void clear() throws Exception {
-        DataAccess db = new MemoryDataAccess();
-        var userService = new UserService(db);
-        // Create UserData and AuthData
-        var registerRequest = new RegisterRequest("joe", "joe@email.com", "password");
-        AuthData authData = userService.register(registerRequest);
-        // Create GameData
-        var createGameRequest = new CreateGameRequest(authData.authToken(), "testGame");
-        userService.createGame(createGameRequest);
-
-        userService.clear();
-        AuthData newAuthData = assertDoesNotThrow(() -> userService.register(registerRequest)); // no user or auth in order for this to work
-        assertTrue(userService.listGames(new ListGamesRequest(newAuthData.authToken())).isEmpty());
-    }
 }

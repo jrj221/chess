@@ -15,37 +15,49 @@ public class UserService {
         //var authData = new AuthData(user.username(), generateAuthToken());
     }
 
-    public AuthData register(RegisterRequest user) throws Exception {
-        if (dataAccess.getUser(user.username()) != null) {
-            throw new Exception("Already exists");
+    public AuthData register(RegisterRequest registerRequest) throws Exception {
+        if (registerRequest.username() == null || registerRequest.email() == null|| registerRequest.password() == null) {
+            throw new Exception("Bad request");
         }
-        dataAccess.createUser(new UserData(user.username(), user.email(), user.password()));
-        return dataAccess.createAuth(user.username());
+        if (dataAccess.getUser(registerRequest.username()) != null) {
+            throw new AlreadyTakenException("Already exists");
+        }
+        dataAccess.createUser(new UserData(registerRequest.username(), registerRequest.email(), registerRequest.password()));
+        return dataAccess.createAuth(registerRequest.username());
     }
 
-    public AuthData login(LoginRequest user) throws Exception {
-        UserData userData = dataAccess.getUser(user.username());
+    public AuthData login(LoginRequest loginRequest) throws Exception {
+        if (loginRequest.username() == null || loginRequest.password() == null) {
+            throw new Exception("Bad request");
+        }
+        UserData userData = dataAccess.getUser(loginRequest.username());
         if (userData == null) {
-            throw new Exception("Unauthorized Login"); // no existing user
+            throw new UnauthorizedException("Unauthorized Login"); // no existing user
         }
-        if (!Objects.equals(user.password(), userData.password())) { // bad match
-            throw new Exception("Unauthorized Login"); // wrong password
+        if (!Objects.equals(loginRequest.password(), userData.password())) { // bad match
+            throw new UnauthorizedException("Unauthorized Login"); // wrong password
         }
-        return dataAccess.createAuth(user.username());
+        return dataAccess.createAuth(loginRequest.username());
     }
 
     public void logout(LogoutRequest logoutRequest) throws Exception {
+        if (logoutRequest.authToken() == null) {
+            throw new Exception("Bad request");
+        }
         var authData = dataAccess.getAuth(logoutRequest.authToken());
         if (authData == null) {
-            throw new Exception("Unauthorized Logout");
+            throw new UnauthorizedException("Unauthorized Logout");
         }
         dataAccess.deleteAuth(logoutRequest.authToken());
     }
 
-    public int createGame(CreateGameRequest createGameRequest) throws Exception {
-        var authData = dataAccess.getAuth(createGameRequest.authToken());
+    public int createGame(CreateGameRequest createGameRequest, String authToken) throws Exception {
+        if (authToken == null || createGameRequest.gameName() == null) {
+            throw new Exception("Bad request");
+        }
+        var authData = dataAccess.getAuth(authToken);
         if (authData == null) {
-            throw new Exception("Unauthorized Logout");
+            throw new UnauthorizedException("Unauthorized Logout");
         }
         String gameName = createGameRequest.gameName();
         int gameID = dataAccess.createGameData(gameName);
@@ -53,17 +65,23 @@ public class UserService {
     }
 
     public ArrayList<GameData> listGames(ListGamesRequest listGamesRequest) throws Exception {
+        if (listGamesRequest.authToken() == null) {
+            throw new Exception("Bad request");
+        }
         var authData = dataAccess.getAuth(listGamesRequest.authToken());
         if (authData == null) {
-            throw new Exception("Unauthorized Logout");
+            throw new UnauthorizedException("Unauthorized Logout");
         }
         return dataAccess.getAllGames();
     }
 
-    public void joinGame(JoinGameRequest joinGameRequest) throws Exception {
-        var authData = dataAccess.getAuth(joinGameRequest.authToken());
+    public void joinGame(JoinGameRequest joinGameRequest, String authToken) throws Exception {
+        if ((!Objects.equals(joinGameRequest.playerColor(), "BLACK") && !Objects.equals(joinGameRequest.playerColor(), "WHITE")) || authToken == null || joinGameRequest.gameID() == 0) {
+            throw new Exception("Bad request");
+        }
+        var authData = dataAccess.getAuth(authToken);
         if (authData == null) {
-            throw new Exception("Unauthorized Logout");
+            throw new UnauthorizedException("Unauthorized");
         }
         var gameData = dataAccess.getGame(joinGameRequest.gameID());
         if (gameData == null) {
