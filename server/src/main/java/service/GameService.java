@@ -39,7 +39,9 @@ public class GameService {
     }
 
     public void joinGame(JoinGameRequest joinGameRequest, String authToken) throws Exception {
-        if ((!Objects.equals(joinGameRequest.playerColor(), "BLACK") && !Objects.equals(joinGameRequest.playerColor(), "WHITE")) || authToken == null || joinGameRequest.gameID() == 0) {
+        if ((!Objects.equals(joinGameRequest.playerColor(), "BLACK")
+                && !Objects.equals(joinGameRequest.playerColor(), "WHITE"))
+                || authToken == null || joinGameRequest.gameID() == 0) {
             throw new Exception("Bad request");
         }
         var authData = dataAccess.getAuth(authToken);
@@ -50,7 +52,8 @@ public class GameService {
         if (gameData == null) {
             throw new NoExistingGameException("No game found");
         }
-        if ((joinGameRequest.playerColor().equals("BLACK") && gameData.blackUsername() != null) || (joinGameRequest.playerColor().equals("WHITE") && gameData.whiteUsername() != null)) {
+        if ((joinGameRequest.playerColor().equals("BLACK") && gameData.blackUsername() != null)
+                || (joinGameRequest.playerColor().equals("WHITE") && gameData.whiteUsername() != null)) {
             throw new AlreadyTakenException("Color not available");
         }
         String username = authData.username();

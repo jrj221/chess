@@ -65,12 +65,18 @@ public class ChessPiece {
         return String.format("%s %s", pieceColor, type);
     }
 
-    public HashSet<ChessPosition> getEndPositions(boolean recursion, ChessBoard board, ChessPosition myPosition, HashSet<ChessPosition> directions) {
+    public HashSet<ChessPosition> getEndPositions(boolean recursion,
+                                                  ChessBoard board,
+                                                  ChessPosition myPosition,
+                                                  HashSet<ChessPosition>
+                                                          directions) {
         var endPositions = new HashSet<ChessPosition>();
         if (recursion) {
             for (ChessPosition direction : directions) {
                 for (int i = 1; i <= 8; i++) {
-                    var endPosition = new ChessPosition(myPosition.getRow() + (i * direction.getRow()), myPosition.getColumn() + (i * direction.getColumn()));
+                    var endPosition = new ChessPosition(
+                            myPosition.getRow() + (i * direction.getRow()),
+                            myPosition.getColumn() + (i * direction.getColumn()));
                     var legality = ChessMove.isLegal(board, endPosition, pieceColor);
                     if (legality == 2) { // available spot
                         endPositions.add(endPosition);
@@ -87,7 +93,9 @@ public class ChessPiece {
         }
         else { // no recursion
             for (ChessPosition direction : directions) {
-                var endPosition = new ChessPosition(myPosition.getRow() + direction.getRow(), myPosition.getColumn() + direction.getColumn());
+                var endPosition = new ChessPosition(
+                        myPosition.getRow() + direction.getRow(),
+                        myPosition.getColumn() + direction.getColumn());
                 var legality = ChessMove.isLegal(board, endPosition, pieceColor);
                 if (legality == 2 || legality == 3) { // available or enemy capture
                     endPositions.add(endPosition);
@@ -104,21 +112,29 @@ public class ChessPiece {
             var forward = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn());
             if (board.getPiece(forward) == null) {endPositions.add(forward);}
             var twiceForward = new ChessPosition(myPosition.getRow() + 2, myPosition.getColumn());
-            if (myPosition.getRow() == 2 && board.getPiece(twiceForward) == null && board.getPiece(forward) == null) {endPositions.add(twiceForward);}
+            if (myPosition.getRow() == 2 && board.getPiece(twiceForward) == null && board.getPiece(forward) == null) {
+                endPositions.add(twiceForward);
+            }
             var leftDiagonal = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn()-1);
             var rightDiagonal = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn()+1);
-            if (!ChessMove.outOfBounds(leftDiagonal) && board.getPiece(leftDiagonal) != null && board.getPiece(leftDiagonal).getTeamColor() != pieceColor) {endPositions.add(leftDiagonal);}
-            if (!ChessMove.outOfBounds(rightDiagonal) && board.getPiece(rightDiagonal) != null && board.getPiece(rightDiagonal).getTeamColor() != pieceColor) {endPositions.add(rightDiagonal);}
+            if (!ChessMove.outOfBounds(leftDiagonal) && board.getPiece(leftDiagonal) != null
+                    && board.getPiece(leftDiagonal).getTeamColor() != pieceColor) {endPositions.add(leftDiagonal);}
+            if (!ChessMove.outOfBounds(rightDiagonal) && board.getPiece(rightDiagonal) != null
+                    && board.getPiece(rightDiagonal).getTeamColor() != pieceColor) {endPositions.add(rightDiagonal);}
         }
         if (pieceColor == ChessGame.TeamColor.BLACK) {
             var downward = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn());
             if (board.getPiece(downward) == null) {endPositions.add(downward);}
             var twiceDownward = new ChessPosition(myPosition.getRow() - 2, myPosition.getColumn());
-            if (myPosition.getRow() == 7 && board.getPiece(twiceDownward) == null && board.getPiece(downward) == null) {endPositions.add(twiceDownward);}
+            if (myPosition.getRow() == 7 && board.getPiece(twiceDownward) == null && board.getPiece(downward) == null) {
+                endPositions.add(twiceDownward);
+            }
             var leftDiagonal = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn()-1);
             var rightDiagonal = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn()+1);
-            if (!ChessMove.outOfBounds(leftDiagonal) && board.getPiece(leftDiagonal) != null && board.getPiece(leftDiagonal).getTeamColor() != pieceColor) {endPositions.add(leftDiagonal);}
-            if (!ChessMove.outOfBounds(rightDiagonal) && board.getPiece(rightDiagonal) != null && board.getPiece(rightDiagonal).getTeamColor() != pieceColor) {endPositions.add(rightDiagonal);}
+            if (!ChessMove.outOfBounds(leftDiagonal) && board.getPiece(leftDiagonal) != null
+                    && board.getPiece(leftDiagonal).getTeamColor() != pieceColor) {endPositions.add(leftDiagonal);}
+            if (!ChessMove.outOfBounds(rightDiagonal) && board.getPiece(rightDiagonal) != null
+                    && board.getPiece(rightDiagonal).getTeamColor() != pieceColor) {endPositions.add(rightDiagonal);}
         }
         return endPositions;
     }
