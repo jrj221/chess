@@ -1,11 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import dataaccess.AlreadyTakenException;
-import dataaccess.MemoryDataAccess;
-import dataaccess.NoExistingGameException;
-import dataaccess.UnauthorizedException;
+import dataaccess.*;
 import datamodel.*;
 import io.javalin.*;
 import io.javalin.http.Context;
@@ -18,10 +14,12 @@ public class Server {
 
     private final Javalin server;
     private final UserService userService;
+    private final GameService gameService;
 
     public Server() {
         var dataAccess = new MemoryDataAccess();
         userService = new UserService(dataAccess);
+        gameService = new GameService(dataAccess);
         server = Javalin.create(config -> config.staticFiles.add("web"));
         server.post("user", ctx -> register(ctx));
         server.post("session", ctx -> login(ctx));
@@ -90,7 +88,7 @@ public class Server {
             var serializer = new Gson();
             String requestJson = ctx.body();
             var listGamesRequest = new ListGamesRequest(ctx.header("authorization"));
-            ArrayList<GameData> allGames = userService.listGames(listGamesRequest);
+            ArrayList<GameData> allGames = gameService.listGames(listGamesRequest);
             ctx.result(serializer.toJson(Map.of("games", allGames)));
         } catch (UnauthorizedException ex) {
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
@@ -106,7 +104,7 @@ public class Server {
             var serializer = new Gson();
             String requestJson = ctx.body();
             var createGameRequest = serializer.fromJson(requestJson, CreateGameRequest.class);
-            int gameID = userService.createGame(createGameRequest, ctx.header("authorization"));
+            int gameID = gameService.createGame(createGameRequest, ctx.header("authorization"));
             ctx.result(serializer.toJson(Map.of("gameID", gameID)));
         } catch (UnauthorizedException ex) {
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
@@ -122,7 +120,7 @@ public class Server {
             var serializer = new Gson();
             String requestJson = ctx.body();
             var joinGameRequest = serializer.fromJson(requestJson, JoinGameRequest.class);
-            userService.joinGame(joinGameRequest, ctx.header("authorization"));
+            gameService.joinGame(joinGameRequest, ctx.header("authorization"));
         } catch (NoExistingGameException ex) {
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(500).result(message);

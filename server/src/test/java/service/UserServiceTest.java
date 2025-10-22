@@ -2,17 +2,25 @@ package service;
 
 import dataaccess.*;
 import datamodel.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserServiceTest {
 
+    static DataAccess db;
+    static UserService userService;
+
+    @BeforeEach
+    void setup() {
+        db = new MemoryDataAccess();
+        userService = new UserService(db);
+    }
+
     @Test
     void registerSuccessful() throws Exception {
-        DataAccess db = new MemoryDataAccess();
         var registerRequest = new RegisterRequest("joe", "joe@email.com", "password");
-        var userService = new UserService(db);
         var authData = userService.register(registerRequest);
         assertNotNull(authData);
         assertEquals(registerRequest.username(), authData.username());
@@ -21,17 +29,13 @@ class UserServiceTest {
 
     @Test
     void registerUserTaken() throws Exception { // why are these throwing exceptions
-        DataAccess db = new MemoryDataAccess();
         var registerRequest = new RegisterRequest("joe", "joe@email.com", "password");
-        var userService = new UserService(db);
         userService.register(registerRequest);
         assertThrows(Exception.class, () -> userService.register(registerRequest));
     }
 
     @Test
     void loginSuccessful() throws Exception {
-        DataAccess db = new MemoryDataAccess();
-        var userService = new UserService(db);
         var registerRequest = new RegisterRequest("joe", "joe@email.com", "password");
         var loginRequest = new LoginRequest("joe", "password");
         userService.register(registerRequest);
@@ -43,16 +47,12 @@ class UserServiceTest {
 
     @Test
     void loginNoExistingUser() throws Exception {
-        DataAccess db = new MemoryDataAccess();
-        var userService = new UserService(db);
         var loginRequest = new LoginRequest("joe", "password");
         assertThrows(Exception.class, () -> userService.login(loginRequest));
     }
 
     @Test
     void loginWrongPassword() throws Exception {
-        DataAccess db = new MemoryDataAccess();
-        var userService = new UserService(db);
         var registerRequest = new RegisterRequest("joe", "joe@email.com", "password");
         userService.register(registerRequest);
         var loginRequest = new LoginRequest("joe", "BADpassword");
@@ -61,8 +61,6 @@ class UserServiceTest {
 
     @Test
     void logoutSuccessful() throws Exception {
-        DataAccess db = new MemoryDataAccess();
-        var userService = new UserService(db);
         var registerRequest = new RegisterRequest("joe", "joe@email.com", "password");
         var authData = userService.register(registerRequest);
         var loginRequest = new LoginRequest("joe", "password");
@@ -73,8 +71,6 @@ class UserServiceTest {
 
     @Test
     void logoutBadAuthToken() throws Exception {
-        DataAccess db = new MemoryDataAccess();
-        var userService = new UserService(db);
         var registerRequest = new RegisterRequest("joe", "joe@email.com", "password");
         userService.register(registerRequest);
         var loginRequest = new LoginRequest("joe", "password");
@@ -86,17 +82,16 @@ class UserServiceTest {
 
     @Test
     void clear() throws Exception {
-        DataAccess db = new MemoryDataAccess();
-        var userService = new UserService(db);
+        var gameService = new GameService(db);
         // Create UserData and AuthData
         var registerRequest = new RegisterRequest("joe", "joe@email.com", "password");
         AuthData authData = userService.register(registerRequest);
         // Create GameData
         var createGameRequest = new CreateGameRequest("testGame");
-        userService.createGame(createGameRequest, authData.authToken());
+        gameService.createGame(createGameRequest, authData.authToken());
 
         userService.clear();
         AuthData newAuthData = assertDoesNotThrow(() -> userService.register(registerRequest)); // no user or auth in order for this to work
-        assertTrue(userService.listGames(new ListGamesRequest(newAuthData.authToken())).isEmpty());
+        assertTrue(gameService.listGames(new ListGamesRequest(newAuthData.authToken())).isEmpty());
     }
 }
