@@ -30,7 +30,16 @@ public class SQLDataAccess implements DataAccess {
 
     @Override
     public void createUser(UserData user) {
-
+        try (var connection = DatabaseManager.getConnection()) {
+            var statement = connection.prepareStatement("INSERT INTO users (username, email, password) " +
+                    "VALUES (?, ?, ?)");
+            statement.setString(1, user.username());
+            statement.setString(2, user.email());
+            statement.setString(3, user.password());
+            statement.executeUpdate();
+        } catch (Exception ex) {
+            //
+        }
     }
 
     @Override
