@@ -3,13 +3,11 @@ package dataaccess;
 import datamodel.*;
 import org.junit.jupiter.api.Test;
 
-import javax.xml.crypto.Data;
-
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class DataAccessTest {
+class MemoryDataAccessTest {
 
     @Test
     void getUser() {

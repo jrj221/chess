@@ -29,6 +29,11 @@ public class DatabaseManager {
         }
     }
 
+    static public void createTable(Connection conn, String statement) throws SQLException {
+        var preparedStatement = conn.prepareStatement(statement);
+        preparedStatement.executeUpdate();
+    }
+
     /**
      * Create a connection to the database and sets the catalog based upon the
      * properties specified in db.properties. Connections to the database should
@@ -46,6 +51,25 @@ public class DatabaseManager {
             //do not wrap the following line with a try-with-resources
             var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
             conn.setCatalog(databaseName);
+            var userStatement = "CREATE TABLE IF NOT EXISTS users (" +
+                    "username VARCHAR(100)," +
+                    "email VARCHAR(100)," +
+                    "password VARCHAR(100)" +
+                    ")";
+            var gameStatement = "CREATE TABLE IF NOT EXISTS games (" +
+                    "gameID INT," +
+                    "whiteUsername VARCHAR(100)," +
+                    "blackUsername VARCHAR(100)," +
+                    "gameName VARCHAR(100)," +
+                    "game VARCHAR(10000)," + // serialized game string
+                    ")";
+            var authStatement = "CREATE TABLE IF NOT EXISTS auth (" +
+                    "authToken VARCHAR(100)," +
+                    "username VARCHAR(100)," +
+                    ")";
+            createTable(conn, userStatement);
+            createTable(conn, gameStatement);
+            createTable(conn, authStatement);
             return conn;
         } catch (SQLException ex) {
             throw new DataAccessException("failed to get connection", ex);
