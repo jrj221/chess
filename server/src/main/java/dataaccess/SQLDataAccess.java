@@ -44,7 +44,12 @@ public class SQLDataAccess implements DataAccess {
 
     @Override
     public void clear() {
-
+        try (var connection = DatabaseManager.getConnection()) {
+            var statement = connection.prepareStatement("DROP TABLE auth, games, users");
+            statement.executeUpdate();
+        } catch (Exception ex) {
+            //
+        }
     }
 
     @Override
