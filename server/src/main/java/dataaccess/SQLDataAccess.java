@@ -65,6 +65,7 @@ public class SQLDataAccess implements DataAccess {
         } catch (Exception ex) {
             //
         }
+        return null; // what do here outside of logic loop
     }
 
     private String generateAuthToken() {
