@@ -1,6 +1,7 @@
 package dataaccess;
 
 import datamodel.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,7 +20,9 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public void createUser(UserData user) {
-        users.put(user.username(), user);
+        var hashedPass = generateHashedPassword(user.password());
+        var hashedUser = new UserData(user.username(), user.email(), hashedPass);
+        users.put(user.username(), hashedUser);
     }
 
     @Override
@@ -87,6 +90,11 @@ public class MemoryDataAccess implements DataAccess {
             gameData = new GameData(gameID, gameData.whiteUsername(), username, gameData.gameName(), gameData.game());
         }
         games.put(gameID, gameData);
+    }
+
+    @Override
+    public String generateHashedPassword(String password) {
+        return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
     private String generateAuthToken() {

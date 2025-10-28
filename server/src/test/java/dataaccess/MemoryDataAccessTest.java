@@ -2,6 +2,7 @@ package dataaccess;
 
 import datamodel.*;
 import org.junit.jupiter.api.Test;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.ArrayList;
 
@@ -10,20 +11,15 @@ import static org.junit.jupiter.api.Assertions.*;
 class MemoryDataAccessTest {
 
     @Test
-    void getUser() {
+    void createAndGetUser() {
         DataAccess db = new MemoryDataAccess();
         var user = new UserData("joe", "joe@email.com", "password");
         db.createUser(user);
-        assertEquals(user, db.getUser("joe"));
+        var foundUser = db.getUser(user.username());
+        assertEquals(user.email(), foundUser.email());
+        assertTrue(BCrypt.checkpw(user.password(), foundUser.password()));
     }
 
-    @Test
-    void createUser() {
-        DataAccess db = new MemoryDataAccess();
-        var user = new UserData("joe", "joe@email.com", "password");
-        db.createUser(user);
-        assertEquals(user, db.getUser(user.username()));
-    }
 
     @Test
     void createAuth() {

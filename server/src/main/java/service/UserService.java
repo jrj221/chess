@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import dataaccess.*;
 import datamodel.*; // AuthData and UserData and the like
+import org.mindrot.jbcrypt.BCrypt;
 
 
 public class UserService {
@@ -33,7 +34,7 @@ public class UserService {
         if (userData == null) {
             throw new UnauthorizedException("Unauthorized Login"); // no existing user
         }
-        if (!Objects.equals(loginRequest.password(), userData.password())) { // bad match
+        if (!BCrypt.checkpw(loginRequest.password(), userData.password())) { // bad match
             throw new UnauthorizedException("Unauthorized Login"); // wrong password
         }
         return dataAccess.createAuth(loginRequest.username());

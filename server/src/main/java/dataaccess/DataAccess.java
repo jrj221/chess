@@ -15,4 +15,5 @@ public interface DataAccess {
     GameData getGame(int gameID);
     ArrayList<GameData> getAllGames();
     void joinGame(String username, int gameID, String playerColor);
+    String generateHashedPassword(String password);
 }

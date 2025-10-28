@@ -3,7 +3,9 @@ package dataaccess;
 import datamodel.AuthData;
 import datamodel.GameData;
 import datamodel.UserData;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.ArrayList;
 
@@ -11,20 +13,20 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class SQLDataAccessTest {
 
-    @Test
-    void getUser() {
+    @BeforeEach
+    void clearAll() {
         DataAccess db = new SQLDataAccess();
-        var user = new UserData("joe", "joe@email.com", "password");
-        db.createUser(user);
-        assertEquals(user, db.getUser("joe"));
+        db.clear();
     }
 
     @Test
-    void createUser() {
+    void createAndGetUser() { // not sure how you would test separately
         DataAccess db = new SQLDataAccess();
         var user = new UserData("joe", "joe@email.com", "password");
         db.createUser(user);
-        assertEquals(user, db.getUser(user.username()));
+        var foundUser = db.getUser(user.username());
+        assertEquals(user.email(), foundUser.email());
+        assertTrue(BCrypt.checkpw(user.password(), foundUser.password()));
     }
 
     @Test
@@ -64,7 +66,6 @@ public class SQLDataAccessTest {
     @Test
     void getAllGames() {
         DataAccess db = new SQLDataAccess();
-        db.clear();
         var game1 = db.createGameData("game1");
         var game2 = db.createGameData("game2");
         var game3 = db.createGameData("game3");

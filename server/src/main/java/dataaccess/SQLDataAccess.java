@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import datamodel.AuthData;
 import datamodel.GameData;
 import datamodel.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -38,11 +39,17 @@ public class SQLDataAccess implements DataAccess {
                     "VALUES (?, ?, ?)");
             statement.setString(1, user.username());
             statement.setString(2, user.email());
-            statement.setString(3, user.password());
+            String hashedPassword = generateHashedPassword(user.password());
+            statement.setString(3, hashedPassword);
             statement.executeUpdate();
         } catch (Exception ex) {
             //
         }
+    }
+
+    @Override
+    public String generateHashedPassword(String password) {
+        return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
     @Override
