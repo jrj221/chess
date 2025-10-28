@@ -48,4 +48,22 @@ public class SQLDataAccessTest {
         db.deleteAuth(authData.authToken());
         assertNull(db.getAuth(authData.authToken()));
     }
+
+    @Test
+    void getGame() {
+        DataAccess db = new SQLDataAccess();
+        var game1ID = db.createGameData("game1");
+        assertNotNull(db.getGame(game1ID));
+        assertEquals("game1", db.getGame(game1ID).gameName());
+    }
+
+    @Test
+    void createGameData() {
+        DataAccess db = new SQLDataAccess();
+        var myGameID = db.createGameData("myGame");
+        assertEquals("myGame", db.getGame(myGameID).gameName());
+        assertNull(db.getGame(myGameID).whiteUsername());
+        assertNull(db.getGame(myGameID).blackUsername());
+        assertNull(db.getGame(myGameID).game());
+    }
 }

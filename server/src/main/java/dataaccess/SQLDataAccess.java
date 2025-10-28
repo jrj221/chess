@@ -151,7 +151,25 @@ public class SQLDataAccess implements DataAccess {
 
     @Override
     public ArrayList<GameData> getAllGames() {
-        return null;
+        var allGames = new ArrayList<GameData>();
+        try (var connection = DatabaseManager.getConnection()) {
+            var statement = connection.prepareStatement("SELECT * from games");
+            var rs = statement.executeQuery();
+            while (rs.next()) {
+                var gameID = rs.getInt("gameID");
+                var whiteUsername = rs.getString("whiteUsername");
+                var blackUsername = rs.getString("blackUsername");
+                var gameName = rs.getString("gameName");
+                var gameJson = rs.getString("game");
+                var serializer = new Gson();
+                var game = serializer.fromJson(gameJson, ChessGame.class);
+                var gameData = new GameData(gameID, whiteUsername, blackUsername, gameName, game);
+                allGames.add(gameData);
+            }
+        } catch (Exception ex) {
+            //
+        }
+        return allGames;
     }
 
     @Override
