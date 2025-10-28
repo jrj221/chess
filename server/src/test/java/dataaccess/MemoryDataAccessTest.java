@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class MemoryDataAccessTest {
 
     @Test
-    void createAndGetUser() {
+    void createAndGetUser() throws Exception {
         DataAccess db = new MemoryDataAccess();
         var user = new UserData("joe", "joe@email.com", "password");
         db.createUser(user);
@@ -22,7 +22,7 @@ class MemoryDataAccessTest {
 
 
     @Test
-    void createAuth() {
+    void createAuth() throws Exception {
         DataAccess db = new MemoryDataAccess();
         String username = "joe";
         AuthData authData = db.createAuth(username);
@@ -31,7 +31,7 @@ class MemoryDataAccessTest {
     }
 
     @Test
-    void getAuth() {
+    void getAuth() throws Exception {
         DataAccess db = new MemoryDataAccess();
         String username = "joe";
         AuthData authData = db.createAuth(username);
@@ -39,7 +39,7 @@ class MemoryDataAccessTest {
     }
 
     @Test
-    void deleteAuth() {
+    void deleteAuth() throws Exception {
         DataAccess db = new MemoryDataAccess();
         String username = "joe";
         AuthData authData = db.createAuth(username);
@@ -48,7 +48,7 @@ class MemoryDataAccessTest {
     }
 
     @Test
-    void createGameData() {
+    void createGameData() throws Exception {
         DataAccess db = new MemoryDataAccess();
         var myGameID = db.createGameData("myGame");
         assertEquals("myGame", db.getGame(myGameID).gameName());
@@ -58,7 +58,7 @@ class MemoryDataAccessTest {
     }
 
     @Test
-    void getGame() {
+    void getGame() throws Exception {
         DataAccess db = new MemoryDataAccess();
         var game1ID = db.createGameData("game1");
         assertNotNull(db.getGame(game1ID));
@@ -66,7 +66,7 @@ class MemoryDataAccessTest {
     }
 
     @Test
-    void getAllGames() {
+    void getAllGames() throws Exception {
         DataAccess db = new MemoryDataAccess();
         var game1 = db.createGameData("game1");
         var game2 = db.createGameData("game2");
@@ -80,7 +80,7 @@ class MemoryDataAccessTest {
     }
 
     @Test
-    void joinGame() {
+    void joinGame() throws Exception {
         DataAccess db = new MemoryDataAccess();
         var game1ID = db.createGameData("game1");
         db.joinGame("joe", game1ID, "WHITE");
@@ -89,7 +89,7 @@ class MemoryDataAccessTest {
     }
 
     @Test
-    void clear() {
+    void clear() throws Exception {
         DataAccess db = new MemoryDataAccess();
         db.createUser(new UserData("joe", "joe@email.com", "password"));
         AuthData authData = db.createAuth("joe");

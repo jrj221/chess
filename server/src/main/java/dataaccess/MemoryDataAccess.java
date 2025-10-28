@@ -14,12 +14,17 @@ public class MemoryDataAccess implements DataAccess {
     private final HashMap<Integer, GameData> games = new HashMap<>();
 
     @Override
-    public UserData getUser(String username) {
-        return users.get(username);
+    public UserData getUser(String username) throws Exception{
+        var user = users.get(username);
+        if (user == null) {
+            throw new DataAccessException("User not found");
+        } else {
+            return user;
+        }
     }
 
     @Override
-    public void createUser(UserData user) {
+    public void createUser(UserData user) throws Exception {
         var hashedPass = generateHashedPassword(user.password());
         var hashedUser = new UserData(user.username(), user.email(), hashedPass);
         users.put(user.username(), hashedUser);
@@ -33,7 +38,7 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public AuthData createAuth(String username) {
+    public AuthData createAuth(String username) throws Exception {
         String authToken = generateAuthToken();
         var authData = new AuthData(username, authToken);
         auth.put(authToken, authData);
@@ -41,17 +46,22 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public AuthData getAuth(String authToken) {
-        return auth.get(authToken);
+    public AuthData getAuth(String authToken)  throws Exception{
+        var found_auth = auth.get(authToken);
+        if (found_auth == null) {
+            throw new DataAccessException("Auth not found");
+        } else {
+            return found_auth;
+        }
     }
 
     @Override
-    public void deleteAuth(String authToken) {
+    public void deleteAuth(String authToken) throws Exception {
         auth.remove(authToken);
     }
 
     @Override
-    public int createGameData(String gameName) {
+    public int createGameData(String gameName) throws Exception {
         int gameID = 1;
         while (true) {
             if (games.get(gameID) != null) {
@@ -66,12 +76,17 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public GameData getGame(int gameID) {
-        return games.get(gameID);
+    public GameData getGame(int gameID) throws Exception {
+        var game = games.get(gameID);
+        if (game == null) {
+            throw new DataAccessException("Game not found");
+        } else {
+            return game;
+        }
     }
 
     @Override
-    public ArrayList<GameData> getAllGames() {
+    public ArrayList<GameData> getAllGames() throws Exception {
         var allGames = new ArrayList<GameData>();
         var keys = games.keySet();
         for (var key : keys) {
@@ -81,19 +96,20 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public void joinGame(String username, int gameID, String playerColor) {
+    public void joinGame(String username, int gameID, String playerColor) throws Exception {
         var gameData = games.get(gameID);
         if (playerColor.equals("WHITE")) {
             gameData = new GameData(gameID, username, gameData.blackUsername(), gameData.gameName(), gameData.game());
-        }
-        else {
+        } else if (playerColor.equals("BLACK")) {
             gameData = new GameData(gameID, gameData.whiteUsername(), username, gameData.gameName(), gameData.game());
+        } else {
+            throw new DataAccessException("invalid playerColor");
         }
         games.put(gameID, gameData);
     }
 
     @Override
-    public String generateHashedPassword(String password) {
+    public String generateHashedPassword(String password) throws Exception {
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 

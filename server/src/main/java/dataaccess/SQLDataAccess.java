@@ -8,13 +8,14 @@ import datamodel.UserData;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.UUID;
 
 public class SQLDataAccess implements DataAccess {
 
     @Override
-    public UserData getUser(String username) {
+    public UserData getUser(String username) throws Exception {
         try (var connection = DatabaseManager.getConnection()) {
             var statement = connection.prepareStatement("SELECT * FROM users");
             var rs = statement.executeQuery();
@@ -26,14 +27,14 @@ public class SQLDataAccess implements DataAccess {
                     return new UserData(found_username, found_email, found_password);
                 }
             }
-            return null; //no user found
+            throw new DataAccessException("User not found");
         } catch (Exception ex) {
-            return null; //what do I do here??
+            throw new SQLException("SQL Exception");
         }
     }
 
     @Override
-    public void createUser(UserData user) {
+    public void createUser(UserData user) throws Exception {
         try (var connection = DatabaseManager.getConnection()) {
             var statement = connection.prepareStatement("INSERT INTO users (username, email, password) " +
                     "VALUES (?, ?, ?)");
@@ -43,7 +44,7 @@ public class SQLDataAccess implements DataAccess {
             statement.setString(3, hashedPassword);
             statement.executeUpdate();
         } catch (Exception ex) {
-            //
+            throw new SQLException("SQL Exception");
         }
     }
 
@@ -63,7 +64,7 @@ public class SQLDataAccess implements DataAccess {
     }
 
     @Override
-    public AuthData createAuth(String username) {
+    public AuthData createAuth(String username) throws Exception {
         try (var connection = DatabaseManager.getConnection()) {
             var statement = connection.prepareStatement("INSERT INTO auth (username, authToken) VALUES (?, ?)");
             var authData = new AuthData(username, generateAuthToken());
@@ -72,9 +73,8 @@ public class SQLDataAccess implements DataAccess {
             statement.executeUpdate();
             return authData;
         } catch (Exception ex) {
-            //
+            throw new SQLException("SQL Exception");
         }
-        return null; // what do here outside of logic loop
     }
 
     private String generateAuthToken() {
@@ -82,7 +82,7 @@ public class SQLDataAccess implements DataAccess {
     }
 
     @Override
-    public AuthData getAuth(String authToken) {
+    public AuthData getAuth(String authToken) throws Exception {
         try (var connection = DatabaseManager.getConnection()) {
             var statement = connection.prepareStatement("SELECT * from auth");
             var rs = statement.executeQuery();
@@ -92,25 +92,25 @@ public class SQLDataAccess implements DataAccess {
                     return new AuthData(username, authToken);
                 }
             }
+            throw new DataAccessException("Auth not found");
         } catch (Exception ex) {
-            //
+            throw new SQLException("SQL Exception");
         }
-        return null; // no auth found
     }
 
     @Override
-    public void deleteAuth(String authToken) {
+    public void deleteAuth(String authToken) throws Exception {
         try (var connection = DatabaseManager.getConnection()) {
             var statement = connection.prepareStatement("DELETE FROM auth WHERE authToken = ?");
             statement.setString(1, authToken);
             statement.executeUpdate();
         } catch (Exception ex) {
-            //
+            throw new SQLException("SQL Exception");
         }
     }
 
     @Override
-    public int createGameData(String gameName) {
+    public int createGameData(String gameName) throws Exception {
         try (var connection = DatabaseManager.getConnection()) {
             var statement = connection.prepareStatement("INSERT INTO games " +
                     "(gameID, gameName) " +
@@ -129,13 +129,12 @@ public class SQLDataAccess implements DataAccess {
             statement.executeUpdate();
             return gameID;
         } catch (Exception ex) {
-            //
+            throw new SQLException("SQL Exception");
         }
-        return -1; // idk error
     }
 
     @Override
-    public GameData getGame(int gameID) {
+    public GameData getGame(int gameID) throws Exception {
         try (var connection = DatabaseManager.getConnection()) {
             var statement = connection.prepareStatement("SELECT * from games");
             var rs = statement.executeQuery();
@@ -150,14 +149,14 @@ public class SQLDataAccess implements DataAccess {
                     return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
                 }
             }
+            throw new DataAccessException("Game not found");
         } catch (Exception ex) {
-            //
+            throw new SQLException("SQL Exception");
         }
-        return null; // game not found i guess
     }
 
     @Override
-    public ArrayList<GameData> getAllGames() {
+    public ArrayList<GameData> getAllGames() throws Exception {
         var allGames = new ArrayList<GameData>();
         try (var connection = DatabaseManager.getConnection()) {
             var statement = connection.prepareStatement("SELECT * from games");
@@ -173,29 +172,30 @@ public class SQLDataAccess implements DataAccess {
                 var gameData = new GameData(gameID, whiteUsername, blackUsername, gameName, game);
                 allGames.add(gameData);
             }
+            return allGames;
         } catch (Exception ex) {
-            //
+            throw new SQLException("SQL Exception");
         }
-        return allGames;
     }
 
     @Override
-    public void joinGame(String username, int gameID, String playerColor) {
+    public void joinGame(String username, int gameID, String playerColor) throws Exception {
         try (var connection = DatabaseManager.getConnection()) {
             if (playerColor.equals("WHITE")) {
                 var statement = connection.prepareStatement("UPDATE games SET whiteUsername = ? WHERE gameID = ?");
                 statement.setString(1, username);
                 statement.setInt(2, gameID);
                 statement.executeUpdate();
-            }
-            else if (playerColor.equals("BLACK")) {
+            } else if (playerColor.equals("BLACK")) {
                 var statement = connection.prepareStatement("UPDATE games SET blackUsername = ? WHERE gameID = ?");
                 statement.setString(1, username);
                 statement.setInt(2, gameID);
                 statement.executeUpdate();
+            } else {
+                throw new DataAccessException("invalid playerColor");
             }
         } catch (Exception ex) {
-            //
+            throw new SQLException("SQL Exception");
         }
     }
 }

@@ -1,11 +1,14 @@
 package service;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Objects;
 
 import dataaccess.*;
 import datamodel.*; // AuthData and UserData and the like
 import org.mindrot.jbcrypt.BCrypt;
+
+import javax.xml.crypto.Data;
 
 
 public class UserService {
@@ -16,39 +19,45 @@ public class UserService {
     }
 
     public AuthData register(RegisterRequest registerRequest) throws Exception {
-        if (registerRequest.username() == null || registerRequest.email() == null|| registerRequest.password() == null) {
-            throw new Exception("Bad request");
-        }
-        if (dataAccess.getUser(registerRequest.username()) != null) {
+        try {
+            if (registerRequest.username() == null || registerRequest.email() == null|| registerRequest.password() == null) {
+                throw new Exception("Bad request");
+            }
+            dataAccess.createUser(new UserData(registerRequest.username(), registerRequest.email(), registerRequest.password()));
+            return dataAccess.createAuth(registerRequest.username());
+        } catch (DataAccessException ex) {
             throw new AlreadyTakenException("Already exists");
+
         }
-        dataAccess.createUser(new UserData(registerRequest.username(), registerRequest.email(), registerRequest.password()));
-        return dataAccess.createAuth(registerRequest.username());
+
     }
 
     public AuthData login(LoginRequest loginRequest) throws Exception {
-        if (loginRequest.username() == null || loginRequest.password() == null) {
-            throw new Exception("Bad request");
+        try {
+            if (loginRequest.username() == null || loginRequest.password() == null) {
+                throw new Exception("Bad request");
+            }
+            UserData userData = dataAccess.getUser(loginRequest.username());
+            if (!BCrypt.checkpw(loginRequest.password(), userData.password())) { // bad match
+                throw new UnauthorizedException("Unauthorized Login"); // wrong password
+            }
+            return dataAccess.createAuth(loginRequest.username());
         }
-        UserData userData = dataAccess.getUser(loginRequest.username());
-        if (userData == null) {
+        catch (DataAccessException ex) {
             throw new UnauthorizedException("Unauthorized Login"); // no existing user
         }
-        if (!BCrypt.checkpw(loginRequest.password(), userData.password())) { // bad match
-            throw new UnauthorizedException("Unauthorized Login"); // wrong password
-        }
-        return dataAccess.createAuth(loginRequest.username());
     }
 
     public void logout(LogoutRequest logoutRequest) throws Exception {
-        if (logoutRequest.authToken() == null) {
-            throw new Exception("Bad request");
-        }
-        var authData = dataAccess.getAuth(logoutRequest.authToken());
-        if (authData == null) {
+        try {
+            if (logoutRequest.authToken() == null) {
+                throw new Exception("Bad request");
+            }
+            var authData = dataAccess.getAuth(logoutRequest.authToken());
+            dataAccess.deleteAuth(logoutRequest.authToken());
+        } catch (DataAccessException ex) {
             throw new UnauthorizedException("Unauthorized Logout");
         }
-        dataAccess.deleteAuth(logoutRequest.authToken());
     }
 
     public void clear() {

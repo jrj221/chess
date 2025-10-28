@@ -7,6 +7,7 @@ import io.javalin.*;
 import io.javalin.http.Context;
 import service.*;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -45,6 +46,9 @@ public class Server {
             // when userService throws an exception>
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(403).result(message);
+        } catch (SQLException ex) {
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(500).result(message);
         } catch (Exception ex) { // bad request
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(400).result(message);

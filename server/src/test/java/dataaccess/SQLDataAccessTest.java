@@ -20,7 +20,7 @@ public class SQLDataAccessTest {
     }
 
     @Test
-    void createAndGetUser() { // not sure how you would test separately
+    void createAndGetUser() throws Exception{ // not sure how you would test separately
         DataAccess db = new SQLDataAccess();
         var user = new UserData("joe", "joe@email.com", "password");
         db.createUser(user);
@@ -30,7 +30,7 @@ public class SQLDataAccessTest {
     }
 
     @Test
-    void createAuth() {
+    void createAuth() throws Exception {
         DataAccess db = new SQLDataAccess();
         String username = "joe";
         AuthData authData = db.createAuth(username);
@@ -39,7 +39,7 @@ public class SQLDataAccessTest {
     }
 
     @Test
-    void getAuth() {
+    void getAuth() throws Exception {
         DataAccess db = new SQLDataAccess();
         String username = "joe";
         AuthData authData = db.createAuth(username);
@@ -47,7 +47,7 @@ public class SQLDataAccessTest {
     }
 
     @Test
-    void deleteAuth() {
+    void deleteAuth() throws Exception {
         DataAccess db = new SQLDataAccess();
         String username = "joe";
         AuthData authData = db.createAuth(username);
@@ -56,7 +56,7 @@ public class SQLDataAccessTest {
     }
 
     @Test
-    void getGame() {
+    void getGame() throws Exception {
         DataAccess db = new SQLDataAccess();
         var game1ID = db.createGameData("game1");
         assertNotNull(db.getGame(game1ID));
@@ -64,7 +64,7 @@ public class SQLDataAccessTest {
     }
 
     @Test
-    void getAllGames() {
+    void getAllGames() throws Exception {
         DataAccess db = new SQLDataAccess();
         var game1 = db.createGameData("game1");
         var game2 = db.createGameData("game2");
@@ -78,7 +78,7 @@ public class SQLDataAccessTest {
     }
 
     @Test
-    void joinGame() {
+    void joinGame() throws Exception {
         DataAccess db = new SQLDataAccess();
         var game1ID = db.createGameData("game1");
         db.joinGame("joe", game1ID, "WHITE");
@@ -87,7 +87,7 @@ public class SQLDataAccessTest {
     }
 
     @Test
-    void createGameData() {
+    void createGameData() throws Exception {
         DataAccess db = new SQLDataAccess();
         var myGameID = db.createGameData("myGame");
         assertEquals("myGame", db.getGame(myGameID).gameName());
