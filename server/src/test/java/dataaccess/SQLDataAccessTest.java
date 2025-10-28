@@ -64,6 +64,7 @@ public class SQLDataAccessTest {
     @Test
     void getAllGames() {
         DataAccess db = new SQLDataAccess();
+        db.clear();
         var game1 = db.createGameData("game1");
         var game2 = db.createGameData("game2");
         var game3 = db.createGameData("game3");
@@ -73,6 +74,15 @@ public class SQLDataAccessTest {
         myGames.add(db.getGame(game3));
         ArrayList<GameData> allGames = db.getAllGames();
         assertEquals(myGames, allGames);
+    }
+
+    @Test
+    void joinGame() {
+        DataAccess db = new SQLDataAccess();
+        var game1ID = db.createGameData("game1");
+        db.joinGame("joe", game1ID, "WHITE");
+        var gameData = db.getGame(game1ID);
+        assertEquals("joe", gameData.whiteUsername());
     }
 
     @Test
