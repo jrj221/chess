@@ -174,6 +174,14 @@ public class SQLDataAccess implements DataAccess {
 
     @Override
     public void joinGame(String username, int gameID, String playerColor) {
-
+        try (var connection = DatabaseManager.getConnection()) {
+            var statement = connection.prepareStatement("UPDATE games; SET ? = ? WHERE gameID = ?");
+            statement.setString(2, playerColor.equals("WHITE") ? "whiteUsername" : "blackUsername");
+            statement.setString(2, username);
+            statement.setInt(3, gameID);
+            statement.executeUpdate();
+        } catch (Exception ex) {
+            //
+        }
     }
 }
