@@ -102,7 +102,27 @@ public class SQLDataAccess implements DataAccess {
 
     @Override
     public int createGameData(String gameName) {
-        return 0;
+        try (var connection = DatabaseManager.getConnection()) {
+            var statement = connection.prepareStatement("INSERT INTO games " +
+                    "(gameID, gameName) " +
+                    "VALUES (?,?)");
+            int gameID = 1;
+            while (true) {
+                if (getGame(gameID) != null) { // need to implement getGame()
+                    gameID++;
+                }
+                else {
+                    break; // usable gameID
+                }
+            }
+            statement.setInt(1, gameID);
+            statement.setString(2, gameName);
+            statement.executeUpdate();
+            return gameID;
+        } catch (Exception ex) {
+            //
+        }
+        return -1; // idk error
     }
 
     @Override

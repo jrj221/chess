@@ -59,10 +59,10 @@ public class DatabaseManager {
                     ")";
             var gameStatement = "CREATE TABLE IF NOT EXISTS games (" +
                     "gameID INT PRIMARY KEY," +
-                    "whiteUsername VARCHAR(100)," +
-                    "blackUsername VARCHAR(100)," +
+                    "whiteUsername VARCHAR(100) DEFAULT NULL," +
+                    "blackUsername VARCHAR(100) DEFAULT NULL," +
                     "gameName VARCHAR(100)," +
-                    "game VARCHAR(10000)" + // serialized game string
+                    "game VARCHAR(10000) DEFAULT NULL" + // serialized game string
                     ")";
             var authStatement = "CREATE TABLE IF NOT EXISTS auth (" +
                     "authToken VARCHAR(100) PRIMARY KEY," +
