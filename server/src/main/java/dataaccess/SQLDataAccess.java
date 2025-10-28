@@ -6,6 +6,7 @@ import datamodel.UserData;
 
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class SQLDataAccess implements DataAccess {
 
@@ -54,7 +55,20 @@ public class SQLDataAccess implements DataAccess {
 
     @Override
     public AuthData createAuth(String username) {
-        return null;
+        try (var connection = DatabaseManager.getConnection()) {
+            var statement = connection.prepareStatement("INSERT INTO auth (username, authToken) VALUES (?, ?)");
+            var authData = new AuthData(username, generateAuthToken());
+            statement.setString(1, authData.username());
+            statement.setString(2, authData.authToken());
+            statement.executeUpdate();
+            return authData;
+        } catch (Exception ex) {
+            //
+        }
+    }
+
+    private String generateAuthToken() {
+        return UUID.randomUUID().toString();
     }
 
     @Override
