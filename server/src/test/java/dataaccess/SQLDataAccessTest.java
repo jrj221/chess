@@ -31,4 +31,12 @@ public class SQLDataAccessTest {
         assertEquals(username, authData.username());
         assertNotNull(authData.authToken());
     }
+
+    @Test
+    void getAuth() {
+        DataAccess db = new SQLDataAccess();
+        String username = "joe";
+        AuthData authData = db.createAuth(username);
+        assertEquals(authData, db.getAuth(authData.authToken()));
+    }
 }
