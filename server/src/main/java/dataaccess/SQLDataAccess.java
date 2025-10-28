@@ -91,7 +91,13 @@ public class SQLDataAccess implements DataAccess {
 
     @Override
     public void deleteAuth(String authToken) {
-
+        try (var connection = DatabaseManager.getConnection()) {
+            var statement = connection.prepareStatement("DELETE FROM auth WHERE authToken = ?");
+            statement.setString(1, authToken);
+            statement.executeUpdate();
+        } catch (Exception ex) {
+            //
+        }
     }
 
     @Override

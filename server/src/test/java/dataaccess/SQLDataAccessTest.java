@@ -39,4 +39,13 @@ public class SQLDataAccessTest {
         AuthData authData = db.createAuth(username);
         assertEquals(authData, db.getAuth(authData.authToken()));
     }
+
+    @Test
+    void deleteAuth() {
+        DataAccess db = new SQLDataAccess();
+        String username = "joe";
+        AuthData authData = db.createAuth(username);
+        db.deleteAuth(authData.authToken());
+        assertNull(db.getAuth(authData.authToken()));
+    }
 }
