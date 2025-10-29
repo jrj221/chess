@@ -7,6 +7,7 @@ import datamodel.GameData;
 import datamodel.UserData;
 import org.mindrot.jbcrypt.BCrypt;
 
+import javax.xml.crypto.Data;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public class SQLDataAccess implements DataAccess {
             String hashedPassword = generateHashedPassword(user.password());
             statement.setString(3, hashedPassword);
             statement.executeUpdate();
-        } catch (SQLException ex) {
+        } catch (SQLException ex) { // how can i differentiate this from any other SQLException?
             throw new DataAccessException("Username taken");
         } catch (Exception ex) {
             throw new SQLException("SQL Exception");
@@ -107,10 +108,14 @@ public class SQLDataAccess implements DataAccess {
     @Override
     public void deleteAuth(String authToken) throws Exception {
         try (var connection = DatabaseManager.getConnection()) {
+            getAuth(authToken);
             var statement = connection.prepareStatement("DELETE FROM auth WHERE authToken = ?");
             statement.setString(1, authToken);
             statement.executeUpdate();
-        } catch (Exception ex) {
+        } catch (DataAccessException ex) {
+            throw new DataAccessException("invalid authToken");
+            // wouldn't happen since it's handled by service, but I need a fail test
+        } catch (SQLException ex) {
             throw new SQLException("SQL Exception");
         }
     }

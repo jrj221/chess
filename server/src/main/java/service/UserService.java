@@ -52,7 +52,7 @@ public class UserService {
             if (logoutRequest.authToken() == null) {
                 throw new Exception("Bad request");
             }
-            var authData = dataAccess.getAuth(logoutRequest.authToken());
+            dataAccess.getAuth(logoutRequest.authToken()); // throws error if bad authToken
             dataAccess.deleteAuth(logoutRequest.authToken());
         } catch (DataAccessException ex) {
             throw new UnauthorizedException("Unauthorized Logout");

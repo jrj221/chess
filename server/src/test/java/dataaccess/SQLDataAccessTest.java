@@ -85,6 +85,12 @@ public class SQLDataAccessTest {
     }
 
     @Test
+    void deleteAuthBadAuthToken() throws Exception {
+        DataAccess db = new SQLDataAccess();
+        assertThrows(DataAccessException.class, () -> db.deleteAuth("badToken"));
+    }
+
+    @Test
     void getGame() throws Exception {
         DataAccess db = new SQLDataAccess();
         var game1ID = db.createGameData("game1");
