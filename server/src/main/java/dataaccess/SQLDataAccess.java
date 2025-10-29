@@ -43,6 +43,8 @@ public class SQLDataAccess implements DataAccess {
             String hashedPassword = generateHashedPassword(user.password());
             statement.setString(3, hashedPassword);
             statement.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Username taken");
         } catch (Exception ex) {
             throw new SQLException("SQL Exception");
         }

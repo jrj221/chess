@@ -27,7 +27,6 @@ public class UserService {
             return dataAccess.createAuth(registerRequest.username());
         } catch (DataAccessException ex) {
             throw new AlreadyTakenException("Already exists");
-
         }
 
     }

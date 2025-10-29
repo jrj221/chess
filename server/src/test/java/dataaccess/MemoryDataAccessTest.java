@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class MemoryDataAccessTest {
 
     @Test
-    void createAndGetUser() throws Exception {
+    void createAndGetUserSuccessful() throws Exception {
         DataAccess db = new MemoryDataAccess();
         var user = new UserData("joe", "joe@email.com", "password");
         db.createUser(user);
@@ -19,7 +19,6 @@ class MemoryDataAccessTest {
         assertEquals(user.email(), foundUser.email());
         assertTrue(BCrypt.checkpw(user.password(), foundUser.password()));
     }
-
 
     @Test
     void createAuth() throws Exception {

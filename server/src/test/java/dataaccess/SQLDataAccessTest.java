@@ -20,13 +20,22 @@ public class SQLDataAccessTest {
     }
 
     @Test
-    void createAndGetUser() throws Exception{ // not sure how you would test separately
+    void createAndGetUserSuccessful() throws Exception{ // not sure how you would test separately
         DataAccess db = new SQLDataAccess();
         var user = new UserData("joe", "joe@email.com", "password");
         db.createUser(user);
         var foundUser = db.getUser(user.username());
         assertEquals(user.email(), foundUser.email());
         assertTrue(BCrypt.checkpw(user.password(), foundUser.password()));
+    }
+
+    @Test
+    void createUsernameTaken() throws Exception {
+        DataAccess db = new SQLDataAccess();
+        var user = new UserData("joe", "joe@email.com", "password");
+        db.createUser(user);
+        var newUser = new UserData("joe", "joe@email.com", "password");
+        assertThrows(DataAccessException.class, () -> db.createUser(newUser));
     }
 
     @Test
