@@ -3,6 +3,7 @@ package service;
 import dataaccess.*;
 import datamodel.*;
 
+import javax.xml.crypto.Data;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -39,25 +40,27 @@ public class GameService {
     }
 
     public void joinGame(JoinGameRequest joinGameRequest, String authToken) throws Exception {
-        if ((!Objects.equals(joinGameRequest.playerColor(), "BLACK")
-                && !Objects.equals(joinGameRequest.playerColor(), "WHITE"))
-                || authToken == null || joinGameRequest.gameID() < 1) {
-            throw new Exception("Bad request");
+        try {
+            if (joinGameRequest.playerColor() == null || authToken == null) {
+                throw new Exception("Bad request");
+            }
+            var authData = dataAccess.getAuth(authToken);
+            if (authData == null) {
+                throw new UnauthorizedException("Unauthorized");
+            }
+            String username = authData.username();
+            dataAccess.joinGame(username, joinGameRequest.gameID(), joinGameRequest.playerColor());
+        } catch (DataAccessException ex) {
+            if (ex.getMessage().equals("Invalid gameID")) {
+                throw new NoExistingGameException("No existing game");
+            }
+            else if (ex.getMessage().equals("Auth not found")) {
+                throw new UnauthorizedException("Unauthorized");
+            }
+            else if (ex.getMessage().equals("Invalid playerColor")) {
+                throw new Exception("Invalid playerColor");
+            }
         }
-        var authData = dataAccess.getAuth(authToken);
-        if (authData == null) {
-            throw new UnauthorizedException("Unauthorized");
-        }
-        var gameData = dataAccess.getGame(joinGameRequest.gameID());
-        if (gameData == null) {
-            throw new NoExistingGameException("No game found");
-        }
-        if ((joinGameRequest.playerColor().equals("BLACK") && gameData.blackUsername() != null)
-                || (joinGameRequest.playerColor().equals("WHITE") && gameData.whiteUsername() != null)) {
-            throw new AlreadyTakenException("Color not available");
-        }
-        String username = authData.username();
-        dataAccess.joinGame(username, joinGameRequest.gameID(), joinGameRequest.playerColor());
     }
 
 }

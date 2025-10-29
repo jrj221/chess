@@ -109,4 +109,14 @@ public class GameServiceTest {
         assertThrows(AlreadyTakenException.class, () -> gameService.joinGame(joinGameRequest, authData.authToken()));
     }
 
+    @Test
+    void joinGameInvalidColor() throws Exception {
+        var registerRequest = new RegisterRequest("joe", "joe@email.com", "password");
+        AuthData authData = userService.register(registerRequest);
+        var createGameRequest = new CreateGameRequest("testGame");
+        int gameID = gameService.createGame(createGameRequest, authData.authToken());
+        var joinGameRequest = new JoinGameRequest("GREEN", gameID);
+        assertThrows(Exception.class, () -> gameService.joinGame(joinGameRequest, authData.authToken()));
+    }
+
 }

@@ -25,9 +25,20 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public void createUser(UserData user) throws Exception {
-        var hashedPass = generateHashedPassword(user.password());
-        var hashedUser = new UserData(user.username(), user.email(), hashedPass);
-        users.put(user.username(), hashedUser);
+        try {
+            if (getUser(user.username()) != null) {
+                throw new DataAccessException("Username already taken");
+            }
+        } catch (DataAccessException ex) {
+            if (ex.getMessage().equals("User not found")) {
+                var hashedPass = generateHashedPassword(user.password());
+                var hashedUser = new UserData(user.username(), user.email(), hashedPass);
+                users.put(user.username(), hashedUser);
+            }
+            else if (ex.getMessage().equals("Username already taken")) {
+                throw new DataAccessException("Username already taken");
+            }
+        }
     }
 
     @Override
@@ -98,12 +109,21 @@ public class MemoryDataAccess implements DataAccess {
     @Override
     public void joinGame(String username, int gameID, String playerColor) throws Exception {
         var gameData = games.get(gameID);
+        if (gameData == null) {
+            throw new NoExistingGameException("Invalid gameID");
+        }
         if (playerColor.equals("WHITE")) {
+            if (games.get(gameID).whiteUsername() != null) {
+                throw new AlreadyTakenException("Team taken");
+            }
             gameData = new GameData(gameID, username, gameData.blackUsername(), gameData.gameName(), gameData.game());
         } else if (playerColor.equals("BLACK")) {
+            if (games.get(gameID).blackUsername() != null) {
+                throw new AlreadyTakenException("Team taken");
+            }
             gameData = new GameData(gameID, gameData.whiteUsername(), username, gameData.gameName(), gameData.game());
         } else {
-            throw new DataAccessException("invalid playerColor");
+            throw new DataAccessException("Invalid playerColor");
         }
         games.put(gameID, gameData);
     }
@@ -111,6 +131,11 @@ public class MemoryDataAccess implements DataAccess {
     @Override
     public String generateHashedPassword(String password) throws Exception {
         return BCrypt.hashpw(password, BCrypt.gensalt());
+    }
+
+    @Override
+    public Integer countGames() throws Exception {
+        return games.size();
     }
 
     private String generateAuthToken() {

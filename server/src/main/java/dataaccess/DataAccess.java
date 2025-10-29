@@ -16,4 +16,5 @@ public interface DataAccess {
     ArrayList<GameData> getAllGames() throws Exception;
     void joinGame(String username, int gameID, String playerColor) throws Exception;
     String generateHashedPassword(String password) throws Exception;
+    Integer countGames() throws Exception;
 }

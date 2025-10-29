@@ -91,7 +91,7 @@ public class SQLDataAccessTest {
         String username = "joe";
         AuthData authData = db.createAuth(username);
         db.deleteAuth(authData.authToken());
-        assertNull(db.getAuth(authData.authToken()));
+        assertThrows(DataAccessException.class, () -> db.getAuth(authData.authToken()));
     }
 
     @Test

@@ -38,12 +38,12 @@ class MemoryDataAccessTest {
     }
 
     @Test
-    void deleteAuth() throws Exception {
+    void deleteAuthSuccessful() throws Exception {
         DataAccess db = new MemoryDataAccess();
         String username = "joe";
         AuthData authData = db.createAuth(username);
         db.deleteAuth(authData.authToken());
-        assertNull(db.getAuth(authData.authToken()));
+        assertThrows(DataAccessException.class, () -> db.getAuth(authData.authToken()));
     }
 
     @Test
@@ -88,14 +88,14 @@ class MemoryDataAccessTest {
     }
 
     @Test
-    void clear() throws Exception {
+    void clearSuccessful() throws Exception {
         DataAccess db = new MemoryDataAccess();
         db.createUser(new UserData("joe", "joe@email.com", "password"));
         AuthData authData = db.createAuth("joe");
         int myGameID = db.createGameData("myGame");
         db.clear();
-        assertNull(db.getUser("joe"));
-        assertNull(db.getAuth(authData.authToken()));
-        assertNull(db.getGame(myGameID));
+        assertThrows(DataAccessException.class, () -> db.getUser("joe"));
+        assertThrows(DataAccessException.class, () -> db.getAuth(authData.authToken()));
+        assertThrows(DataAccessException.class, () -> db.getGame(myGameID));
     }
 }

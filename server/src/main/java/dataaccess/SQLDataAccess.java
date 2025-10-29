@@ -57,6 +57,21 @@ public class SQLDataAccess implements DataAccess {
     }
 
     @Override
+    public Integer countGames() throws Exception {
+        try (var connection = DatabaseManager.getConnection()) {
+            var statement = connection.prepareStatement("SELECT * FROM games");
+            var rs = statement.executeQuery();
+            int count = 0;
+            while (rs.next()) {
+                count++;
+            }
+            return count;
+        } catch (Exception ex) {
+            throw new SQLException("SQL Exception");
+        }
+    }
+
+    @Override
     public void clear() {
         try (var connection = DatabaseManager.getConnection()) {
             var statement = connection.prepareStatement("DROP TABLE auth, games, users");
@@ -129,15 +144,7 @@ public class SQLDataAccess implements DataAccess {
             var statement = connection.prepareStatement("INSERT INTO games " +
                     "(gameID, gameName) " +
                     "VALUES (?,?)");
-            int gameID = 1;
-            while (true) {
-                if (getGame(gameID) != null) { // need to implement getGame()
-                    gameID++;
-                }
-                else {
-                    break; // usable gameID
-                }
-            }
+            int gameID = countGames() + 1;
             statement.setInt(1, gameID);
             statement.setString(2, gameName);
             statement.executeUpdate();
@@ -207,10 +214,10 @@ public class SQLDataAccess implements DataAccess {
                 statement.setInt(2, gameID);
                 statement.executeUpdate();
             } else {
-                throw new DataAccessException("invalid playerColor");
+                throw new DataAccessException("Invalid playerColor");
             }
         } catch (DataAccessException ex) {
-            throw new DataAccessException("invalid GameID");
+            throw new DataAccessException("Invalid GameID");
         } catch (SQLException ex) {
             throw new SQLException("SQL Exception");
         }
