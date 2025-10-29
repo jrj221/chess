@@ -22,7 +22,17 @@ public class SQLDataAccessTest {
     }
 
     @Test
-    void createAndGetUserSuccessful() throws Exception{ // not sure how you would test separately
+    void createUserSuccessful() throws Exception { // not sure how you would test separately
+        DataAccess db = new SQLDataAccess();
+        var user = new UserData("joe", "joe@email.com", "password");
+        db.createUser(user);
+        var foundUser = db.getUser(user.username());
+        assertEquals(user.email(), foundUser.email());
+        assertTrue(BCrypt.checkpw(user.password(), foundUser.password()));
+    }
+
+    @Test
+    void getUserSuccessful() throws Exception { // not sure how you would test separately
         DataAccess db = new SQLDataAccess();
         var user = new UserData("joe", "joe@email.com", "password");
         db.createUser(user);
@@ -99,7 +109,7 @@ public class SQLDataAccessTest {
     }
 
     @Test
-    void getGameGameNotFoudn() throws Exception {
+    void getGameGameNotFound() throws Exception {
         DataAccess db = new SQLDataAccess();
         assertThrows(DataAccessException.class, () -> db.getGame(1));
     }
@@ -116,6 +126,14 @@ public class SQLDataAccessTest {
         myGames.add(db.getGame(game3));
         ArrayList<GameData> allGames = db.getAllGames();
         assertEquals(myGames, allGames);
+    }
+
+    @Test
+    void getAllGamesFail() throws Exception {
+        DataAccess db = new SQLDataAccess();
+        assertDoesNotThrow(() -> db.clear());
+        var games = db.getAllGames();
+        assertTrue(games.isEmpty());
     }
 
     @Test
