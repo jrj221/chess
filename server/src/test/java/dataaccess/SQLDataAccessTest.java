@@ -70,6 +70,12 @@ public class SQLDataAccessTest {
     }
 
     @Test
+    void getAuthAuthNotFound() {
+        DataAccess db = new SQLDataAccess();
+        assertThrows(DataAccessException.class, () -> db.getAuth("nonsenseToken"));
+    }
+
+    @Test
     void deleteAuth() throws Exception {
         DataAccess db = new SQLDataAccess();
         String username = "joe";

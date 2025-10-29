@@ -99,7 +99,7 @@ public class SQLDataAccess implements DataAccess {
                 }
             }
             throw new DataAccessException("Auth not found");
-        } catch (Exception ex) {
+        } catch (SQLException ex) {
             throw new SQLException("SQL Exception");
         }
     }
