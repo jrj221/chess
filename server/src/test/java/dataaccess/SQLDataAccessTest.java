@@ -57,8 +57,7 @@ public class SQLDataAccessTest {
     @Test
     void createAuthNullUsername() throws Exception {
         DataAccess db = new SQLDataAccess();
-        String username = null;
-        assertThrows(DataAccessException.class, () -> db.createAuth(username));
+        assertThrows(DataAccessException.class, () -> db.createAuth(null));
     }
 
     @Test
@@ -129,5 +128,11 @@ public class SQLDataAccessTest {
         assertNull(db.getGame(myGameID).whiteUsername());
         assertNull(db.getGame(myGameID).blackUsername());
         assertNull(db.getGame(myGameID).game());
+    }
+
+    @Test
+    void createGameDataNullGameName() throws Exception {
+        DataAccess db = new SQLDataAccess();
+        assertThrows(DataAccessException.class, () -> db.createGameData(null));
     }
 }

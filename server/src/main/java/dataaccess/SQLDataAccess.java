@@ -123,6 +123,9 @@ public class SQLDataAccess implements DataAccess {
     @Override
     public int createGameData(String gameName) throws Exception {
         try (var connection = DatabaseManager.getConnection()) {
+            if (gameName == null) {
+                throw new DataAccessException("gameName cannot be null");
+            }
             var statement = connection.prepareStatement("INSERT INTO games " +
                     "(gameID, gameName) " +
                     "VALUES (?,?)");
@@ -139,7 +142,7 @@ public class SQLDataAccess implements DataAccess {
             statement.setString(2, gameName);
             statement.executeUpdate();
             return gameID;
-        } catch (Exception ex) {
+        } catch (SQLException ex) {
             throw new SQLException("SQL Exception");
         }
     }
