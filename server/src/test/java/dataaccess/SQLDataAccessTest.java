@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.mindrot.jbcrypt.BCrypt;
 
 import javax.xml.crypto.Data;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -124,6 +125,19 @@ public class SQLDataAccessTest {
         db.joinGame("joe", game1ID, "WHITE");
         var gameData = db.getGame(game1ID);
         assertEquals("joe", gameData.whiteUsername());
+    }
+
+    @Test
+    void joinGameInvalidColor() throws Exception {
+        DataAccess db = new SQLDataAccess();
+        db.createGameData("fakeGame");
+        assertThrows(DataAccessException.class, () -> db.joinGame("joe", 1, "GREEN"));
+    }
+
+    @Test
+    void joinGameInvalidGameID() throws Exception {
+        DataAccess db = new SQLDataAccess();
+        assertThrows(DataAccessException.class, () -> db.joinGame("joe", 2, "WHITE"));
     }
 
     @Test

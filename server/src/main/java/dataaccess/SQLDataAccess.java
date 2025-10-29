@@ -187,7 +187,7 @@ public class SQLDataAccess implements DataAccess {
                 allGames.add(gameData);
             }
             return allGames;
-        } catch (Exception ex) {
+        } catch (SQLException ex) {
             throw new SQLException("SQL Exception");
         }
     }
@@ -195,6 +195,7 @@ public class SQLDataAccess implements DataAccess {
     @Override
     public void joinGame(String username, int gameID, String playerColor) throws Exception {
         try (var connection = DatabaseManager.getConnection()) {
+            getGame(gameID); // throws DataAccessException if game not found
             if (playerColor.equals("WHITE")) {
                 var statement = connection.prepareStatement("UPDATE games SET whiteUsername = ? WHERE gameID = ?");
                 statement.setString(1, username);
@@ -208,7 +209,9 @@ public class SQLDataAccess implements DataAccess {
             } else {
                 throw new DataAccessException("invalid playerColor");
             }
-        } catch (Exception ex) {
+        } catch (DataAccessException ex) {
+            throw new DataAccessException("invalid GameID");
+        } catch (SQLException ex) {
             throw new SQLException("SQL Exception");
         }
     }

@@ -41,7 +41,7 @@ public class GameService {
     public void joinGame(JoinGameRequest joinGameRequest, String authToken) throws Exception {
         if ((!Objects.equals(joinGameRequest.playerColor(), "BLACK")
                 && !Objects.equals(joinGameRequest.playerColor(), "WHITE"))
-                || authToken == null || joinGameRequest.gameID() == 0) {
+                || authToken == null || joinGameRequest.gameID() < 1) {
             throw new Exception("Bad request");
         }
         var authData = dataAccess.getAuth(authToken);
