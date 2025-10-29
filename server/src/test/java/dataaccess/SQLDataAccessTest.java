@@ -55,6 +55,13 @@ public class SQLDataAccessTest {
     }
 
     @Test
+    void createAuthNullUsername() throws Exception {
+        DataAccess db = new SQLDataAccess();
+        String username = null;
+        assertThrows(DataAccessException.class, () -> db.createAuth(username));
+    }
+
+    @Test
     void getAuth() throws Exception {
         DataAccess db = new SQLDataAccess();
         String username = "joe";

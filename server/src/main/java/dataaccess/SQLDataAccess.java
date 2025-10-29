@@ -70,11 +70,15 @@ public class SQLDataAccess implements DataAccess {
         try (var connection = DatabaseManager.getConnection()) {
             var statement = connection.prepareStatement("INSERT INTO auth (username, authToken) VALUES (?, ?)");
             var authData = new AuthData(username, generateAuthToken());
+            if (authData.username() == null) {
+                throw new DataAccessException("You can't provide a null username");
+                // this will never happen because my service checks against this, but I needed a fail test
+            }
             statement.setString(1, authData.username());
             statement.setString(2, authData.authToken());
             statement.executeUpdate();
             return authData;
-        } catch (Exception ex) {
+        } catch (SQLException ex) {
             throw new SQLException("SQL Exception");
         }
     }
