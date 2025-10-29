@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mindrot.jbcrypt.BCrypt;
 
+import javax.xml.crypto.Data;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,6 +37,12 @@ public class SQLDataAccessTest {
         db.createUser(user);
         var newUser = new UserData("joe", "joe@email.com", "password");
         assertThrows(DataAccessException.class, () -> db.createUser(newUser));
+    }
+
+    @Test
+    void getUserUserNotFound() throws Exception {
+        DataAccess db = new SQLDataAccess();
+        assertThrows(DataAccessException.class, () -> db.getUser("joe"));
     }
 
     @Test
