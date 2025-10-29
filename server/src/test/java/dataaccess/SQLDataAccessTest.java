@@ -98,6 +98,12 @@ public class SQLDataAccessTest {
     }
 
     @Test
+    void getGameGameNotFoudn() throws Exception {
+        DataAccess db = new SQLDataAccess();
+        assertThrows(DataAccessException.class, () -> db.getGame(1));
+    }
+
+    @Test
     void getAllGames() throws Exception {
         DataAccess db = new SQLDataAccess();
         var game1 = db.createGameData("game1");

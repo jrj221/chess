@@ -164,7 +164,7 @@ public class SQLDataAccess implements DataAccess {
                 }
             }
             throw new DataAccessException("Game not found");
-        } catch (Exception ex) {
+        } catch (SQLException ex) {
             throw new SQLException("SQL Exception");
         }
     }
