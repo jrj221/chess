@@ -18,7 +18,7 @@ public class Server {
     private final GameService gameService;
 
     public Server() {
-        var dataAccess = new MemoryDataAccess();
+        var dataAccess = new SQLDataAccess();
         userService = new UserService(dataAccess);
         gameService = new GameService(dataAccess);
         server = Javalin.create(config -> config.staticFiles.add("web"));
@@ -46,12 +46,12 @@ public class Server {
             // when userService throws an exception>
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(403).result(message);
-        } catch (SQLException ex) {
-            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
-            ctx.status(500).result(message);
-        } catch (Exception ex) { // bad request
+        } catch (BadRequestException ex) { // bad request
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(400).result(message);
+        } catch (Exception ex) {
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(500).result(message);
         }
     }
 
@@ -65,9 +65,12 @@ public class Server {
         } catch (UnauthorizedException ex) {
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(401).result(message);
-        } catch (Exception ex) { // bad request
+        } catch (BadRequestException ex) { // bad request
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(400).result(message);
+        } catch (Exception ex) {
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(500).result(message);
         }
     }
 
@@ -81,9 +84,12 @@ public class Server {
         } catch (UnauthorizedException ex) {
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(401).result(message);
-        } catch (Exception ex) { // bad request
+        } catch (BadRequestException ex) { // bad request
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(400).result(message);
+        } catch (Exception ex) {
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(500).result(message);
         }
     }
 
@@ -97,9 +103,12 @@ public class Server {
         } catch (UnauthorizedException ex) {
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(401).result(message);
-        } catch (Exception ex) { // bad request
+        } catch (BadRequestException ex) { // bad request
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(400).result(message);
+        } catch (Exception ex) {
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(500).result(message);
         }
     }
 
@@ -113,9 +122,12 @@ public class Server {
         } catch (UnauthorizedException ex) {
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(401).result(message);
-        } catch (Exception ex) { // bad request
+        } catch (BadRequestException ex) { // bad request
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(400).result(message);
+        } catch (Exception ex) {
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(500).result(message);
         }
     }
 
@@ -125,25 +137,27 @@ public class Server {
             String requestJson = ctx.body();
             var joinGameRequest = serializer.fromJson(requestJson, JoinGameRequest.class);
             gameService.joinGame(joinGameRequest, ctx.header("authorization"));
-        } catch (NoExistingGameException ex) {
-            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
-            ctx.status(500).result(message);
-        } catch (AlreadyTakenException ex) {
-            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
-            ctx.status(403).result(message);
         } catch (UnauthorizedException ex) {
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(401).result(message);
-        } catch (Exception ex) { // bad request
+        } catch (BadRequestException ex) { // bad request
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(400).result(message);
+        } catch (Exception ex) {
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(500).result(message);
         }
         ctx.result();
     }
 
     private void clear(Context ctx) {
-        userService.clear();
-        ctx.result();
+        try {
+            userService.clear();
+            ctx.result();
+        } catch (Exception ex) {
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(500).result(message);
+        }
     }
 
     public int run(int desiredPort) {

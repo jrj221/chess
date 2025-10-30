@@ -1,15 +1,8 @@
 package service;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Objects;
-
 import dataaccess.*;
 import datamodel.*; // AuthData and UserData and the like
 import org.mindrot.jbcrypt.BCrypt;
-
-import javax.xml.crypto.Data;
-
 
 public class UserService {
     private final DataAccess dataAccess;
@@ -21,12 +14,16 @@ public class UserService {
     public AuthData register(RegisterRequest registerRequest) throws Exception {
         try {
             if (registerRequest.username() == null || registerRequest.email() == null|| registerRequest.password() == null) {
-                throw new Exception("Bad request");
+                throw new BadRequestException("Bad request");
             }
             dataAccess.createUser(new UserData(registerRequest.username(), registerRequest.email(), registerRequest.password()));
             return dataAccess.createAuth(registerRequest.username());
         } catch (DataAccessException ex) {
-            throw new AlreadyTakenException("Already exists");
+            if (ex.getMessage().equals("Username taken")) {
+                throw new AlreadyTakenException("Already exists");
+            } else {
+                throw new Exception("Internal Error");
+            }
         }
 
     }
@@ -34,7 +31,7 @@ public class UserService {
     public AuthData login(LoginRequest loginRequest) throws Exception {
         try {
             if (loginRequest.username() == null || loginRequest.password() == null) {
-                throw new Exception("Bad request");
+                throw new BadRequestException("Bad request");
             }
             UserData userData = dataAccess.getUser(loginRequest.username());
             if (!BCrypt.checkpw(loginRequest.password(), userData.password())) { // bad match
@@ -50,7 +47,7 @@ public class UserService {
     public void logout(LogoutRequest logoutRequest) throws Exception {
         try {
             if (logoutRequest.authToken() == null) {
-                throw new Exception("Bad request");
+                throw new BadRequestException("Bad request");
             }
             dataAccess.getAuth(logoutRequest.authToken()); // throws error if bad authToken
             dataAccess.deleteAuth(logoutRequest.authToken());
@@ -59,7 +56,7 @@ public class UserService {
         }
     }
 
-    public void clear() {
+    public void clear() throws Exception {
         dataAccess.clear();
     }
 }

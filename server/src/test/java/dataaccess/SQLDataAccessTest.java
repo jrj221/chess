@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SQLDataAccessTest {
 
     @BeforeEach
-    void clearAll() {
+    void clearAll() throws Exception {
         DataAccess db = new SQLDataAccess();
         db.clear();
     }

@@ -9,7 +9,6 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import javax.xml.crypto.Data;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -29,25 +28,28 @@ public class SQLDataAccess implements DataAccess {
                 }
             }
             throw new DataAccessException("User not found");
-        } catch (SQLException ex) {
-            throw new SQLException("SQL Exception");
         }
     }
 
     @Override
     public void createUser(UserData user) throws Exception {
         try (var connection = DatabaseManager.getConnection()) {
-            var statement = connection.prepareStatement("INSERT INTO users (username, email, password) " +
-                    "VALUES (?, ?, ?)");
-            statement.setString(1, user.username());
-            statement.setString(2, user.email());
-            String hashedPassword = generateHashedPassword(user.password());
-            statement.setString(3, hashedPassword);
-            statement.executeUpdate();
-        } catch (SQLException ex) { // how can i differentiate this from any other SQLException?
-            throw new DataAccessException("Username taken");
-        } catch (Exception ex) {
-            throw new SQLException("SQL Exception");
+            try {
+                getUser(user.username()); // if user doesn't exist, it throws, and we catch and resume below
+                throw new DataAccessException("Username taken");
+            } catch (DataAccessException ex) {
+                    if (ex.getMessage().equals("Username taken")) { // distinguishes logic flow
+                        throw new DataAccessException("Username taken");
+                    }
+                    var statement = connection.prepareStatement("INSERT INTO users " +
+                            "(username, email, password) " +
+                            "VALUES (?, ?, ?)");
+                    statement.setString(1, user.username());
+                    statement.setString(2, user.email());
+                    String hashedPassword = generateHashedPassword(user.password());
+                    statement.setString(3, hashedPassword);
+                    statement.executeUpdate();
+            }
         }
     }
 
@@ -66,18 +68,14 @@ public class SQLDataAccess implements DataAccess {
                 count++;
             }
             return count;
-        } catch (Exception ex) {
-            throw new SQLException("SQL Exception");
         }
     }
 
     @Override
-    public void clear() {
+    public void clear() throws Exception {
         try (var connection = DatabaseManager.getConnection()) {
             var statement = connection.prepareStatement("DROP TABLE auth, games, users");
             statement.executeUpdate();
-        } catch (Exception ex) {
-            //
         }
     }
 
@@ -94,8 +92,6 @@ public class SQLDataAccess implements DataAccess {
             statement.setString(2, authData.authToken());
             statement.executeUpdate();
             return authData;
-        } catch (SQLException ex) {
-            throw new SQLException("SQL Exception");
         }
     }
 
@@ -115,8 +111,6 @@ public class SQLDataAccess implements DataAccess {
                 }
             }
             throw new DataAccessException("Auth not found");
-        } catch (SQLException ex) {
-            throw new SQLException("SQL Exception");
         }
     }
 
@@ -128,10 +122,8 @@ public class SQLDataAccess implements DataAccess {
             statement.setString(1, authToken);
             statement.executeUpdate();
         } catch (DataAccessException ex) {
-            throw new DataAccessException("invalid authToken");
+            throw new DataAccessException("Invalid authToken");
             // wouldn't happen since it's handled by service, but I need a fail test
-        } catch (SQLException ex) {
-            throw new SQLException("SQL Exception");
         }
     }
 
@@ -149,8 +141,6 @@ public class SQLDataAccess implements DataAccess {
             statement.setString(2, gameName);
             statement.executeUpdate();
             return gameID;
-        } catch (SQLException ex) {
-            throw new SQLException("SQL Exception");
         }
     }
 
@@ -171,8 +161,6 @@ public class SQLDataAccess implements DataAccess {
                 }
             }
             throw new DataAccessException("Game not found");
-        } catch (SQLException ex) {
-            throw new SQLException("SQL Exception");
         }
     }
 
@@ -194,8 +182,6 @@ public class SQLDataAccess implements DataAccess {
                 allGames.add(gameData);
             }
             return allGames;
-        } catch (SQLException ex) {
-            throw new SQLException("SQL Exception");
         }
     }
 
@@ -218,8 +204,6 @@ public class SQLDataAccess implements DataAccess {
             }
         } catch (DataAccessException ex) {
             throw new DataAccessException("Invalid GameID");
-        } catch (SQLException ex) {
-            throw new SQLException("SQL Exception");
         }
     }
 }

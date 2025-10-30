@@ -42,7 +42,7 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public void clear() {
+    public void clear() throws Exception {
         users.clear();
         auth.clear();
         games.clear();
