@@ -140,9 +140,12 @@ public class Server {
         } catch (UnauthorizedException ex) {
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(401).result(message);
-        } catch (BadRequestException ex) { // bad request
+        } catch (BadRequestException | NoExistingGameException ex) { // bad request
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(400).result(message);
+        } catch (AlreadyTakenException ex) {
+            var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(403).result(message);
         } catch (Exception ex) {
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(500).result(message);

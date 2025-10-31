@@ -203,6 +203,9 @@ public class SQLDataAccess implements DataAccess {
                 throw new DataAccessException("Invalid playerColor");
             }
         } catch (DataAccessException ex) {
+            if (ex.getMessage().equals("Invalid playerColor")) {
+                throw new DataAccessException("Invalid playerColor");
+            }
             throw new DataAccessException("Invalid GameID");
         }
     }

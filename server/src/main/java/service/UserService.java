@@ -4,6 +4,8 @@ import dataaccess.*;
 import datamodel.*; // AuthData and UserData and the like
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.sql.SQLException;
+
 public class UserService {
     private final DataAccess dataAccess;
 
@@ -38,8 +40,10 @@ public class UserService {
                 throw new UnauthorizedException("Unauthorized Login"); // wrong password
             }
             return dataAccess.createAuth(loginRequest.username());
-        }
-        catch (DataAccessException ex) {
+        } catch (DataAccessException ex) {
+            if (ex.getMessage().equals("failed to get connection")) {
+                throw new SQLException(ex.getMessage()); // HUH? why is it caught as if it's DataAccessException?
+            }
             throw new UnauthorizedException("Unauthorized Login"); // no existing user
         }
     }
@@ -52,7 +56,10 @@ public class UserService {
             dataAccess.getAuth(logoutRequest.authToken()); // throws error if bad authToken
             dataAccess.deleteAuth(logoutRequest.authToken());
         } catch (DataAccessException ex) {
-            throw new UnauthorizedException("Unauthorized Logout");
+            if (ex.getMessage().equals("failed to get connection")) {
+                throw new SQLException(ex.getMessage()); // HUH? why is it caught as if it's DataAccessException?
+            }
+            throw new UnauthorizedException("Unauthorized auth");
         }
     }
 

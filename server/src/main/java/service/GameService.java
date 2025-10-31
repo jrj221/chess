@@ -4,6 +4,7 @@ import dataaccess.*;
 import datamodel.*;
 
 import javax.xml.crypto.Data;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -25,7 +26,13 @@ public class GameService {
             int gameID = dataAccess.createGameData(gameName);
             return gameID;
         } catch (DataAccessException ex) { // catches if getAuth throws (no auth found)
-            throw new UnauthorizedException("Unauthorized");
+            if (ex.getMessage().equals("gameName cannot be null")) {
+                throw new BadRequestException("gameName cannot be null");
+            } else if (ex.getMessage().equals("failed to get connection")) {
+                throw new SQLException(ex.getMessage()); // HUH? why is it caught as if it's DataAccessException?
+            } else {
+                throw new UnauthorizedException("Unauthorized");
+            }
         }
     }
 
@@ -37,6 +44,9 @@ public class GameService {
             dataAccess.getAuth(listGamesRequest.authToken());
             return dataAccess.getAllGames();
         } catch (DataAccessException ex) { // catches if getAuth throws (auth not found)
+            if (ex.getMessage().equals("failed to get connection")) {
+                throw new SQLException(ex.getMessage()); // HUH? why is it caught as if it's DataAccessException?
+            }
             throw new UnauthorizedException("Unauthorized auth");
         }
     }
@@ -46,12 +56,19 @@ public class GameService {
             if (joinGameRequest.playerColor() == null || authToken == null) {
                 throw new BadRequestException("Bad request");
             }
+            var gameData = dataAccess.getGame(joinGameRequest.gameID());
+            if ((joinGameRequest.playerColor().equals("WHITE") && gameData.whiteUsername() != null) ||
+                    (joinGameRequest.playerColor().equals("BLACK") && gameData.blackUsername() != null)) {
+                throw new AlreadyTakenException("team already taken");
+            }
             var authData = dataAccess.getAuth(authToken);
             String username = authData.username();
             dataAccess.joinGame(username, joinGameRequest.gameID(), joinGameRequest.playerColor());
         } catch (DataAccessException ex) {
             switch (ex.getMessage()) {
-                case "Invalid gameID" -> throw new NoExistingGameException("No existing game");
+                case "failed to get connection" -> throw new SQLException(ex.getMessage()); // HUH? why is it caught as if it's DataAccessException?
+                case "Game not found" -> throw new NoExistingGameException("No existing game"); // if getGame fails
+                case "Invalid gameID" -> throw new NoExistingGameException("No existing game"); // could be thrown by joinGame
                 case "Auth not found" -> throw new UnauthorizedException("Unauthorized auth");
                 case "Invalid playerColor" -> throw new BadRequestException("Invalid playerColor");
             }
