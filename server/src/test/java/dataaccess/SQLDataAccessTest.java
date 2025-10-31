@@ -34,7 +34,7 @@ public class SQLDataAccessTest {
     @Test
     void getUserSuccessful() throws Exception { // not sure how you would test separately
         DataAccess db = new SQLDataAccess();
-        var user = new UserData("joe", "joe@email.com", "password");
+        var user = new UserData("john", "john@email.com", "password");
         db.createUser(user);
         var foundUser = db.getUser(user.username());
         assertEquals(user.email(), foundUser.email());

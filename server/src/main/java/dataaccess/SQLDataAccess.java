@@ -21,10 +21,10 @@ public class SQLDataAccess implements DataAccess {
             var rs = statement.executeQuery();
             while (rs.next()) {
                 if (rs.getString("username").equals(username)) {
-                    var found_username = rs.getString("username");
-                    var found_email = rs.getString("email");
-                    var found_password = rs.getString("password");
-                    return new UserData(found_username, found_email, found_password);
+                    var foundUsername = rs.getString("username");
+                    var foundEmail = rs.getString("email");
+                    var foundPassword = rs.getString("password");
+                    return new UserData(foundUsername, foundEmail, foundPassword);
                 }
             }
             throw new DataAccessException("User not found");

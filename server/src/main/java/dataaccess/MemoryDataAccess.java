@@ -58,11 +58,11 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public AuthData getAuth(String authToken)  throws Exception{
-        var found_auth = auth.get(authToken);
-        if (found_auth == null) {
+        var foundAuth = auth.get(authToken);
+        if (foundAuth == null) {
             throw new DataAccessException("Auth not found");
         } else {
-            return found_auth;
+            return foundAuth;
         }
     }
 
