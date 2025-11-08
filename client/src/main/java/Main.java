@@ -59,6 +59,13 @@ public class Main {
                     }
                     logout();
                     break;
+                } case "create": {
+                    if (state.equals("LOGGED_OUT")) {
+                        System.out.println("Create game utility not available while logged out");
+                        break;
+                    }
+                    create(input_words);
+                    break;
                 }
             }
         }
@@ -94,8 +101,8 @@ public class Main {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         switch (response.statusCode()) {
             case 200:
-                var authData = new Gson().fromJson(response.body(), RegisterResponse.class);
-                authToken = authData.authToken();
+                var responseJson = new Gson().fromJson(response.body(), RegisterResponse.class);
+                authToken = responseJson.authToken();
                 System.out.println("Account successfully registered. You are now logged in.");
                 return;
             case 400:
@@ -130,8 +137,8 @@ public class Main {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         switch (response.statusCode()) {
             case 200: {
-                var authData = new Gson().fromJson(response.body(), LoginResponse.class); // refer to GPT if the type casting is being weird
-                authToken = authData.authToken();
+                var responseJson = new Gson().fromJson(response.body(), LoginResponse.class); // refer to GPT if the type casting is being weird
+                authToken = responseJson.authToken();
                 System.out.println("Successfully logged in");
                 return;
             } case 400: {
@@ -161,6 +168,44 @@ public class Main {
             case 200:  {
                 authToken = null;
                 System.out.println("Successfully logged out");
+                return;
+            } case 400: {
+                // will never happen since I've already ensured that all fields are given
+                System.out.println("authToken cannot be null");
+                return;
+            } case 401: {
+                // shouldn't ever happen since how woudl you even get a bad authToken?
+                System.out.println("bad authToken");
+                return;
+            } case 500: {
+                System.out.println("Internal error, please try again"); // SQL errors?
+                // return basically
+            }
+        }
+    }
+
+    public static void create(String[] input_words) throws Exception {
+        if (input_words.length != 2) {
+            System.out.println("Creating a game requires 1 argument: GAME_NAME");
+            return;
+        }
+        HttpClient client = HttpClient.newHttpClient();
+        var gameName = input_words[1];
+        var body = Map.of("gameName", gameName);
+        var jsonBody = new Gson().toJson(body);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI("http://localhost:8080/game")) // we need to grab the port being used
+                .header("Content-Type", "application.json")
+                .header("authorization", authToken)
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        switch (response.statusCode()) {
+            case 200: {
+                var responseJson = new Gson().fromJson(response.body(), CreateGameResponse.class);
+                var gameID = responseJson.gameID();
+                System.out.printf("Game %s succesfully created. Use game ID %d to join or observe it\n",
+                        gameName, gameID);
                 return;
             } case 400: {
                 // will never happen since I've already ensured that all fields are given
