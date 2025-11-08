@@ -16,7 +16,18 @@ public class Main {
         while (true) {
             System.out.printf("[%s] >>> ", state);
             var input_words = scanner.nextLine().split(" ");
+            HttpClient client = HttpClient.newHttpClient(); // allows us to call endpoints
+            HttpRequest request;
+            HttpResponse<String> response;
             switch (input_words[0]) {
+                case "clear": // FOR TESTING ONLY, REMOVE BEFORE COMPLETION
+                    request = HttpRequest.newBuilder()
+                        .uri(new URI("http://localhost:8080/db"))
+                        .DELETE()
+                        .build();
+                    response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                    System.out.println(response.body());
+                    break;
                 case "help":
                     System.out.println("\tregister <USERNAME> <EMAIL> <PASSWORD> | Register a new user\n" +
                             "\tlogin <USERNAME> <PASSWORD> | Login to an existing user\n" +
@@ -27,7 +38,7 @@ public class Main {
                     return;
                 case "login":
                     if (input_words.length != 4) {
-                        System.out.println("login requires 3 arguments\n\tUSERNAME\n\tEMAIL\n\tPASSWORD");
+                        System.out.println("login requires 3 arguments: USERNAME, EMAIL, and PASSWORD");
                         break;
                     }
                     var username = input_words[1];
@@ -35,15 +46,14 @@ public class Main {
                     var password = input_words[3];
                     var body = Map.of("username", username, "email", email, "password", password);
                     var jsonBody = new Gson().toJson(body);
-                    try (HttpClient client = HttpClient.newHttpClient()) {
-                        HttpRequest request = HttpRequest.newBuilder()
-                                .uri(new URI("http://localhost:8080/session"))
-                                .header("Content-Type", "application.json")
-                                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                                .build();
-                        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-                        System.out.println(response.body());
-                    }
+                    request = HttpRequest.newBuilder()
+                        .uri(new URI("http://localhost:8080/session")) // we need to grab the port being used
+                        .header("Content-Type", "application.json")
+                        .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                        .build();
+                    response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+                    System.out.println(response.body());
                     break;
                 case "register":
                     break;
