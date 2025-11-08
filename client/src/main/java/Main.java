@@ -113,7 +113,9 @@ public class Main {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         switch (response.statusCode()) {
             case 200:
-                System.out.println("Account successfully registered. Login to access more utilities.");
+                var authData = new Gson().fromJson(response.body(), RegisterResponse.class);
+                authToken = authData.authToken();
+                System.out.println("Account successfully registered. You are now logged in.");
                 return;
             case 400:
                 // will never happen since I've already ensured that all fields are given
