@@ -17,19 +17,31 @@ public class Main {
     public static void main(String[] args) throws Exception {
         System.out.println("♕ 240 Chess Client ♕");
         Scanner scanner = new Scanner(System.in);
-        while (authToken == null) { // Logged out REPL
-            System.out.print("[LOGGED_OUT] >>> ");
+        while (true) {
+            var state = authToken == null ? "LOGGED_OUT" : "LOGGED_IN";
+            System.out.printf("[%s] >>> ", state);
             var input_words = scanner.nextLine().split(" ");
             switch (input_words[0]) {
                 case "clear": { // FOR TESTING ONLY, REMOVE BEFORE COMPLETION
                     clear();
                     break;
                 } case "help": {
-                    System.out.println("""
-                            \tregister <USERNAME> <EMAIL> <PASSWORD> | Register a new user
-                            \tlogin <USERNAME> <PASSWORD> | Login to an existing user
-                            \tquit | Quit the chess program
-                            \thelp | See possible commands""");
+                    if (state.equals("LOGGED_OUT")) {
+                        System.out.println("""
+                                \tregister <USERNAME> <EMAIL> <PASSWORD> | Register a new user
+                                \tlogin <USERNAME> <PASSWORD> | Login to an existing user
+                                \tquit | Quit the chess program
+                                \thelp | See possible commands""");
+                    } else {
+                        System.out.println("""
+                                \tcreate <GAME_NAME> | Create a new game
+                                \tlist | List existing games
+                                \tjoin <ID> <WHITE|BLACK> | Join a game
+                                \tobserve <ID> | Observe a game
+                                \tlogout | Logout when you are done
+                                \tquit | Quit the chess program
+                                \thelp | See possible commands""");
+                    }
                     break;
                 } case "quit": {
                     return;
@@ -75,7 +87,6 @@ public class Main {
             case 200: {
                 var authData = new Gson().fromJson(response.body(), LoginResponse.class); // refer to GPT if the type casting is being weird
                 authToken = authData.authToken();
-                System.out.println(authToken);
                 System.out.println("Successfully logged in");
                 return;
             } case 400: {
