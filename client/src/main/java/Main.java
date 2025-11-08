@@ -52,6 +52,13 @@ public class Main {
                 } case "register": {
                     register(input_words);
                     break;
+                } case "logout": {
+                    if (state.equals("LOGGED_OUT")) {
+                        System.out.println("Logout utility not available while logged out");
+                        break;
+                    }
+                    logout();
+                    break;
                 }
             }
         }
@@ -65,43 +72,6 @@ public class Main {
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         System.out.println(response.body());
-    }
-
-    public static void login(String[] input_words) throws Exception {
-        if (input_words.length != 3) {
-            System.out.println("logging in requires 2 arguments: USERNAME and PASSWORD");
-            return;
-        }
-        HttpClient client = HttpClient.newHttpClient();
-        var username = input_words[1];
-        var password = input_words[2];
-        var body = Map.of("username", username, "password", password);
-        var jsonBody = new Gson().toJson(body);
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI("http://localhost:8080/session")) // we need to grab the port being used
-                .header("Content-Type", "application.json")
-                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                .build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        switch (response.statusCode()) {
-            case 200: {
-                var authData = new Gson().fromJson(response.body(), LoginResponse.class); // refer to GPT if the type casting is being weird
-                authToken = authData.authToken();
-                System.out.println("Successfully logged in");
-                return;
-            } case 400: {
-                // will never happen since I've already ensured that all fields are given
-                System.out.println("You are missing one of two fields: USERNAME or PASSWORD. " +
-                        "Please ensure you include all necessariy fields.");
-                return;
-            } case 401: {
-                System.out.println("Incorrect username or password");
-                return;
-            } case 500: {
-                System.out.println("Internal error, please try again"); // SQL errors?
-                // return basically
-            }
-        }
     }
 
     public static void register(String[] input_words) throws Exception {
@@ -141,4 +111,70 @@ public class Main {
                 // return basically
         }
     }
+
+    public static void login(String[] input_words) throws Exception {
+        if (input_words.length != 3) {
+            System.out.println("logging in requires 2 arguments: USERNAME and PASSWORD");
+            return;
+        }
+        HttpClient client = HttpClient.newHttpClient();
+        var username = input_words[1];
+        var password = input_words[2];
+        var body = Map.of("username", username, "password", password);
+        var jsonBody = new Gson().toJson(body);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI("http://localhost:8080/session")) // we need to grab the port being used
+                .header("Content-Type", "application.json")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        switch (response.statusCode()) {
+            case 200: {
+                var authData = new Gson().fromJson(response.body(), LoginResponse.class); // refer to GPT if the type casting is being weird
+                authToken = authData.authToken();
+                System.out.println("Successfully logged in");
+                return;
+            } case 400: {
+                // will never happen since I've already ensured that all fields are given
+                System.out.println("You are missing one of two fields: USERNAME or PASSWORD. " +
+                        "Please ensure you include all necessariy fields.");
+                return;
+            } case 401: {
+                System.out.println("Incorrect username or password");
+                return;
+            } case 500: {
+                System.out.println("Internal error, please try again"); // SQL errors?
+                // return basically
+            }
+        }
+    }
+
+    public static void logout() throws Exception {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(new URI("http://localhost:8080/session"))
+            .DELETE()
+            .header("authorization", authToken)
+            .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        switch (response.statusCode()) {
+            case 200:  {
+                authToken = null;
+                System.out.println("Successfully logged out");
+                return;
+            } case 400: {
+                // will never happen since I've already ensured that all fields are given
+                System.out.println("authToken cannot be null");
+                return;
+            } case 401: {
+                // shouldn't ever happen since how woudl you even get a bad authToken?
+                System.out.println("bad authToken");
+                return;
+            } case 500: {
+                System.out.println("Internal error, please try again"); // SQL errors?
+                // return basically
+            }
+        }
+    }
+
 }
