@@ -1,14 +1,13 @@
 package serverfacade;
 
 import com.google.gson.Gson;
-import datamodel.CreateGameResponse;
-import datamodel.LoginResponse;
-import datamodel.RegisterResponse;
+import datamodel.*;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.Map;
 
 public class ServerFacade {
@@ -155,8 +154,88 @@ public class ServerFacade {
                 System.out.println("authToken cannot be null");
                 return;
             } case 401: {
-                // shouldn't ever happen since how woudl you even get a bad authToken?
+                // shouldn't ever happen since how would you even get a bad authToken?
                 System.out.println("bad authToken");
+                return;
+            } case 500: {
+                System.out.println("Internal error, please try again"); // SQL errors?
+                // return basically
+            }
+        }
+    }
+
+
+    public void list() throws Exception {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(new URI("http://localhost:" + port + "/game"))
+            .header("authorization", authToken)
+            .GET()
+            .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        switch (response.statusCode()) {
+            case 200: {
+                var responseJson = new Gson().fromJson(response.body(), ListGamesResponse.class);
+                ArrayList<GameData> games = responseJson.games();
+                if (games.isEmpty()) {
+                    System.out.println("No games yet. Create one using \"create <GAME_NAME>\"");
+                }
+                for (int i = 0; i < games.size(); i++) {
+                    var game = games.get(i);
+                    System.out.printf("""
+                            %d.
+                            \tGame Name: %s
+                            \tGame ID: %d
+                            \tWhite Player: %s
+                            \tBlack Player: %s
+                            """, i+1, game.gameName(), game.gameID(),
+                            game.whiteUsername() == null ? "No player" : game.whiteUsername(),
+                            game.blackUsername() == null ? "No player" : game.blackUsername());
+                }
+                return;
+            } case 401: {
+                // shouldn't ever happen since how would you even get a bad authToken?
+                System.out.println("bad authToken");
+                return;
+            } case 500: {
+                System.out.println("Internal error, please try again"); // SQL errors?
+                // return basically
+            }
+        }
+    }
+
+
+    public void join(String[] input_words) throws Exception {
+        if (input_words.length != 3) {
+            System.out.println("Creating a game requires 2 arguments: GAME_ID and TEAM_COLOR");
+            return;
+        }
+        HttpClient client = HttpClient.newHttpClient();
+        var gameID = input_words[1];
+        var playerColor = input_words[2];
+        var body = Map.of("gameID", gameID, "playerColor", playerColor);
+        var jsonBody = new Gson().toJson(body);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI("http://localhost:" + port + "/game"))
+                .header("Content-Type", "application.json")
+                .header("authorization", authToken)
+                .PUT(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        switch (response.statusCode()) {
+            case 200: {
+                System.out.printf("Successfully joined team %s in game %s!\n", playerColor, gameID);
+                return;
+            } case 400: {
+                // will never happen since I've already ensured that all fields are given
+                System.out.println("authToken cannot be null");
+                return;
+            } case 401: {
+                // shouldn't ever happen since how would you even get a bad authToken?
+                System.out.println("bad authToken");
+                return;
+            } case 403: {
+                System.out.printf("Team %s is not available. Please choose a different team.\n", playerColor);
                 return;
             } case 500: {
                 System.out.println("Internal error, please try again"); // SQL errors?

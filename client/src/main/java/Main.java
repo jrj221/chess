@@ -22,7 +22,7 @@ public class Main {
             var state = facade.getAuthToken() == null ? "LOGGED_OUT" : "LOGGED_IN";
             System.out.printf("[%s] >>> ", state);
             var input_words = scanner.nextLine().split(" ");
-            switch (input_words[0]) {
+            switch (input_words[0].toLowerCase()) {
                 case "clear": { // FOR TESTING ONLY, REMOVE BEFORE COMPLETION
                     facade.clear();
                     break;
@@ -66,6 +66,20 @@ public class Main {
                         break;
                     }
                     facade.create(input_words);
+                    break;
+                } case "list": {
+                    if (state.equals("LOGGED_OUT")) {
+                        System.out.println("List games utility not available while logged out");
+                        break;
+                    }
+                    facade.list();
+                    break;
+                } case "join": {
+                    if (state.equals("LOGGED_OUT")) {
+                        System.out.println("Join game utility not available while logged out");
+                        break;
+                    }
+                    facade.join(input_words);
                     break;
                 }
             }
