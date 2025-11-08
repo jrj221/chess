@@ -41,9 +41,9 @@ public class Server {
             String requestJson = ctx.body();
             var user = serializer.fromJson(requestJson, RegisterRequest.class);
             var authData = userService.register(user);
-            ctx.result(serializer.toJson(authData)); // response
+            ctx.result(serializer.toJson(authData));
         } catch (AlreadyTakenException ex) {
-            // when userService throws an exception>
+            // when userService throws an exception
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(403).result(message);
         } catch (BadRequestException ex) { // bad request

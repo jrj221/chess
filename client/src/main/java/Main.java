@@ -14,6 +14,7 @@ public class Main {
         System.out.println("♕ 240 Chess Client ♕");
         var state = "LOGGED_OUT";
         Scanner scanner = new Scanner(System.in);
+        String auth = null;
         while (true) {
             System.out.printf("[%s] >>> ", state);
             var input_words = scanner.nextLine().split(" ");
@@ -74,7 +75,7 @@ public class Main {
 
     public static void register(String[] input_words) throws Exception {
         if (input_words.length != 4) {
-            System.out.println("registering requires 3 arguments: USERNAME, EMAIL, and PASSWORD");
+            System.out.println("Registering requires 3 arguments: USERNAME, EMAIL, and PASSWORD");
             return;
         }
         HttpClient client = HttpClient.newHttpClient();
@@ -85,11 +86,26 @@ public class Main {
         var body = Map.of("username", username, "email", email, "password", password);
         var jsonBody = new Gson().toJson(body);
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI("http://localhost:8080/session")) // we need to grab the port being used
+                .uri(new URI("http://localhost:8080/user")) // we need to grab the port being used
                 .header("Content-Type", "application.json")
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
+        switch (response.statusCode()) {
+            case 200:
+                System.out.println("Account successfully registered. Login to access more utilities.");
+                return;
+            case 400:
+                // will never happen since I've already ensured that all fields are given
+                System.out.println("You are missing one of three fields: USERNAME, EMAIL, or PASSWORD. " +
+                        "Please ensure you include all necessariy fields.");
+                return;
+            case 403:
+                System.out.println("Username already taken, try a different one");
+                return;
+            case 500:
+                System.out.println("Internal error, please try again"); // SQL errors?
+                // return basically
+        }
     }
 }
