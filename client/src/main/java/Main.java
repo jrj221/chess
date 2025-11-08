@@ -7,16 +7,18 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Map;
 import java.util.Scanner;
+import datamodel.*;
 
 
 public class Main {
+
+    static String authToken = null;
+
     public static void main(String[] args) throws Exception {
         System.out.println("♕ 240 Chess Client ♕");
-        var state = "LOGGED_OUT";
         Scanner scanner = new Scanner(System.in);
-        String auth = null;
-        while (true) {
-            System.out.printf("[%s] >>> ", state);
+        while (authToken == null) { // Logged out REPL
+            System.out.print("[LOGGED_OUT] >>> ");
             var input_words = scanner.nextLine().split(" ");
             switch (input_words[0]) {
                 case "clear": { // FOR TESTING ONLY, REMOVE BEFORE COMPLETION
@@ -33,6 +35,7 @@ public class Main {
                     return;
                 } case "login": {
                     login(input_words);
+                    //PROBLEM: if you quit while logged in, you will be required to log in again next time, but the authdata isn't deleted
                     break;
                 } case "register": {
                     register(input_words);
@@ -53,15 +56,14 @@ public class Main {
     }
 
     public static void login(String[] input_words) throws Exception {
-        if (input_words.length != 4) {
-            System.out.println("logging in requires 3 arguments: USERNAME, EMAIL, and PASSWORD");
+        if (input_words.length != 3) {
+            System.out.println("logging in requires 2 arguments: USERNAME and PASSWORD");
             return;
         }
         HttpClient client = HttpClient.newHttpClient();
         var username = input_words[1];
-        var email = input_words[2];
-        var password = input_words[3];
-        var body = Map.of("username", username, "email", email, "password", password);
+        var password = input_words[2];
+        var body = Map.of("username", username, "password", password);
         var jsonBody = new Gson().toJson(body);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI("http://localhost:8080/session")) // we need to grab the port being used
@@ -69,8 +71,26 @@ public class Main {
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        System.out.println(response.body());
+        switch (response.statusCode()) {
+            case 200: {
+                var authData = new Gson().fromJson(response.body(), LoginResponse.class); // refer to GPT if the type casting is being weird
+                authToken = authData.authToken();
+                System.out.println(authToken);
+                System.out.println("Successfully logged in");
+                return;
+            } case 400: {
+                // will never happen since I've already ensured that all fields are given
+                System.out.println("You are missing one of two fields: USERNAME or PASSWORD. " +
+                        "Please ensure you include all necessariy fields.");
+                return;
+            } case 401: {
+                System.out.println("Incorrect username or password");
+                return;
+            } case 500: {
+                System.out.println("Internal error, please try again"); // SQL errors?
+                // return basically
+            }
+        }
     }
 
     public static void register(String[] input_words) throws Exception {
