@@ -2,6 +2,7 @@ package serverfacade;
 
 import com.google.gson.Gson;
 import datamodel.*;
+import ui.EscapeSequences;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -212,7 +213,7 @@ public class ServerFacade {
 
     public void join(String[] input_words) throws Exception {
         if (input_words.length != 3) {
-            System.out.println("Creating a game requires 2 arguments: GAME_ID and TEAM_COLOR");
+            System.out.println("Joining a game requires 2 arguments: GAME_ID and TEAM_COLOR");
             return;
         }
         HttpClient client = HttpClient.newHttpClient();

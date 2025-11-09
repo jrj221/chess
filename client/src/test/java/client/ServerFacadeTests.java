@@ -235,6 +235,6 @@ public class ServerFacadeTests {
         facade.join(joinInputWords);
         System.setOut(originalOut); // MUST UNDO REDIRECTION so that output goes to console like it should
         assertEquals("Team WHITE is not available. Please choose a different team.\n", out.toString());
-
     }
+
 }
