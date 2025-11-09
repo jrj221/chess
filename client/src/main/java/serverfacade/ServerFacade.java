@@ -18,11 +18,14 @@ public class ServerFacade {
         this.port = port;
     }
 
+
     public String getAuthToken() {
         return authToken;
     }
 
+
     public void setAuthToken(String string) { authToken = string; } // only used for testing
+
 
     public void register(String[] input_words) throws Exception {
         if (input_words.length != 4) {
@@ -254,6 +257,6 @@ public class ServerFacade {
                 .DELETE()
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        System.out.println(response.body());
+        setAuthToken(null);
     }
 }
