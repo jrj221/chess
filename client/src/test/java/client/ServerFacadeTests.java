@@ -36,22 +36,51 @@ public class ServerFacadeTests {
 
     @Test
     public void registerSuccessful() throws Exception {
-        String[] input_words = {"register", "joe", "email", "pass"};
+        String[] InputWords = {"register", "joe", "email", "pass"};
         assertNull(facade.getAuthToken());
-        facade.register(input_words);
+        facade.register(InputWords);
         assertNotNull(facade.getAuthToken());
     }
 
     @Test
     public void registerUsernameTaken() throws Exception {
-        String[] input_words = {"register", "joe", "email", "pass"};
-        facade.register(input_words);
+        String[] InputWords = {"register", "joe", "email", "pass"};
+        facade.register(InputWords);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
         System.setOut(new PrintStream(out)); // redirects stdout to my buffer
-        facade.register(input_words); // attempt to register again
+        facade.register(InputWords); // attempt to register again
         System.setOut(System.out); // MUST UNDO REDIRECTION so that output goes to console like it should
         assertEquals("Username already taken, try a different one\n", out.toString());
+    }
+
+    @Test
+    public void loginSuccessful() throws Exception {
+        String[] InputWords = {"register", "joe", "email", "pass"};
+        facade.register(InputWords);
+        facade.logout();
+        assertNull(facade.getAuthToken());
+        ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
+        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
+        String[] loginInputWords = {"login", "joe", "pass"};
+        facade.login(loginInputWords); // attempt to register again
+        System.setOut(System.out); // MUST UNDO REDIRECTION so that output goes to console like it should
+        assertEquals("Successfully logged in\n", out.toString());
+        assertNotNull(facade.getAuthToken());
+    }
+
+    @Test
+    public void login() throws Exception {
+        String[] InputWords = {"register", "joe", "email", "pass"};
+        facade.register(InputWords);
+        facade.logout();
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
+        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
+        String[] loginInputWords = {"login", "joe", "wrongPass"};
+        facade.login(loginInputWords); // attempt to register again
+        System.setOut(System.out); // MUST UNDO REDIRECTION so that output goes to console like it should
+        assertEquals("Incorrect username or password\n", out.toString());
     }
 
 }
