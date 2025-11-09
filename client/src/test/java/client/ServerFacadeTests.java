@@ -36,28 +36,28 @@ public class ServerFacadeTests {
 
     @Test
     public void registerSuccessful() throws Exception {
-        String[] InputWords = {"register", "joe", "email", "pass"};
+        String[] inputWords = {"register", "joe", "email", "pass"};
         assertNull(facade.getAuthToken());
-        facade.register(InputWords);
+        facade.register(inputWords);
         assertNotNull(facade.getAuthToken());
     }
 
     @Test
     public void registerUsernameTaken() throws Exception {
-        String[] InputWords = {"register", "joe", "email", "pass"};
-        facade.register(InputWords);
+        String[] inputWords = {"register", "joe", "email", "pass"};
+        facade.register(inputWords);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
         System.setOut(new PrintStream(out)); // redirects stdout to my buffer
-        facade.register(InputWords); // attempt to register again
+        facade.register(inputWords); // attempt to register again
         System.setOut(System.out); // MUST UNDO REDIRECTION so that output goes to console like it should
         assertEquals("Username already taken, try a different one\n", out.toString());
     }
 
     @Test
     public void loginSuccessful() throws Exception {
-        String[] InputWords = {"register", "joe", "email", "pass"};
-        facade.register(InputWords);
+        String[] inputWords = {"register", "joe", "email", "pass"};
+        facade.register(inputWords);
         facade.logout();
         assertNull(facade.getAuthToken());
         ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
@@ -71,8 +71,8 @@ public class ServerFacadeTests {
 
     @Test
     public void loginBadPassword() throws Exception {
-        String[] InputWords = {"register", "joe", "email", "pass"};
-        facade.register(InputWords);
+        String[] inputWords = {"register", "joe", "email", "pass"};
+        facade.register(inputWords);
         facade.logout();
 
         ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
@@ -85,8 +85,8 @@ public class ServerFacadeTests {
 
     @Test
     public void loginBadUsername() throws Exception {
-        String[] InputWords = {"register", "joe", "email", "pass"};
-        facade.register(InputWords);
+        String[] inputWords = {"register", "joe", "email", "pass"};
+        facade.register(inputWords);
         facade.logout();
 
         ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
@@ -99,8 +99,8 @@ public class ServerFacadeTests {
 
     @Test
     public void logoutSuccessful() throws Exception {
-        String[] InputWords = {"register", "joe", "email", "pass"};
-        facade.register(InputWords);
+        String[] inputWords = {"register", "joe", "email", "pass"};
+        facade.register(inputWords);
         assertNotNull(facade.getAuthToken());
         facade.logout();
         assertNull(facade.getAuthToken());
@@ -117,4 +117,27 @@ public class ServerFacadeTests {
         assertEquals("bad authToken\n", out.toString());
     }
 
+    @Test
+    public void createGameSuccessful() throws Exception {
+        String[] inputWords = {"register", "joe", "email", "pass"};
+        facade.register(inputWords);
+        String[] createInputWords = {"create", "myGame"};
+        ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
+        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
+        facade.create(createInputWords);
+        System.setOut(System.out); // MUST UNDO REDIRECTION so that output goes to console like it should
+        assertEquals("Game myGame succesfully created. Use game ID 1 to join or observe it\n", out.toString());
+    }
+
+    @Test
+    public void createGameNotEnoughArgs() throws Exception {
+        String[] inputWords = {"register", "joe", "email", "pass"};
+        facade.register(inputWords);
+        String[] createInputWords = {"create"};
+        ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
+        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
+        facade.create(createInputWords);
+        System.setOut(System.out); // MUST UNDO REDIRECTION so that output goes to console like it should
+        assertEquals("Creating a game requires 1 argument: GAME_NAME\n", out.toString());
+    }
 }
