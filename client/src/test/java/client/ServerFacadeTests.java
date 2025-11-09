@@ -176,7 +176,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void listGames() throws Exception {
+    public void listGamesBadAuth() throws Exception {
         // listing without having registered. Shouldn't ever happen in the real thing
         facade.setAuthToken("badToken");
         PrintStream originalOut = System.out;
@@ -185,5 +185,56 @@ public class ServerFacadeTests {
         facade.list(); // attempt to list
         System.setOut(originalOut); // MUST UNDO REDIRECTION so that output goes to console like it should
         assertEquals("bad authToken\n", out.toString());
+    }
+
+    @Test
+    public void joinGameSuccessful() throws Exception {
+        String[] inputWords = {"register", "joe", "email", "pass"};
+        facade.register(inputWords);
+        String[] createInputWords = {"create", "myGame"};
+        facade.create(createInputWords);
+        ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
+        PrintStream originalOut = System.out;
+        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
+        facade.list();
+        System.setOut(originalOut); // MUST UNDO REDIRECTION so that output goes to console like it should
+        assertEquals("""
+                1.
+                \tGame Name: myGame
+                \tGame ID: 1
+                \tWhite Player: No player
+                \tBlack Player: No player
+                """, out.toString());
+        out.reset();
+        String[] joinInputWords = {"join", "1", "WHITE"};
+        facade.join(joinInputWords);
+        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
+        facade.list();
+        System.setOut(originalOut); // MUST UNDO REDIRECTION so that output goes to console like it should
+        assertEquals("""
+                1.
+                \tGame Name: myGame
+                \tGame ID: 1
+                \tWhite Player: joe
+                \tBlack Player: No player
+                """, out.toString());
+    }
+
+    @Test
+    public void joinGameTeamTaken() throws Exception {
+        String[] inputWords = {"register", "joe", "email", "pass"};
+        facade.register(inputWords);
+        String[] createInputWords = {"create", "myGame"};
+        facade.create(createInputWords);
+        String[] joinInputWords = {"join", "1", "WHITE"};
+        facade.join(joinInputWords);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
+        PrintStream originalOut = System.out;
+        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
+        facade.join(joinInputWords);
+        System.setOut(originalOut); // MUST UNDO REDIRECTION so that output goes to console like it should
+        assertEquals("Team WHITE is not available. Please choose a different team.\n", out.toString());
+
     }
 }
