@@ -70,7 +70,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void login() throws Exception {
+    public void loginBadPassword() throws Exception {
         String[] InputWords = {"register", "joe", "email", "pass"};
         facade.register(InputWords);
         facade.logout();
@@ -81,6 +81,40 @@ public class ServerFacadeTests {
         facade.login(loginInputWords); // attempt to register again
         System.setOut(System.out); // MUST UNDO REDIRECTION so that output goes to console like it should
         assertEquals("Incorrect username or password\n", out.toString());
+    }
+
+    @Test
+    public void loginBadUsername() throws Exception {
+        String[] InputWords = {"register", "joe", "email", "pass"};
+        facade.register(InputWords);
+        facade.logout();
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
+        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
+        String[] loginInputWords = {"login", "joeShmoe", "pass"};
+        facade.login(loginInputWords); // attempt to register again
+        System.setOut(System.out); // MUST UNDO REDIRECTION so that output goes to console like it should
+        assertEquals("Incorrect username or password\n", out.toString());
+    }
+
+    @Test
+    public void logoutSuccessful() throws Exception {
+        String[] InputWords = {"register", "joe", "email", "pass"};
+        facade.register(InputWords);
+        assertNotNull(facade.getAuthToken());
+        facade.logout();
+        assertNull(facade.getAuthToken());
+    }
+
+    @Test
+    public void logoutBadRequest() throws Exception {
+        // logout without having registered. Shouldn't ever happen in the real thing
+        facade.setAuthToken("badToken");
+        ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
+        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
+        facade.logout(); // attempt to register again
+        System.setOut(System.out); // MUST UNDO REDIRECTION so that output goes to console like it should
+        assertEquals("bad authToken\n", out.toString());
     }
 
 }

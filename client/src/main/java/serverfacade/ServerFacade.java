@@ -22,6 +22,8 @@ public class ServerFacade {
         return authToken;
     }
 
+    public void setAuthToken(String string) { authToken = string; } // only used for testing
+
     public void register(String[] input_words) throws Exception {
         if (input_words.length != 4) {
             System.out.println("Registering requires 3 arguments: USERNAME, EMAIL, and PASSWORD");
