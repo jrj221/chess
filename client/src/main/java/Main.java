@@ -25,10 +25,6 @@ public class Main {
             System.out.printf("[%s] >>> ", state);
             var input_words = scanner.nextLine().split(" ");
             switch (input_words[0].toLowerCase()) {
-                case "test": {
-                    display();
-                    break;
-                }
                 case "clear": { // FOR TESTING ONLY, REMOVE BEFORE COMPLETION
                     facade.clear();
                     break;
@@ -89,104 +85,6 @@ public class Main {
                     break;
                 }
             }
-        }
-    }
-
-    public static void display() {
-        // idea for phase 6: make a map where each key has a value that is a color and piece.
-        // that way you just update the piece part and update the board
-        var board = new String[10][10];
-        var pieceMap = new HashMap<String, List<String>>(); // key: 0:0, value: [black, whitePawn]
-        String[] horizRow = {"   ", " a ", " b ", " c ", " d ", " e ", " f ", " g ", " h ", "   "};
-        String[] vertRow = {"   ", " 8 ", " 7 ", " 6 ", " 5 ", " 4 ", " 3 ", " 2 ", " 1 ", "   "};
-        String[] royalRowWhite = {
-                "   ",
-                EscapeSequences.SET_BG_COLOR_BLACK + " ♖ ",
-                EscapeSequences.SET_BG_COLOR_WHITE + " ♘ ",
-                EscapeSequences.SET_BG_COLOR_BLACK + " ♗ ",
-                EscapeSequences.SET_BG_COLOR_WHITE + " ♕ ",
-                EscapeSequences.SET_BG_COLOR_BLACK + " ♔ ",
-                EscapeSequences.SET_BG_COLOR_WHITE + " ♗ ",
-                EscapeSequences.SET_BG_COLOR_BLACK + " ♘ ",
-                EscapeSequences.SET_BG_COLOR_WHITE + " ♖ ",
-                "   "};
-        String[] pawnRowWhite = {
-                "   ",
-                EscapeSequences.SET_BG_COLOR_WHITE +" ♙ ",
-                EscapeSequences.SET_BG_COLOR_BLACK + " ♙ ",
-                EscapeSequences.SET_BG_COLOR_WHITE +" ♙ ",
-                EscapeSequences.SET_BG_COLOR_BLACK + " ♙ ",
-                EscapeSequences.SET_BG_COLOR_WHITE +" ♙ ",
-                EscapeSequences.SET_BG_COLOR_BLACK + " ♙ ",
-                EscapeSequences.SET_BG_COLOR_WHITE +" ♙ ",
-                EscapeSequences.SET_BG_COLOR_BLACK + " ♙ ",
-                "   "};
-        String[] royalRowBlack = {
-                "   ",
-                EscapeSequences.SET_BG_COLOR_WHITE + " ♜ ",
-                EscapeSequences.SET_BG_COLOR_BLACK + " ♞ ",
-                EscapeSequences.SET_BG_COLOR_WHITE + " ♝ ",
-                EscapeSequences.SET_BG_COLOR_BLACK + " ♛ ",
-                EscapeSequences.SET_BG_COLOR_WHITE + " ♚ ",
-                EscapeSequences.SET_BG_COLOR_BLACK + " ♝ ",
-                EscapeSequences.SET_BG_COLOR_WHITE + " ♞ ",
-                EscapeSequences.SET_BG_COLOR_BLACK + " ♜ ",
-                "   "};
-        String[] pawnRowBlack  = {
-                "   ",
-                EscapeSequences.SET_BG_COLOR_BLACK + " ♟ ",
-                EscapeSequences.SET_BG_COLOR_WHITE + " ♟ ",
-                EscapeSequences.SET_BG_COLOR_BLACK + " ♟ ",
-                EscapeSequences.SET_BG_COLOR_WHITE + " ♟ ",
-                EscapeSequences.SET_BG_COLOR_BLACK +  " ♟ ",
-                EscapeSequences.SET_BG_COLOR_WHITE + " ♟ ",
-                EscapeSequences.SET_BG_COLOR_BLACK +  " ♟ ",
-                EscapeSequences.SET_BG_COLOR_WHITE+ " ♟ ",
-                "   "};
-        String[] emptyWhiteFirstRow  = {
-                "   ",
-                EscapeSequences.SET_BG_COLOR_WHITE + "   ",
-                EscapeSequences.SET_BG_COLOR_BLACK + "   ",
-                EscapeSequences.SET_BG_COLOR_WHITE + "   ",
-                EscapeSequences.SET_BG_COLOR_BLACK + "   ",
-                EscapeSequences.SET_BG_COLOR_WHITE + "   ",
-                EscapeSequences.SET_BG_COLOR_BLACK + "   ",
-                EscapeSequences.SET_BG_COLOR_WHITE + "   ",
-                EscapeSequences.SET_BG_COLOR_BLACK + "   ",
-                "   "};
-        String[] emptyBlackFirstRow  = {
-                "   ",
-                EscapeSequences.SET_BG_COLOR_BLACK + "   ",
-                EscapeSequences.SET_BG_COLOR_WHITE + "   ",
-                EscapeSequences.SET_BG_COLOR_BLACK + "   ",
-                EscapeSequences.SET_BG_COLOR_WHITE + "   ",
-                EscapeSequences.SET_BG_COLOR_BLACK + "   ",
-                EscapeSequences.SET_BG_COLOR_WHITE + "   ",
-                EscapeSequences.SET_BG_COLOR_BLACK + "   ",
-                EscapeSequences.SET_BG_COLOR_WHITE + "   ",
-                "   "};
-        for (int j = 0; j < 10; j++) {
-            board[0][j] = EscapeSequences.SET_BG_COLOR_DARK_GREY + horizRow[j];
-            board[1][j] = royalRowBlack[j];
-            board[2][j] = pawnRowBlack[j];
-            board[3][j] = emptyWhiteFirstRow[j];
-            board[4][j] = emptyBlackFirstRow[j];
-            board[5][j] = emptyWhiteFirstRow[j];
-            board[6][j] = emptyBlackFirstRow[j];
-            board[7][j] = pawnRowWhite[j];
-            board[8][j] = royalRowWhite[j];
-            board[9][j] = EscapeSequences.SET_BG_COLOR_DARK_GREY + horizRow[j];
-        }
-        for (int i = 0; i < 10; i++) {
-            board[i][0] = EscapeSequences.SET_BG_COLOR_DARK_GREY + vertRow[i];
-            board[i][9] = EscapeSequences.SET_BG_COLOR_DARK_GREY + vertRow[i];
-            // this got overwritten in the other loop, so I made it its own loop
-        }
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
-                System.out.print(board[i][j]);
-            }
-            System.out.print(EscapeSequences.RESET_BG_COLOR + "\n");
         }
     }
 }
