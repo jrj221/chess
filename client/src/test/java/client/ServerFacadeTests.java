@@ -169,7 +169,6 @@ public class ServerFacadeTests {
         assertEquals("""
                 1.
                 \tGame Name: myGame
-                \tGame ID: 1
                 \tWhite Player: No player
                 \tBlack Player: No player
                 """, out.toString());
@@ -201,7 +200,6 @@ public class ServerFacadeTests {
         assertEquals("""
                 1.
                 \tGame Name: myGame
-                \tGame ID: 1
                 \tWhite Player: No player
                 \tBlack Player: No player
                 """, out.toString());
@@ -214,7 +212,6 @@ public class ServerFacadeTests {
         assertEquals("""
                 1.
                 \tGame Name: myGame
-                \tGame ID: 1
                 \tWhite Player: joe
                 \tBlack Player: No player
                 """, out.toString());
@@ -229,10 +226,14 @@ public class ServerFacadeTests {
         String[] joinInputWords = {"join", "1", "WHITE"};
         facade.join(joinInputWords);
 
+        facade.logout(); // logout first account, register new one
+        String[] janeInputWords = {"register", "jane", "email", "pass"};
+        facade.register(janeInputWords);
+        String[] janeJoinInputWords = {"join", "1", "WHITE"};
         ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
         PrintStream originalOut = System.out;
         System.setOut(new PrintStream(out)); // redirects stdout to my buffer
-        facade.join(joinInputWords);
+        facade.join(janeJoinInputWords);
         System.setOut(originalOut); // MUST UNDO REDIRECTION so that output goes to console like it should
         assertEquals("Team WHITE is not available. Please choose a different team.\n", out.toString());
     }

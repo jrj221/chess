@@ -77,9 +77,9 @@ public class Main {
                     }
                     facade.list();
                     break;
-                } case "join": {
+                } case "play": {
                     if (state.equals("LOGGED_OUT")) {
-                        System.out.println("Join game utility not available while logged out");
+                        System.out.println("Play/join game utility not available while logged out");
                         break;
                     }
                     facade.join(input_words);

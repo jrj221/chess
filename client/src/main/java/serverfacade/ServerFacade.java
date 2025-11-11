@@ -193,10 +193,9 @@ public class ServerFacade {
                     System.out.printf("""
                             %d.
                             \tGame Name: %s
-                            \tGame ID: %d
                             \tWhite Player: %s
                             \tBlack Player: %s
-                            """, i+1, game.gameName(), game.gameID(),
+                            """, i+1, game.gameName(),
                             game.whiteUsername() == null ? "No player" : game.whiteUsername(),
                             game.blackUsername() == null ? "No player" : game.blackUsername());
                 }
