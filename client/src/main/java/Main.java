@@ -47,6 +47,7 @@ public class Main {
                     }
                     break;
                 } case "quit": {
+                    if (state.equals("LOGGED_IN")) {facade.logout();}
                     return;
                 } case "login": {
                     facade.login(input_words);
@@ -82,6 +83,13 @@ public class Main {
                         break;
                     }
                     facade.join(input_words);
+                    break;
+                } case "observe": {
+                    if (state.equals("LOGGED_OUT")) {
+                        System.out.println("Observe game utility not available while logged out");
+                        break;
+                    }
+                    facade.observe(input_words);
                     break;
                 }
             }

@@ -56,13 +56,15 @@ public class GameService {
             if (joinGameRequest.playerColor() == null || authToken == null) {
                 throw new BadRequestException("Bad request");
             }
-            var gameData = dataAccess.getGame(joinGameRequest.gameID());
-            if ((joinGameRequest.playerColor().equals("WHITE") && gameData.whiteUsername() != null) ||
-                    (joinGameRequest.playerColor().equals("BLACK") && gameData.blackUsername() != null)) {
-                throw new AlreadyTakenException("team already taken");
-            }
             var authData = dataAccess.getAuth(authToken);
             String username = authData.username();
+            var gameData = dataAccess.getGame(joinGameRequest.gameID());
+            if ((joinGameRequest.playerColor().equals("WHITE") && (gameData.whiteUsername() != null
+                    && !gameData.whiteUsername().equals(username))) ||
+                    (joinGameRequest.playerColor().equals("BLACK") && (gameData.blackUsername() != null
+                            && !gameData.blackUsername().equals(username)))) {
+                throw new AlreadyTakenException("team already taken");
+            }
             dataAccess.joinGame(username, joinGameRequest.gameID(), joinGameRequest.playerColor());
         } catch (DataAccessException ex) {
             switch (ex.getMessage()) {

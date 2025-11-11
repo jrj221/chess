@@ -253,6 +253,18 @@ public class ServerFacade {
         }
     }
 
+
+    public void observe(String[] input_words) throws Exception {
+        if (input_words.length != 2) {
+            System.out.println("Observing a game requires 1 argument: GAME_ID");
+            return;
+        }
+        // next phase we will change this to actually grab a specific game
+        display("WHITE");
+    }
+
+
+    /// Displays the chess board (orientation based on team)
     public static void display(String team) {
         var board = new String[10][10];
         var pieceMap = new HashMap<String, List<String>>(); // key: 0:0, value: [black, whitePawn]
