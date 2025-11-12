@@ -52,6 +52,7 @@ public class ServerFacade {
             case 200:
                 var responseJson = new Gson().fromJson(response.body(), RegisterResponse.class);
                 System.out.println("Account successfully registered. You are now logged in.");
+                System.out.println(authToken); // TESTING
                 authToken = responseJson.authToken();
                 return;
             case 400:
@@ -120,11 +121,11 @@ public class ServerFacade {
                 return;
             } case 400: {
                 // will never happen since I've already ensured that all fields are given
-                System.out.println("authToken cannot be null");
+                System.out.println("authToken should not be null");
                 return;
             } case 401: {
                 // shouldn't ever happen since how would you even get a bad authToken?
-                System.out.println("bad authToken");
+                System.out.println("invalid authToken");
                 return;
             } case 500: {
                 System.out.println("Internal error, please try again"); // SQL errors?
@@ -180,12 +181,14 @@ public class ServerFacade {
             .header("authorization", authToken)
             .GET()
             .build();
+        System.out.println(authToken); // TESTING
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         switch (response.statusCode()) {
             case 200: {
                 var responseJson = new Gson().fromJson(response.body(), ListGamesResponse.class);
                 ArrayList<GameData> games = responseJson.games();
                 if (games.isEmpty()) {
+//                    throw erorr
                     System.out.println("No games yet. Create one using \"create <GAME_NAME>\"");
                 }
                 for (int i = 0; i < games.size(); i++) {
