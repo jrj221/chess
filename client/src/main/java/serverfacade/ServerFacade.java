@@ -235,6 +235,11 @@ public class ServerFacade {
                 display(playerColor);
                 return;
             } case 400: {
+                var responseJson = new Gson().fromJson(response.body(), ErrorResponse.class);
+                if (responseJson.message().equals("Error: No existing game")) {
+                    System.out.println("No existing game.");
+                    return;
+                }
                 // will never happen since I've already ensured that all fields are given
                 System.out.println("authToken cannot be null");
                 return;
