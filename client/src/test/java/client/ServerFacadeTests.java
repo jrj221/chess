@@ -238,4 +238,46 @@ public class ServerFacadeTests {
         assertEquals("Team WHITE is not available. Please choose a different team.\n", out.toString());
     }
 
+    @Test
+    public void observeSuccessful() throws Exception {
+        String[] inputWords = {"register", "joe", "email", "pass"};
+        facade.register(inputWords);
+        String[] createInputWords = {"create", "myGame"};
+        facade.create(createInputWords);
+        String[] observeInputWords = {"observe", "1"};
+
+        PrintStream originalOut = System.out;
+        ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
+        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
+        facade.observe(observeInputWords); // attempt to list
+        System.setOut(originalOut); // MUST UNDO REDIRECTION so that output goes to console like it should
+        assertEquals("""
+                [48;5;235m   [48;5;235m a [48;5;235m b [48;5;235m c [48;5;235m d [48;5;235m e [48;5;235m f [48;5;235m g [48;5;235m h [48;5;235m   [49m
+                [48;5;235m 8 [48;5;0m ♜ [48;5;15m ♞ [48;5;0m ♝ [48;5;15m ♚ [48;5;0m ♛ [48;5;15m ♝ [48;5;0m ♞ [48;5;15m ♜ [48;5;235m 8 [49m
+                [48;5;235m 7 [48;5;15m ♟ [48;5;0m ♟ [48;5;15m ♟ [48;5;0m ♟ [48;5;15m ♟ [48;5;0m ♟ [48;5;15m ♟ [48;5;0m ♟ [48;5;235m 7 [49m
+                [48;5;235m 6 [48;5;0m   [48;5;15m   [48;5;0m   [48;5;15m   [48;5;0m   [48;5;15m   [48;5;0m   [48;5;15m   [48;5;235m 6 [49m
+                [48;5;235m 5 [48;5;15m   [48;5;0m   [48;5;15m   [48;5;0m   [48;5;15m   [48;5;0m   [48;5;15m   [48;5;0m   [48;5;235m 5 [49m
+                [48;5;235m 4 [48;5;0m   [48;5;15m   [48;5;0m   [48;5;15m   [48;5;0m   [48;5;15m   [48;5;0m   [48;5;15m   [48;5;235m 4 [49m
+                [48;5;235m 3 [48;5;15m   [48;5;0m   [48;5;15m   [48;5;0m   [48;5;15m   [48;5;0m   [48;5;15m   [48;5;0m   [48;5;235m 3 [49m
+                [48;5;235m 2 [48;5;0m ♙ [48;5;15m ♙ [48;5;0m ♙ [48;5;15m ♙ [48;5;0m ♙ [48;5;15m ♙ [48;5;0m ♙ [48;5;15m ♙ [48;5;235m 2 [49m
+                [48;5;235m 1 [48;5;15m ♖ [48;5;0m ♘ [48;5;15m ♗ [48;5;0m ♔ [48;5;15m ♕ [48;5;0m ♗ [48;5;15m ♘ [48;5;0m ♖ [48;5;235m 1 [49m
+                [48;5;235m   [48;5;235m a [48;5;235m b [48;5;235m c [48;5;235m d [48;5;235m e [48;5;235m f [48;5;235m g [48;5;235m h [48;5;235m   [49m
+                """, out.toString());
+    }
+
+    @Test
+    public void observeNoGameID() throws Exception {
+        String[] inputWords = {"register", "joe", "email", "pass"};
+        facade.register(inputWords);
+        String[] createInputWords = {"create", "myGame"};
+        facade.create(createInputWords);
+        String[] observeInputWords = {"observe"};
+
+        PrintStream originalOut = System.out;
+        ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
+        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
+        facade.observe(observeInputWords); // attempt to observe
+        System.setOut(originalOut);
+        assertEquals("Observing a game requires 1 argument: GAME_ID\n", out.toString());
+    }
 }
