@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class ServerFacade {
     Integer port;
-    String authToken;
+    String authToken = "";
 
     public ServerFacade(Integer port) {
         this.port = port;
@@ -123,7 +123,7 @@ public class ServerFacade {
                 System.out.println("authToken cannot be null");
                 return;
             } case 401: {
-                // shouldn't ever happen since how woudl you even get a bad authToken?
+                // shouldn't ever happen since how would you even get a bad authToken?
                 System.out.println("bad authToken");
                 return;
             } case 500: {

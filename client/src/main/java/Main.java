@@ -21,7 +21,7 @@ public class Main {
         System.out.println("♕ 240 Chess Client ♕");
         Scanner scanner = new Scanner(System.in);
         while (true) {
-            var state = facade.getAuthToken() == null ? "LOGGED_OUT" : "LOGGED_IN";
+            var state = facade.getAuthToken().isEmpty() ? "LOGGED_OUT" : "LOGGED_IN";
             System.out.printf("[%s] >>> ", state);
             var inputWords = scanner.nextLine().split(" ");
             switch (inputWords[0].toLowerCase()) {
