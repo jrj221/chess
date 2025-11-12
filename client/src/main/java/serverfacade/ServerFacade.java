@@ -263,7 +263,7 @@ public class ServerFacade {
     }
 
 
-    public static HashMap<String, List<String>> initBoard() {
+    private static HashMap<String, List<String>> initBoard() {
         String[] horizRow = {"   ", " h ", " g ", " f ", " e ", " d ", " c ", " b ", " a ", "   "};
         String[] vertRow = {"   ", " 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 ", "   "};
         String[][] royalRowWhite = {
@@ -361,7 +361,7 @@ public class ServerFacade {
 
 
     /// Displays the chess board (orientation based on team)
-    public static void display(String team) {
+    private static void display(String team) {
         var board = new String[10][10];
         var pieceMap = initBoard(); // key: 0:0, value: [black, whitePawn] // initializes the map
 
