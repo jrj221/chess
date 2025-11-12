@@ -60,7 +60,7 @@ public class ServerFacadeTests {
         String[] inputWords = {"register", "joe", "email", "pass"};
         facade.register(inputWords);
         facade.logout();
-        assertNull(facade.getAuthToken());
+        assertEquals("", facade.getAuthToken());
         ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
         PrintStream originalOut = System.out;
         System.setOut(new PrintStream(out)); // redirects stdout to my buffer
@@ -107,7 +107,7 @@ public class ServerFacadeTests {
         facade.register(inputWords);
         assertNotNull(facade.getAuthToken());
         facade.logout();
-        assertNull(facade.getAuthToken());
+        assertEquals("", facade.getAuthToken());
     }
 
     @Test

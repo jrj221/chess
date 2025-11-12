@@ -23,8 +23,8 @@ public class Main {
         while (true) {
             var state = facade.getAuthToken() == null ? "LOGGED_OUT" : "LOGGED_IN";
             System.out.printf("[%s] >>> ", state);
-            var input_words = scanner.nextLine().split(" ");
-            switch (input_words[0].toLowerCase()) {
+            var inputWords = scanner.nextLine().split(" ");
+            switch (inputWords[0].toLowerCase()) {
                 case "clear": { // FOR TESTING ONLY, REMOVE BEFORE COMPLETION
                     facade.clear();
                     break;
@@ -50,11 +50,10 @@ public class Main {
                     if (state.equals("LOGGED_IN")) {facade.logout();}
                     return;
                 } case "login": {
-                    facade.login(input_words);
-                    //PROBLEM: if you quit while logged in, you will be required to log in again next time, but the authdata isn't deleted
+                    facade.login(inputWords);
                     break;
                 } case "register": {
-                    facade.register(input_words);
+                    facade.register(inputWords);
                     break;
                 } case "logout": {
                     if (state.equals("LOGGED_OUT")) {
@@ -68,7 +67,7 @@ public class Main {
                         System.out.println("Create game utility not available while logged out");
                         break;
                     }
-                    facade.create(input_words);
+                    facade.create(inputWords);
                     break;
                 } case "list": {
                     if (state.equals("LOGGED_OUT")) {
@@ -82,14 +81,14 @@ public class Main {
                         System.out.println("Play/join game utility not available while logged out");
                         break;
                     }
-                    facade.join(input_words);
+                    facade.join(inputWords);
                     break;
                 } case "observe": {
                     if (state.equals("LOGGED_OUT")) {
                         System.out.println("Observe game utility not available while logged out");
                         break;
                     }
-                    facade.observe(input_words);
+                    facade.observe(inputWords);
                     break;
                 }
             }

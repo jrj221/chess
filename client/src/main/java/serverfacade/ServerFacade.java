@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class ServerFacade {
     Integer port;
-    String authToken = null;
+    String authToken;
 
     public ServerFacade(Integer port) {
         this.port = port;
@@ -115,7 +115,7 @@ public class ServerFacade {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         switch (response.statusCode()) {
             case 200:  {
-                authToken = null;
+                authToken = "";
                 System.out.println("Successfully logged out");
                 return;
             } case 400: {
