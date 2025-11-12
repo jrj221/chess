@@ -37,7 +37,7 @@ public class ServerFacadeTests {
     @Test
     public void registerSuccessful() throws Exception {
         String[] inputWords = {"register", "joe", "email", "pass"};
-        assertNull(facade.getAuthToken());
+        assertEquals("", facade.getAuthToken());
         facade.register(inputWords);
         assertNotNull(facade.getAuthToken());
     }

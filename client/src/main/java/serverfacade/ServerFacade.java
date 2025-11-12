@@ -398,6 +398,6 @@ public class ServerFacade {
                 .DELETE()
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        setAuthToken(null);
+        setAuthToken("");
     }
 }
