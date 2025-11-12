@@ -30,16 +30,16 @@ public class ServerFacade {
     public void setAuthToken(String string) { authToken = string; } // only used for testing
 
 
-    public void register(String[] input_words) throws Exception {
-        if (input_words.length != 4) {
+    public void register(String[] inputWords) throws Exception {
+        if (inputWords.length != 4) {
             System.out.println("Registering requires 3 arguments: USERNAME, EMAIL, and PASSWORD");
             return;
         }
         HttpClient client = HttpClient.newHttpClient();
         // a lot of similar stuff with login, should it be refactored somehow?
-        var username = input_words[1];
-        var email = input_words[2];
-        var password = input_words[3];
+        var username = inputWords[1];
+        var email = inputWords[2];
+        var password = inputWords[3];
         var body = Map.of("username", username, "email", email, "password", password);
         var jsonBody = new Gson().toJson(body);
         HttpRequest request = HttpRequest.newBuilder()
@@ -68,14 +68,14 @@ public class ServerFacade {
     }
 
 
-    public void login(String[] input_words) throws Exception {
-        if (input_words.length != 3) {
+    public void login(String[] inputWords) throws Exception {
+        if (inputWords.length != 3) {
             System.out.println("logging in requires 2 arguments: USERNAME and PASSWORD");
             return;
         }
         HttpClient client = HttpClient.newHttpClient();
-        var username = input_words[1];
-        var password = input_words[2];
+        var username = inputWords[1];
+        var password = inputWords[2];
         var body = Map.of("username", username, "password", password);
         var jsonBody = new Gson().toJson(body);
         HttpRequest request = HttpRequest.newBuilder()
@@ -134,13 +134,13 @@ public class ServerFacade {
     }
 
 
-    public void create(String[] input_words) throws Exception {
-        if (input_words.length != 2) {
+    public void create(String[] inputWords) throws Exception {
+        if (inputWords.length != 2) {
             System.out.println("Creating a game requires 1 argument: GAME_NAME");
             return;
         }
         HttpClient client = HttpClient.newHttpClient();
-        var gameName = input_words[1];
+        var gameName = inputWords[1];
         var body = Map.of("gameName", gameName);
         var jsonBody = new Gson().toJson(body);
         HttpRequest request = HttpRequest.newBuilder()
@@ -212,14 +212,14 @@ public class ServerFacade {
     }
 
 
-    public void join(String[] input_words) throws Exception {
-        if (input_words.length != 3) {
+    public void join(String[] inputWords) throws Exception {
+        if (inputWords.length != 3) {
             System.out.println("Joining a game requires 2 arguments: GAME_ID and TEAM_COLOR");
             return;
         }
         HttpClient client = HttpClient.newHttpClient();
-        var gameID = input_words[1];
-        var playerColor = input_words[2];
+        var gameID = inputWords[1];
+        var playerColor = inputWords[2];
         var body = Map.of("gameID", gameID, "playerColor", playerColor);
         var jsonBody = new Gson().toJson(body);
         HttpRequest request = HttpRequest.newBuilder()
@@ -253,8 +253,8 @@ public class ServerFacade {
     }
 
 
-    public void observe(String[] input_words) throws Exception {
-        if (input_words.length != 2) {
+    public void observe(String[] inputWords) throws Exception {
+        if (inputWords.length != 2) {
             System.out.println("Observing a game requires 1 argument: GAME_ID");
             return;
         }
@@ -263,10 +263,7 @@ public class ServerFacade {
     }
 
 
-    /// Displays the chess board (orientation based on team)
-    public static void display(String team) {
-        var board = new String[10][10];
-        var pieceMap = new HashMap<String, List<String>>(); // key: 0:0, value: [black, whitePawn]
+    public static HashMap<String, List<String>> initBoard() {
         String[] horizRow = {"   ", " h ", " g ", " f ", " e ", " d ", " c ", " b ", " a ", "   "};
         String[] vertRow = {"   ", " 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 ", "   "};
         String[][] royalRowWhite = {
@@ -341,6 +338,7 @@ public class ServerFacade {
                 {EscapeSequences.SET_BG_COLOR_WHITE, "   "},
                 {EscapeSequences.SET_BG_COLOR_DARK_GREY, "   "}
         };
+        var pieceMap = new HashMap<String, List<String>>();
         for (int j = 0; j < 10; j++) {
             pieceMap.put(String.format("0:%d", 9-j), List.of(EscapeSequences.SET_BG_COLOR_DARK_GREY, horizRow[j])); // top row
             pieceMap.put(String.format("1:%d", 9-j), List.of(royalRowBlack[j][0], royalRowBlack[j][1]));
@@ -358,6 +356,14 @@ public class ServerFacade {
             pieceMap.put(String.format("%d:0", 9-i), List.of(EscapeSequences.SET_BG_COLOR_DARK_GREY, vertRow[i]));
             pieceMap.put(String.format("%d:9", 9-i), List.of(EscapeSequences.SET_BG_COLOR_DARK_GREY, vertRow[i]));
         }
+        return pieceMap;
+    }
+
+
+    /// Displays the chess board (orientation based on team)
+    public static void display(String team) {
+        var board = new String[10][10];
+        var pieceMap = initBoard(); // key: 0:0, value: [black, whitePawn] // initializes the map
 
         // Build intial board
         pieceMap.forEach((position, piece) -> {
