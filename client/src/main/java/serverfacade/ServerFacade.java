@@ -30,18 +30,9 @@ public class ServerFacade {
     public void setAuthToken(String string) { authToken = string; } // only used for testing
 
 
-    public void register(String[] inputWords) throws Exception {
-        if (inputWords.length != 4) {
-            System.out.println("Registering requires 3 arguments: USERNAME, EMAIL, and PASSWORD");
-            return;
-        }
+    public void register(String jsonBody) throws Exception {
         HttpClient client = HttpClient.newHttpClient();
         // a lot of similar stuff with login, should it be refactored somehow?
-        var username = inputWords[1];
-        var email = inputWords[2];
-        var password = inputWords[3];
-        var body = Map.of("username", username, "email", email, "password", password);
-        var jsonBody = new Gson().toJson(body);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI("http://localhost:" + port + "/user")) // we need to grab the port being used
                 .header("Content-Type", "application.json")
@@ -56,24 +47,18 @@ public class ServerFacade {
                 authToken = responseJson.authToken();
                 return;
             case 400:
-                // will never happen since I've already ensured that all fields are given
-                System.out.println("You are missing one of three fields: USERNAME, EMAIL, or PASSWORD. " +
+                throw new BadRequestException("You are missing one of three fields: " +
+                        "USERNAME, EMAIL, or PASSWORD. " +
                         "Please ensure you include all necessariy fields.");
-                return;
             case 403:
-                System.out.println("Username already taken, try a different one");
-                return;
+                throw new AlreadyTakenException("Username already taken, try a different one");
             case 500:
-                System.out.println("Internal error, please try again"); // SQL errors?
+                throw new Exception("Internal error, please try again"); // SQL errors?
         }
     }
 
 
     public void login(String[] inputWords) throws Exception {
-        if (inputWords.length != 3) {
-            System.out.println("logging in requires 2 arguments: USERNAME and PASSWORD");
-            return;
-        }
         HttpClient client = HttpClient.newHttpClient();
         var username = inputWords[1];
         var password = inputWords[2];
@@ -92,15 +77,12 @@ public class ServerFacade {
                 authToken = responseJson.authToken();
                 return;
             } case 400: {
-                // will never happen since I've already ensured that all fields are given
-                System.out.println("You are missing one of two fields: USERNAME or PASSWORD. " +
+                throw new BadRequestException("You are missing one of two fields: USERNAME or PASSWORD. " +
                         "Please ensure you include all necessariy fields.");
-                return;
             } case 401: {
-                System.out.println("Incorrect username or password");
-                return;
+                throw new UnauthorizedException("Incorrect username or password");
             } case 500: {
-                System.out.println("Internal error, please try again"); // SQL errors?
+                throw new Exception("Internal error, please try again"); // SQL errors?
             }
         }
     }
