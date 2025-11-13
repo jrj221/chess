@@ -42,8 +42,6 @@ public class ServerFacade {
         switch (response.statusCode()) {
             case 200:
                 var responseJson = new Gson().fromJson(response.body(), RegisterResponse.class);
-                System.out.println("Account successfully registered. You are now logged in.");
-                System.out.println(authToken); // TESTING
                 authToken = responseJson.authToken();
                 return;
             case 400:
@@ -73,7 +71,6 @@ public class ServerFacade {
         switch (response.statusCode()) {
             case 200: {
                 var responseJson = new Gson().fromJson(response.body(), LoginResponse.class); // refer to GPT if the type casting is being weird
-                System.out.println("Successfully logged in");
                 authToken = responseJson.authToken();
                 return;
             } case 400: {

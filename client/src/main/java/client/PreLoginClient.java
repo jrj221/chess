@@ -1,12 +1,14 @@
+package client;
+
 import com.google.gson.Gson;
 
 import java.util.*;
 
-import datamodel.*;
+import datamodel.RegisterResponse;
 import serverfacade.ServerFacade;
 
 
-public class PreLoginClient {
+public class PreLoginClient implements Client {
 
     public void printPrompt() {
         System.out.print("[LOGGED_OUT] >>> ");
@@ -28,7 +30,7 @@ public class PreLoginClient {
 
     private String clear() throws Exception {
         facade.clear();
-        return "clear() didn't work";
+        return "Database cleared";
     }
 
     private String help() {
@@ -40,15 +42,15 @@ public class PreLoginClient {
     }
 
     private String register(String[] inputWords) throws Exception {
-        if (inputWords.length == 2) {
+        if (inputWords.length == 4) {
             var body = Map.of(
                     "username", inputWords[1],
                     "email", inputWords[2],
                     "password", inputWords[3]);
             var jsonBody = new Gson().toJson(body);
 
-            facade.register(jsonBody);
-            return "Register successful!";
+            facade.register(jsonBody); // returns a string on success
+            return "Account successfully registered. You are now logged in.";
         }
         throw new Exception("You are missing one of three fields: " +
                 "USERNAME, EMAIL, or PASSWORD. " +
@@ -57,7 +59,6 @@ public class PreLoginClient {
 
     private String login(String[] inputWords) throws Exception {
         if (inputWords.length == 3) {
-
             facade.login(inputWords);
             return "Login successful!";
         }

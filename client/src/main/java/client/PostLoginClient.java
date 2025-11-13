@@ -1,6 +1,8 @@
+package client;
+
 import serverfacade.ServerFacade;
 
-public class PostLoginClient {
+public class PostLoginClient implements Client {
 
     public void printPrompt() {
         System.out.print("[LOGGED_IN] >>> ");
@@ -8,7 +10,7 @@ public class PostLoginClient {
 
     static ServerFacade facade = new ServerFacade(8080);
 
-    public static void eval(String command) throws Exception {
+    public String eval(String command) throws Exception {
         var inputWords = command.toLowerCase().split(" ");
         switch (inputWords[0]) {
             case "clear": { // FOR TESTING ONLY, REMOVE BEFORE COMPLETION
@@ -42,7 +44,10 @@ public class PostLoginClient {
             } case "observe": {
                 facade.observe(inputWords);
                 break;
+            } default: {
+                break;
             }
         }
+        return null;
     }
 }

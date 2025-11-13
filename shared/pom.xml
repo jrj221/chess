@@ -44,7 +44,7 @@
                             <archive>
                                 <manifest>
                                     <mainClass>
-                                        PreLoginClient
+                                        client.PreLoginClient
                                     </mainClass>
                                 </manifest>
                             </archive>
