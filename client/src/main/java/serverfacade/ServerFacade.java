@@ -107,7 +107,7 @@ public class ServerFacade {
     public void create(String jsonBody) throws Exception {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI("http://localhost:8080/game")) // we need to grab the port being used
+                .uri(new URI("http://localhost:" + port + "/game")) // we need to grab the port being used
                 .header("Content-Type", "application.json")
                 .header("authorization", authToken)
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
@@ -325,11 +325,10 @@ public class ServerFacade {
     public void clear() throws Exception {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI("http://localhost:8080/db"))
+                .uri(new URI("http://localhost:" + port + "/db"))
                 .DELETE()
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        System.out.println(response.body());
         setAuthToken("");
     }
 }
