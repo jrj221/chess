@@ -68,7 +68,7 @@ public class PostLoginClient implements Client {
         if (inputWords.length == 3) {
             var gameID = inputWords[1];
             if (Character.isLetter(gameID.charAt(0))) {
-                return "Invalid game index provided. Please use numerals (e.g. \"1\" instead of \"one\"";
+                return "Invalid game index provided. Please use numerals (e.g. \"1\" instead of \"one\")";
             }
             var playerColor = inputWords[2].toUpperCase();
             var body = Map.of(

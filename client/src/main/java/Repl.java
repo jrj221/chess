@@ -20,7 +20,7 @@ public class Repl {
                 if (result.equals("Account successfully registered. You are now logged in.")
                     || result.equals("Login successful!")) {
                     client = new PostLoginClient();
-                } else if (result.equals("Logout successful!")) {
+                } else if (result.equals("Logout successful!") || result.equals("Database cleared")) {
                     client = new PreLoginClient();
                 }
 
