@@ -3,16 +3,12 @@ package client;
 import org.junit.jupiter.api.*;
 import server.Server;
 import serverfacade.ServerFacade;
-
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 
 public class ServerFacadeTests {
 
+    // can i share the exceptions between client and server so i dont have to differentiate in tests?
     private static Server server;
     static ServerFacade facade;
 
@@ -36,268 +32,153 @@ public class ServerFacadeTests {
     }
 
 
-    //    @Test
-//    public void registerSuccessful() throws Exception {
-//        String[] inputWords = {"register", "joe", "email", "pass"};
-//        assertEquals("", facade.getAuthToken());
-//        facade.register(inputWords);
-//        assertNotNull(facade.getAuthToken());
-//    }
-//
-//    @Test
-//    public void registerUsernameTaken() throws Exception {
-//        String[] inputWords = {"register", "joe", "email", "pass"};
-//        facade.register(inputWords);
-//
-//        ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
-//        PrintStream originalOut = System.out;
-//        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
-//        facade.register(inputWords); // attempt to register again
-//        System.setOut(originalOut); // MUST UNDO REDIRECTION so that output goes to console like it should
-//        assertEquals("Username already taken, try a different one\n", out.toString());
-//    }
-//
-//    @Test
-//    public void loginSuccessful() throws Exception {
-//        String[] inputWords = {"register", "joe", "email", "pass"};
-//        facade.register(inputWords);
-//        facade.logout();
-//        assertEquals("", facade.getAuthToken());
-//        ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
-//        PrintStream originalOut = System.out;
-//        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
-//        String[] loginInputWords = {"login", "joe", "pass"};
-//        facade.login(loginInputWords); // attempt to register again
-//        System.setOut(originalOut); // MUST UNDO REDIRECTION so that output goes to console like it should
-//        assertEquals("Successfully logged in\n", out.toString());
-//        assertNotNull(facade.getAuthToken());
-//    }
-//
-//    @Test
-//    public void loginBadPassword() throws Exception {
-//        String[] inputWords = {"register", "joe", "email", "pass"};
-//        facade.register(inputWords);
-//        facade.logout();
-//
-//        ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
-//        PrintStream originalOut = System.out;
-//        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
-//        String[] loginInputWords = {"login", "joe", "wrongPass"};
-//        facade.login(loginInputWords); // attempt to register again
-//        System.setOut(originalOut); // MUST UNDO REDIRECTION so that output goes to console like it should
-//        assertEquals("Incorrect username or password\n", out.toString());
-//    }
-//
-//    @Test
-//    public void loginBadUsername() throws Exception {
-//        String[] inputWords = {"register", "joe", "email", "pass"};
-//        facade.register(inputWords);
-//        facade.logout();
-//
-//        ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
-//        PrintStream originalOut = System.out;
-//        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
-//        String[] loginInputWords = {"login", "joeShmoe", "pass"};
-//        facade.login(loginInputWords); // attempt to register again
-//        System.setOut(originalOut); // MUST UNDO REDIRECTION so that output goes to console like it should
-//        assertEquals("Incorrect username or password\n", out.toString());
-//    }
-//
-//    @Test
-//    public void logoutSuccessful() throws Exception {
-//        String[] inputWords = {"register", "joe", "email", "pass"};
-//        facade.register(inputWords);
-//        assertNotNull(facade.getAuthToken());
-//        facade.logout();
-//        assertEquals("", facade.getAuthToken());
-//    }
-//
-//    @Test
-//    public void logoutBadAuth() throws Exception {
-//        // logout without having registered. Shouldn't ever happen in the real thing
-//        facade.setAuthToken("badToken");
-//        PrintStream originalOut = System.out;
-//        ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
-//        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
-//        facade.logout(); // attempt to register again
-//        System.setOut(originalOut); // MUST UNDO REDIRECTION so that output goes to console like it should
-//        assertEquals("bad authToken\n", out.toString());
-//    }
-//
-//    @Test
-//    public void createGameSuccessful() throws Exception {
-//        String[] inputWords = {"register", "joe", "email", "pass"};
-//        facade.register(inputWords);
-//        String[] createInputWords = {"create", "myGame"};
-//        ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
-//        PrintStream originalOut = System.out;
-//        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
-//        facade.create(createInputWords);
-//        System.setOut(originalOut); // MUST UNDO REDIRECTION so that output goes to console like it should
-//        assertEquals("Game myGame succesfully created. Use game ID 1 to join or observe it\n", out.toString());
-//    }
-//
-//    @Test
-//    public void createGameNotEnoughArgs() throws Exception {
-//        String[] inputWords = {"register", "joe", "email", "pass"};
-//        facade.register(inputWords);
-//        String[] createInputWords = {"create"};
-//        ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
-//        PrintStream originalOut = System.out;
-//        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
-//        facade.create(createInputWords);
-//        System.setOut(originalOut); // MUST UNDO REDIRECTION so that output goes to console like it should
-//        assertEquals("Creating a game requires 1 argument: GAME_NAME\n", out.toString());
-//    }
-//
-//    @Test
-//    public void listGamesSuccessful() throws Exception {
-//        String[] inputWords = {"register", "joe", "email", "pass"};
-//        facade.register(inputWords);
-//        ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
-//        PrintStream originalOut = System.out;
-//        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
-//        facade.list();
-//        System.setOut(originalOut); // MUST UNDO REDIRECTION so that output goes to console like it should
-//        assertEquals("No games yet. Create one using \"create <GAME_NAME>\"\n", out.toString());
-//        out.reset();
-//
-//        String[] createInputWords = {"create", "myGame"};
-//        facade.create(createInputWords);
-//
-//        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
-//        facade.list();
-//        System.setOut(originalOut); // MUST UNDO REDIRECTION so that output goes to console like it should
-//        assertEquals("""
-//                1.
-//                \tGame Name: myGame
-//                \tWhite Player: No player
-//                \tBlack Player: No player
-//                """, out.toString());
-//    }
-//
-//    @Test
-//    public void listGamesBadAuth() throws Exception {
-//        // listing without having registered. Shouldn't ever happen in the real thing
-//        facade.setAuthToken("badToken");
-//        PrintStream originalOut = System.out;
-//        ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
-//        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
-//        facade.list(); // attempt to list
-//        System.setOut(originalOut); // MUST UNDO REDIRECTION so that output goes to console like it should
-//        assertEquals("bad authToken\n", out.toString());
-//    }
-//
-//    @Test
-//    public void joinGameSuccessful() throws Exception {
-//        String[] inputWords = {"register", "joe", "email", "pass"};
-//        facade.register(inputWords);
-//        String[] createInputWords = {"create", "myGame"};
-//        facade.create(createInputWords);
-//        ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
-//        PrintStream originalOut = System.out;
-//        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
-//        facade.list();
-//        System.setOut(originalOut); // MUST UNDO REDIRECTION so that output goes to console like it should
-//        assertEquals("""
-//                1.
-//                \tGame Name: myGame
-//                \tWhite Player: No player
-//                \tBlack Player: No player
-//                """, out.toString());
-//        out.reset();
-//        String[] joinInputWords = {"join", "1", "WHITE"};
-//        facade.join(joinInputWords);
-//        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
-//        facade.list();
-//        System.setOut(originalOut); // MUST UNDO REDIRECTION so that output goes to console like it should
-//        assertEquals("""
-//                1.
-//                \tGame Name: myGame
-//                \tWhite Player: joe
-//                \tBlack Player: No player
-//                """, out.toString());
-//    }
-//
+    /// Register works if there is a change in authToken state
+    @Test
+    public void registerSuccessful() throws Exception {
+        var registerJsonBody = "{\"username\": \"joe\", \"email\": \"email\", \"password\": \"pass\"}";
+        assertEquals("", facade.getAuthToken());
+        facade.register(registerJsonBody);
+        assertNotEquals("", facade.getAuthToken());
+    }
+
+
+    /// AlreadyTakenException should be thrown if you attempt to register with an existing username
+    @Test
+    public void registerUsernameTaken() throws Exception {
+        var registerJsonBody = "{\"username\": \"joe\", \"email\": \"email\", \"password\": \"pass\"}";
+        facade.register(registerJsonBody);
+        facade.logout();
+        assertThrows(datamodel.AlreadyTakenException.class, () -> facade.register(registerJsonBody));
+    }
+
+    /// Register, logout, then log back in. authToken should change states throughout
+    @Test
+    public void loginSuccessful() throws Exception {
+        assertEquals("", facade.getAuthToken());
+        var registerJsonBody = "{\"username\": \"joe\", \"email\": \"email\", \"password\": \"pass\"}";
+        facade.register(registerJsonBody);
+        assertNotEquals("", facade.getAuthToken());
+        facade.logout();
+        assertEquals("", facade.getAuthToken());
+        var loginJsonBody = "{\"username\": \"joe\", \"password\": \"pass\"}";
+        facade.login(loginJsonBody);
+        assertNotEquals("", facade.getAuthToken());
+    }
+
+    /// UnauthorizedException should be thrown when you attempt to log in with an incorrect password
+    @Test
+    public void loginBadPassword() throws Exception {
+        var registerJsonBody = "{\"username\": \"joe\", \"email\": \"email\", \"password\": \"pass\"}";
+        facade.register(registerJsonBody);
+        facade.logout();
+        var loginJsonBody = "{\"username\": \"joe\", \"password\": \"wrongPass\"}";
+        assertThrows(datamodel.UnauthorizedException.class, () -> facade.login(loginJsonBody));
+    }
+
+    /// UnauthorizedException should be thrown when you attempt to log in with an incorrect username
+    @Test
+    public void loginBadUsername() throws Exception {
+        var registerJsonBody = "{\"username\": \"joe\", \"email\": \"email\", \"password\": \"pass\"}";
+        facade.register(registerJsonBody);
+        facade.logout();
+        var loginJsonBody = "{\"username\": \"wrongJoe\", \"password\": \"pass\"}";
+        assertThrows(datamodel.UnauthorizedException.class, () -> facade.login(loginJsonBody));
+    }
+
+    /// Register, then log out. authToken should change states
+    @Test
+    public void logoutSuccessful() throws Exception {
+        assertEquals("", facade.getAuthToken());
+        var registerJsonBody = "{\"username\": \"joe\", \"email\": \"email\", \"password\": \"pass\"}";
+        facade.register(registerJsonBody);
+        assertNotEquals("", facade.getAuthToken());
+        facade.logout();
+        assertEquals("", facade.getAuthToken());
+    }
+
+    /// UnauthorizedException should be thrown when you attempt to logout without being logged in
+    @Test
+    public void logoutBadAuth() throws Exception {
+        assertThrows(datamodel.UnauthorizedException.class, () -> facade.logout());
+    }
+
+    @Test
+    public void createGameSuccessful() throws Exception {
+        var registerJsonBody = "{\"username\": \"joe\", \"email\": \"email\", \"password\": \"pass\"}";
+        facade.register(registerJsonBody);
+        var createJsonBody = "{\"gameName\": \"myGame\"}";
+        assertDoesNotThrow(() -> facade.create(createJsonBody));
+    }
+
+    @Test
+    public void createGameNotEnoughArgs() throws Exception {
+        var registerJsonBody = "{\"username\": \"joe\", \"email\": \"email\", \"password\": \"pass\"}";
+        facade.register(registerJsonBody);
+        var createJsonBody = "{}";
+        assertThrows(datamodel.BadRequestException.class, () -> facade.create(createJsonBody));
+    }
+
+    @Test
+    public void listGamesSuccessful() throws Exception {
+        var registerJsonBody = "{\"username\": \"joe\", \"email\": \"email\", \"password\": \"pass\"}";
+        facade.register(registerJsonBody);
+        assertThrows(Exception.class, () -> facade.list());
+        var createJsonBody = "{\"gameName\": \"myGame\"}";
+        facade.create(createJsonBody);
+        assertDoesNotThrow(() -> facade.list());
+    }
+
+    @Test
+    public void listGamesBadAuth() throws Exception {
+        // listing without having registered. Shouldn't ever happen in the real thing
+        facade.setAuthToken("badToken");
+        assertThrows(datamodel.UnauthorizedException.class, () -> facade.list());
+    }
+
+    @Test
+    public void playGameSuccessful() throws Exception {
+        var registerJsonBody = "{\"username\": \"joe\", \"email\": \"email\", \"password\": \"pass\"}";
+        facade.register(registerJsonBody);
+        var createJsonBody = "{\"gameName\": \"myGame\"}";
+        facade.create(createJsonBody);
+        var playJsonBody = "{\"gameID\": \"1\", \"playerColor\": \"WHITE\"}";
+        assertDoesNotThrow(() -> facade.play(playJsonBody));
+    }
+
+
+    /// Register, create a game, and join it. Registera another player and attempt to join, but it should throw
+    /// an error since the team has been taken
     @Test
     public void joinGameTeamTaken() throws Exception {
-        String[] inputWords = {"register", "joe", "email", "pass"};
-        facade.register(inputWords);
-        String[] createInputWords = {"create", "myGame"};
-        facade.create(createInputWords);
-        String[] joinInputWords = {"join", "1", "WHITE"};
-        facade.join(joinInputWords);
+        var registerJsonBody = "{\"username\": \"joe\", \"email\": \"email\", \"password\": \"pass\"}";
+        facade.register(registerJsonBody);
+        var createJsonBody = "{\"gameName\": \"myGame\"}";
+        facade.create(createJsonBody);
+        var playJsonBody = "{\"gameID\": \"1\", \"playerColor\": \"WHITE\"}";
+        facade.play(playJsonBody);
 
-        facade.logout(); // logout first account, register new one
-        String[] janeInputWords = {"register", "jane", "email", "pass"};
-        facade.register(janeInputWords);
-        String[] janeJoinInputWords = {"join", "1", "WHITE"};
-        ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
-        PrintStream originalOut = System.out;
-        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
-        facade.join(janeJoinInputWords);
-        System.setOut(originalOut); // MUST UNDO REDIRECTION so that output goes to console like it should
-        assertEquals("Team WHITE is not available. Please choose a different team.\n", out.toString());
+        var registerJaneJsonBody = "{\"username\": \"jane\", \"email\": \"email\", \"password\": \"pass\"}";
+        facade.register(registerJaneJsonBody);
+        assertThrows(datamodel.AlreadyTakenException.class, () -> facade.play(playJsonBody));
     }
-//
-//    @Test
-//    public void observeSuccessful() throws Exception {
-//        String[] inputWords = {"register", "joe", "email", "pass"};
-//        facade.register(inputWords);
-//        String[] createInputWords = {"create", "myGame"};
-//        facade.create(createInputWords);
-//        String[] observeInputWords = {"observe", "1"};
-//
-//        PrintStream originalOut = System.out;
-//        ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
-//        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
-//        facade.observe(observeInputWords); // attempt to list
-//        System.setOut(originalOut); // MUST UNDO REDIRECTION so that output goes to console like it should
-//        assertEquals("\u001B[48;5;235m   \u001B[48;5;235m a \u001B[48;5;235m b \u001B[48;5;235m c " +
-//                "\u001B[48;5;235m d \u001B[48;5;235m e \u001B[48;5;235m f \u001B[48;5;235m g \u001B[48;5;235m h " +
-//                "\u001B[48;5;235m   \u001B[49m\n" +
-//                "\u001B[48;5;235m 8 \u001B[48;5;0m ♜ \u001B[48;5;15m ♞ \u001B[48;5;0m ♝ \u001B[48;5;15m ♚ " +
-//                "\u001B[48;5;0m ♛ \u001B[48;5;15m ♝ \u001B[48;5;0m ♞ \u001B[48;5;15m ♜ \u001B[48;5;235m 8 " +
-//                "\u001B[49m\n" +
-//                "\u001B[48;5;235m 7 \u001B[48;5;15m ♟ \u001B[48;5;0m ♟ \u001B[48;5;15m ♟ \u001B[48;5;0m ♟ " +
-//                "\u001B[48;5;15m ♟ \u001B[48;5;0m ♟ \u001B[48;5;15m ♟ \u001B[48;5;0m ♟ \u001B[48;5;235m 7 " +
-//                "\u001B[49m\n" +
-//                "\u001B[48;5;235m 6 \u001B[48;5;0m   \u001B[48;5;15m   \u001B[48;5;0m   \u001B[48;5;15m   " +
-//                "\u001B[48;5;0m   \u001B[48;5;15m   \u001B[48;5;0m   \u001B[48;5;15m   \u001B[48;5;235m 6 " +
-//                "\u001B[49m\n" +
-//                "\u001B[48;5;235m 5 \u001B[48;5;15m   \u001B[48;5;0m   \u001B[48;5;15m   \u001B[48;5;0m   " +
-//                "\u001B[48;5;15m   \u001B[48;5;0m   \u001B[48;5;15m   \u001B[48;5;0m   \u001B[48;5;235m 5 " +
-//                "\u001B[49m\n" +
-//                "\u001B[48;5;235m 4 \u001B[48;5;0m   \u001B[48;5;15m   \u001B[48;5;0m   \u001B[48;5;15m   " +
-//                "\u001B[48;5;0m   \u001B[48;5;15m   \u001B[48;5;0m   \u001B[48;5;15m   \u001B[48;5;235m 4 " +
-//                "\u001B[49m\n" +
-//                "\u001B[48;5;235m 3 \u001B[48;5;15m   \u001B[48;5;0m   \u001B[48;5;15m   \u001B[48;5;0m   " +
-//                "\u001B[48;5;15m   \u001B[48;5;0m   \u001B[48;5;15m   \u001B[48;5;0m   \u001B[48;5;235m 3 " +
-//                "\u001B[49m\n" +
-//                "\u001B[48;5;235m 2 \u001B[48;5;0m ♙ \u001B[48;5;15m ♙ \u001B[48;5;0m ♙ \u001B[48;5;15m ♙ " +
-//                "\u001B[48;5;0m ♙ \u001B[48;5;15m ♙ \u001B[48;5;0m ♙ \u001B[48;5;15m ♙ \u001B[48;5;235m 2 " +
-//                "\u001B[49m\n" +
-//                "\u001B[48;5;235m 1 \u001B[48;5;15m ♖ \u001B[48;5;0m ♘ \u001B[48;5;15m ♗ \u001B[48;5;0m ♔ " +
-//                "\u001B[48;5;15m ♕ \u001B[48;5;0m ♗ \u001B[48;5;15m ♘ \u001B[48;5;0m ♖ \u001B[48;5;235m 1 " +
-//                "\u001B[49m\n" +
-//                "\u001B[48;5;235m   \u001B[48;5;235m a \u001B[48;5;235m b \u001B[48;5;235m c \u001B[48;5;235m d " +
-//                "\u001B[48;5;235m e \u001B[48;5;235m f \u001B[48;5;235m g \u001B[48;5;235m h \u001B[48;5;235m   " +
-//                "\u001B[49m\n", out.toString());
-//    }
-//
-//    @Test
-//    public void observeNoGameID() throws Exception {
-//        String[] inputWords = {"register", "joe", "email", "pass"};
-//        facade.register(inputWords);
-//        String[] createInputWords = {"create", "myGame"};
-//        facade.create(createInputWords);
-//        String[] observeInputWords = {"observe"};
-//
-//        PrintStream originalOut = System.out;
-//        ByteArrayOutputStream out = new ByteArrayOutputStream(); // buffers stream that captures stdout
-//        System.setOut(new PrintStream(out)); // redirects stdout to my buffer
-//        facade.observe(observeInputWords); // attempt to observe
-//        System.setOut(originalOut);
-//        assertEquals("Observing a game requires 1 argument: GAME_ID\n", out.toString());
-//    }
+
+    @Test
+    public void observeSuccessful() throws Exception {
+        var registerJsonBody = "{\"username\": \"joe\", \"email\": \"email\", \"password\": \"pass\"}";
+        facade.register(registerJsonBody);
+        var createJsonBody = "{\"gameName\": \"myGame\"}";
+        facade.create(createJsonBody);
+        var observeJsonBody = "{\"gameID\": \"1\"}";
+        assertDoesNotThrow(() -> facade.observe(observeJsonBody));
+    }
+
+    @Test
+    public void observeNoGameID() throws Exception {
+        var registerJsonBody = "{\"username\": \"joe\", \"email\": \"email\", \"password\": \"pass\"}";
+        facade.register(registerJsonBody);
+        var createJsonBody = "{\"gameName\": \"myGame\"}";
+        facade.create(createJsonBody);
+        var observeJsonBody = "{}";
+        assertThrows(datamodel.BadRequestException.class, () -> facade.observe(observeJsonBody));
+    }
 }

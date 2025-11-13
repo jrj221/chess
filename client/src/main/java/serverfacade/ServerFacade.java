@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class ServerFacade {
     Integer port;
-    String authToken = "";
+    static String authToken = ""; // static shares it across instances so switching clients doesn't affect it
 
     public ServerFacade(Integer port) {
         this.port = port;
@@ -56,12 +56,8 @@ public class ServerFacade {
     }
 
 
-    public void login(String[] inputWords) throws Exception {
+    public void login(String jsonBody) throws Exception {
         HttpClient client = HttpClient.newHttpClient();
-        var username = inputWords[1];
-        var password = inputWords[2];
-        var body = Map.of("username", username, "password", password);
-        var jsonBody = new Gson().toJson(body);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI("http://localhost:" + port + "/session")) // we need to grab the port being used
                 .header("Content-Type", "application.json")
@@ -75,7 +71,7 @@ public class ServerFacade {
                 return;
             } case 400: {
                 throw new BadRequestException("You are missing one of two fields: USERNAME or PASSWORD. " +
-                        "Please ensure you include all necessariy fields.");
+                        "Please ensure you include all necessary fields.");
             } case 401: {
                 throw new UnauthorizedException("Incorrect username or password");
             } case 500: {
@@ -96,33 +92,20 @@ public class ServerFacade {
         switch (response.statusCode()) {
             case 200:  {
                 authToken = "";
-                System.out.println("Successfully logged out");
                 return;
             } case 400: {
-                // will never happen since I've already ensured that all fields are given
-                System.out.println("authToken should not be null");
-                return;
+                throw new BadRequestException("Bad request");
             } case 401: {
-                // shouldn't ever happen since how would you even get a bad authToken?
-                System.out.println("invalid authToken");
-                return;
+                throw new UnauthorizedException("LOGOUT Unauthorized");
             } case 500: {
-                System.out.println("Internal error, please try again"); // SQL errors?
-                // return basically
+                throw new Exception("Internal error, please try again"); // SQL errors?
             }
         }
     }
 
 
-    public void create(String[] inputWords) throws Exception {
-        if (inputWords.length != 2) {
-            System.out.println("Creating a game requires 1 argument: GAME_NAME");
-            return;
-        }
+    public void create(String jsonBody) throws Exception {
         HttpClient client = HttpClient.newHttpClient();
-        var gameName = inputWords[1];
-        var body = Map.of("gameName", gameName);
-        var jsonBody = new Gson().toJson(body);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI("http://localhost:8080/game")) // we need to grab the port being used
                 .header("Content-Type", "application.json")
@@ -132,78 +115,46 @@ public class ServerFacade {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         switch (response.statusCode()) {
             case 200: {
-                var responseJson = new Gson().fromJson(response.body(), CreateGameResponse.class);
-                var gameID = responseJson.gameID();
-                System.out.printf("Game %s succesfully created. Use game ID %d to join or observe it\n",
-                        gameName, gameID);
                 return;
             } case 400: {
-                // will never happen since I've already ensured that all fields are given
-                System.out.println("authToken cannot be null");
-                return;
+                throw new BadRequestException("Bad request");
             } case 401: {
-                // shouldn't ever happen since how would you even get a bad authToken?
-                System.out.println("bad authToken");
-                return;
+                throw new UnauthorizedException("CREATE Unauthorized");
             } case 500: {
-                System.out.println("Internal error, please try again"); // SQL errors?
-                // return basically
+                throw new Exception("Internal error, please try again"); // SQL errors?
             }
         }
     }
 
 
-    public void list() throws Exception {
+    public ArrayList<GameData> list() throws Exception {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
             .uri(new URI("http://localhost:" + port + "/game"))
             .header("authorization", authToken)
             .GET()
             .build();
-        System.out.println(authToken); // TESTING
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         switch (response.statusCode()) {
             case 200: {
                 var responseJson = new Gson().fromJson(response.body(), ListGamesResponse.class);
                 ArrayList<GameData> games = responseJson.games();
                 if (games.isEmpty()) {
-//                    throw erorr
-                    System.out.println("No games yet. Create one using \"create <GAME_NAME>\"");
+                    throw new Exception("No games yet. Create one using \"create <GAME_NAME>\"");
                 }
-                for (int i = 0; i < games.size(); i++) {
-                    var game = games.get(i);
-                    System.out.printf("""
-                            %d.
-                            \tGame Name: %s
-                            \tWhite Player: %s
-                            \tBlack Player: %s
-                            """, i+1, game.gameName(),
-                            game.whiteUsername() == null ? "No player" : game.whiteUsername(),
-                            game.blackUsername() == null ? "No player" : game.blackUsername());
-                }
-                return;
+                return games;
             } case 401: {
-                // shouldn't ever happen since how would you even get a bad authToken?
-                System.out.println("bad authToken");
-                return;
+                throw new UnauthorizedException("LIST Unauthorized");
             } case 500: {
-                System.out.println("Internal error, please try again"); // SQL errors?
-                // return basically
+                throw new Exception("Internal error, please try again"); // SQL errors?
             }
         }
+        return null; // Intellij wanted a return statement
     }
 
 
-    public void join(String[] inputWords) throws Exception {
-        if (inputWords.length != 3) {
-            System.out.println("Joining a game requires 2 arguments: GAME_ID and TEAM_COLOR");
-            return;
-        }
+    public void play(String jsonBody) throws Exception {
         HttpClient client = HttpClient.newHttpClient();
-        var gameID = inputWords[1];
-        var playerColor = inputWords[2];
-        var body = Map.of("gameID", gameID, "playerColor", playerColor);
-        var jsonBody = new Gson().toJson(body);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI("http://localhost:" + port + "/game"))
                 .header("Content-Type", "application.json")
@@ -213,40 +164,31 @@ public class ServerFacade {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         switch (response.statusCode()) {
             case 200: {
-                System.out.printf("Successfully joined team %s in game %s!\n", playerColor, gameID);
-                display(playerColor);
                 return;
             } case 400: {
                 var responseJson = new Gson().fromJson(response.body(), ErrorResponse.class);
                 if (responseJson.message().equals("Error: No existing game")) {
-                    System.out.println("No existing game.");
-                    return;
+                    throw new NoExistingGameException("No existing game");
                 }
-                // will never happen since I've already ensured that all fields are given
-                System.out.println("authToken cannot be null");
-                return;
+                throw new BadRequestException("Bad request");
             } case 401: {
-                // shouldn't ever happen since how would you even get a bad authToken?
-                System.out.println("bad authToken");
-                return;
+                throw new UnauthorizedException("PLAY Unauthorized");
             } case 403: {
-                System.out.printf("Team %s is not available. Please choose a different team.\n", playerColor);
-                return;
+                throw new AlreadyTakenException("Team is not available. Please choose a different team.");
             } case 500: {
-                System.out.println("Internal error, please try again"); // SQL errors?
-                // return basically
+                throw new Exception("Internal error, please try again"); // SQL errors?
             }
         }
     }
 
 
-    public void observe(String[] inputWords) throws Exception {
-        if (inputWords.length != 2) {
-            System.out.println("Observing a game requires 1 argument: GAME_ID");
-            return;
-        }
+    public void observe(String jsonBody) throws Exception {
         // next phase we will change this to actually grab a specific game
-        display("WHITE");
+        if (jsonBody.length() == 2) {
+            throw new BadRequestException("Bad request");
+            // this will get refined, for now this simulates not having a gameID
+        }
+        return;
     }
 
 
@@ -348,7 +290,7 @@ public class ServerFacade {
 
 
     /// Displays the chess board (orientation based on team)
-    private static void display(String team) {
+    public String display(String team) {
         var board = new String[10][10];
         var pieceMap = initBoard(); // key: 0:0, value: [black, whitePawn] // initializes the map
 
@@ -359,22 +301,24 @@ public class ServerFacade {
             board[i][j] = piece.get(0) + piece.get(1);
         });
 
-        // Display board
+        // Display board (convert to string)
+        var boardString = new StringBuilder();
         if (team.equals("WHITE")) {
             for (int i = 0; i < 10; i++) {
                 for (int j = 0; j < 10; j++) {
-                    System.out.print(board[i][j]);
+                    boardString.append(board[i][j]);
                 }
-                System.out.print(EscapeSequences.RESET_BG_COLOR + "\n");
+                boardString.append(EscapeSequences.RESET_BG_COLOR + "\n");
             }
         } else {
             for (int i = 9; i > -1 ; i--) {
                 for (int j = 9; j > -1; j--) {
-                    System.out.print(board[i][j]);
+                    boardString.append(board[i][j]);
                 }
-                System.out.print(EscapeSequences.RESET_BG_COLOR + "\n");
+                boardString.append(EscapeSequences.RESET_BG_COLOR + "\n");
             }
         }
+        return boardString.toString();
     }
 
 

@@ -4,14 +4,16 @@ import com.google.gson.Gson;
 
 import java.util.*;
 
-import datamodel.RegisterResponse;
+import ui.EscapeSequences;
+import ui.EscapeSequences.*;
 import serverfacade.ServerFacade;
 
 
 public class PreLoginClient implements Client {
 
     public void printPrompt() {
-        System.out.print("[LOGGED_OUT] >>> ");
+        System.out.print(EscapeSequences.SET_TEXT_COLOR_YELLOW + "[LOGGED_OUT] " +
+                EscapeSequences.RESET_TEXT_COLOR + ">>> ");
     }
 
     static ServerFacade facade = new ServerFacade(8080);
@@ -20,8 +22,8 @@ public class PreLoginClient implements Client {
         var inputWords = command.toLowerCase().split(" ");
         return switch (inputWords[0]) {
             case "clear" -> clear(); // FOR TESTING ONLY, REMOVE BEFORE COMPLETION
-            case "help" -> help();
-            case "quit" -> "quit"; // best way to quit?
+            case "help", "h" -> help();
+            case "quit", "q", "exit" -> "quit"; // best way to quit?
             case "register" -> register(inputWords);
             case "login" -> login(inputWords);
             default -> String.format("%s is not a valid command", inputWords[0]);
@@ -37,8 +39,8 @@ public class PreLoginClient implements Client {
         return """
                 \tregister <USERNAME> <EMAIL> <PASSWORD> | Register a new user
                 \tlogin <USERNAME> <PASSWORD> | Login to an existing user
-                \tquit | Quit the chess program
-                \thelp | See possible commands""";
+                \tquit|q|exit | Quit the chess program
+                \thelp|h | See possible commands""";
     }
 
     private String register(String[] inputWords) throws Exception {
@@ -52,18 +54,18 @@ public class PreLoginClient implements Client {
             facade.register(jsonBody); // returns a string on success
             return "Account successfully registered. You are now logged in.";
         }
-        throw new Exception("You are missing one of three fields: " +
-                "USERNAME, EMAIL, or PASSWORD. " +
-                "Please ensure you include all necessariy fields.");
+        throw new Exception("Invalid command.\nRegistration takes the form \"register USERNAME, EMAIL, PASSWORD\"");
     }
 
     private String login(String[] inputWords) throws Exception {
         if (inputWords.length == 3) {
-            facade.login(inputWords);
+            var body = Map.of("username", inputWords[1],
+                            "password", inputWords[2]);
+            var jsonBody = new Gson().toJson(body);
+            facade.login(jsonBody);
             return "Login successful!";
         }
-        throw new Exception("You are missing one of two fields: USERNAME or PASSWORD. " +
-                "Please ensure you include all necessariy fields.");
+        throw new Exception("Invalid command.\nLogging in takes the form \"login USERNAME, PASSWORD\"");
     }
 
 }
