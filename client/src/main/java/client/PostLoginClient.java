@@ -1,7 +1,9 @@
 package client;
 
 import com.google.gson.Gson;
+import datamodel.BadRequestException;
 import datamodel.GameData;
+import datamodel.NoExistingGameException;
 import serverfacade.ServerFacade;
 import ui.EscapeSequences;
 
@@ -44,9 +46,10 @@ public class PostLoginClient implements Client {
         throw new Exception("Invalid command.\nCreating a game takes the form \"create GAME_NAME\"");
     }
 
+    // make a map in client that maps game indices to their actual gameIDs
 
     private String list() throws Exception {
-        ArrayList<GameData> games = facade.list(); // returns a string on success
+        ArrayList<GameData> games = facade.list();
         StringBuilder list = new StringBuilder(); // like a string-list hybrid
         for (int i = 0; i < games.size(); i++) {
             var game = games.get(i);
@@ -66,11 +69,17 @@ public class PostLoginClient implements Client {
 
     private String play(String[] inputWords) throws Exception {
         if (inputWords.length == 3) {
-            var gameID = inputWords[1];
-            if (Character.isLetter(gameID.charAt(0))) {
+            var gameIndex = inputWords[1];
+            if (Character.isLetter(gameIndex.charAt(0))) {
                 return "Invalid game index provided. Please use numerals (e.g. \"1\" instead of \"one\")";
             }
+            // is this the best practice?
+            ArrayList<GameData> games = facade.list();
             var playerColor = inputWords[2].toUpperCase();
+            if (Integer.parseInt(gameIndex) > games.size()) {
+                throw new NoExistingGameException("No existing game");
+            }
+            var gameID = games.get(Integer.parseInt(gameIndex)).gameID();
             var body = Map.of(
                     "gameID", gameID,
                     "playerColor", playerColor);
@@ -89,11 +98,11 @@ public class PostLoginClient implements Client {
         if (inputWords.length == 2) {
             if (Character.isLetter(inputWords[1].charAt(0))) {
                 return "Invalid game index provided. Please use numerals (e.g. \"1\" instead of \"one\"";
+            };
+            ArrayList<GameData> games = facade.list();
+            if (Integer.parseInt(inputWords[1]) > games.size()) {
+                throw new NoExistingGameException("No existing game");
             }
-            var body = Map.of(
-                    "gameID", inputWords[1]);
-            var jsonBody = new Gson().toJson(body);
-            facade.observe(jsonBody);
             String board = String.format("Successfully observing in game %s!\n", inputWords[1]);
             board += facade.display("WHITE");
             // this is weird, but it's so the client prints the message and the board

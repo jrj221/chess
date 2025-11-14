@@ -161,24 +161,4 @@ public class ServerFacadeTests {
         facade.register(registerJaneJsonBody);
         assertThrows(datamodel.AlreadyTakenException.class, () -> facade.play(playJsonBody));
     }
-
-    @Test
-    public void observeSuccessful() throws Exception {
-        var registerJsonBody = "{\"username\": \"joe\", \"email\": \"email\", \"password\": \"pass\"}";
-        facade.register(registerJsonBody);
-        var createJsonBody = "{\"gameName\": \"myGame\"}";
-        facade.create(createJsonBody);
-        var observeJsonBody = "{\"gameID\": \"1\"}";
-        assertDoesNotThrow(() -> facade.observe(observeJsonBody));
-    }
-
-    @Test
-    public void observeNoGameID() throws Exception {
-        var registerJsonBody = "{\"username\": \"joe\", \"email\": \"email\", \"password\": \"pass\"}";
-        facade.register(registerJsonBody);
-        var createJsonBody = "{\"gameName\": \"myGame\"}";
-        facade.create(createJsonBody);
-        var observeJsonBody = "{}";
-        assertThrows(datamodel.BadRequestException.class, () -> facade.observe(observeJsonBody));
-    }
 }

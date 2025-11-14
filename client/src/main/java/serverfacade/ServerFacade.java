@@ -182,34 +182,23 @@ public class ServerFacade {
     }
 
 
-    public void observe(String jsonBody) throws Exception {
-        // next phase we will change this to actually grab a specific game
-        if (jsonBody.length() == 2) {
-            throw new BadRequestException("Bad request");
-            // this will get refined, for now this simulates not having a gameID
-        }
-        return;
-    }
-
-
     private static HashMap<String, List<String>> initBoard() {
         String[] horizRow = {"   ", " h ", " g ", " f ", " e ", " d ", " c ", " b ", " a ", "   "};
         String[] vertRow = {"   ", " 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 ", "   "};
         String[][] royalRowWhite = {
                 {EscapeSequences.SET_BG_COLOR_DARK_GREY, "   "},
-                {EscapeSequences.SET_BG_COLOR_BLACK, " ♖ "},
-                {EscapeSequences.SET_BG_COLOR_WHITE, " ♘ "},
-                {EscapeSequences.SET_BG_COLOR_BLACK, " ♗ "},
-                {EscapeSequences.SET_BG_COLOR_WHITE, " ♕ "},
-                {EscapeSequences.SET_BG_COLOR_BLACK, " ♔ "},
-                {EscapeSequences.SET_BG_COLOR_WHITE, " ♗ "},
-                {EscapeSequences.SET_BG_COLOR_BLACK, " ♘ "},
                 {EscapeSequences.SET_BG_COLOR_WHITE, " ♖ "},
+                {EscapeSequences.SET_BG_COLOR_BLACK, " ♘ "},
+                {EscapeSequences.SET_BG_COLOR_WHITE, " ♗ "},
+                {EscapeSequences.SET_BG_COLOR_BLACK, " ♔ "},
+                {EscapeSequences.SET_BG_COLOR_WHITE, " ♕ "},
+                {EscapeSequences.SET_BG_COLOR_BLACK, " ♗ "},
+                {EscapeSequences.SET_BG_COLOR_WHITE, " ♘ "},
+                {EscapeSequences.SET_BG_COLOR_BLACK, " ♖ "},
                 {EscapeSequences.SET_BG_COLOR_DARK_GREY, "   "}
         };
         String[][] pawnRowWhite = {
                 {EscapeSequences.SET_BG_COLOR_DARK_GREY, "   "},
-                {EscapeSequences.SET_BG_COLOR_WHITE, " ♙ "},
                 {EscapeSequences.SET_BG_COLOR_BLACK, " ♙ "},
                 {EscapeSequences.SET_BG_COLOR_WHITE, " ♙ "},
                 {EscapeSequences.SET_BG_COLOR_BLACK, " ♙ "},
@@ -217,23 +206,23 @@ public class ServerFacade {
                 {EscapeSequences.SET_BG_COLOR_BLACK, " ♙ "},
                 {EscapeSequences.SET_BG_COLOR_WHITE, " ♙ "},
                 {EscapeSequences.SET_BG_COLOR_BLACK, " ♙ "},
+                {EscapeSequences.SET_BG_COLOR_WHITE, " ♙ "},
                 {EscapeSequences.SET_BG_COLOR_DARK_GREY, "   "}
         };
         String[][] royalRowBlack = {
                 {EscapeSequences.SET_BG_COLOR_DARK_GREY, "   "},
-                {EscapeSequences.SET_BG_COLOR_WHITE, " ♜ "},
-                {EscapeSequences.SET_BG_COLOR_BLACK, " ♞ "},
-                {EscapeSequences.SET_BG_COLOR_WHITE, " ♝ "},
-                {EscapeSequences.SET_BG_COLOR_BLACK, " ♛ "},
-                {EscapeSequences.SET_BG_COLOR_WHITE, " ♚ "},
-                {EscapeSequences.SET_BG_COLOR_BLACK, " ♝ "},
-                {EscapeSequences.SET_BG_COLOR_WHITE, " ♞ "},
                 {EscapeSequences.SET_BG_COLOR_BLACK, " ♜ "},
+                {EscapeSequences.SET_BG_COLOR_WHITE, " ♞ "},
+                {EscapeSequences.SET_BG_COLOR_BLACK, " ♝ "},
+                {EscapeSequences.SET_BG_COLOR_WHITE, " ♚ "},
+                {EscapeSequences.SET_BG_COLOR_BLACK, " ♛ "},
+                {EscapeSequences.SET_BG_COLOR_WHITE, " ♝ "},
+                {EscapeSequences.SET_BG_COLOR_BLACK, " ♞ "},
+                {EscapeSequences.SET_BG_COLOR_WHITE, " ♜ "},
                 {EscapeSequences.SET_BG_COLOR_DARK_GREY, "   "}
         };
         String[][] pawnRowBlack = {
                 {EscapeSequences.SET_BG_COLOR_DARK_GREY, "   "},
-                {EscapeSequences.SET_BG_COLOR_BLACK, " ♟ "},
                 {EscapeSequences.SET_BG_COLOR_WHITE, " ♟ "},
                 {EscapeSequences.SET_BG_COLOR_BLACK, " ♟ "},
                 {EscapeSequences.SET_BG_COLOR_WHITE, " ♟ "},
@@ -241,11 +230,11 @@ public class ServerFacade {
                 {EscapeSequences.SET_BG_COLOR_WHITE, " ♟ "},
                 {EscapeSequences.SET_BG_COLOR_BLACK, " ♟ "},
                 {EscapeSequences.SET_BG_COLOR_WHITE, " ♟ "},
+                {EscapeSequences.SET_BG_COLOR_BLACK, " ♟ "},
                 {EscapeSequences.SET_BG_COLOR_DARK_GREY, "   "}
         };
         String[][] emptyWhiteFirstRow = {
                 {EscapeSequences.SET_BG_COLOR_DARK_GREY, "   "},
-                {EscapeSequences.SET_BG_COLOR_WHITE, "   "},
                 {EscapeSequences.SET_BG_COLOR_BLACK, "   "},
                 {EscapeSequences.SET_BG_COLOR_WHITE, "   "},
                 {EscapeSequences.SET_BG_COLOR_BLACK, "   "},
@@ -253,11 +242,11 @@ public class ServerFacade {
                 {EscapeSequences.SET_BG_COLOR_BLACK, "   "},
                 {EscapeSequences.SET_BG_COLOR_WHITE, "   "},
                 {EscapeSequences.SET_BG_COLOR_BLACK, "   "},
+                {EscapeSequences.SET_BG_COLOR_WHITE, "   "},
                 {EscapeSequences.SET_BG_COLOR_DARK_GREY, "   "}
         };
         String[][] emptyBlackFirstRow = {
                 {EscapeSequences.SET_BG_COLOR_DARK_GREY, "   "},
-                {EscapeSequences.SET_BG_COLOR_BLACK, "   "},
                 {EscapeSequences.SET_BG_COLOR_WHITE, "   "},
                 {EscapeSequences.SET_BG_COLOR_BLACK, "   "},
                 {EscapeSequences.SET_BG_COLOR_WHITE, "   "},
@@ -265,6 +254,7 @@ public class ServerFacade {
                 {EscapeSequences.SET_BG_COLOR_WHITE, "   "},
                 {EscapeSequences.SET_BG_COLOR_BLACK, "   "},
                 {EscapeSequences.SET_BG_COLOR_WHITE, "   "},
+                {EscapeSequences.SET_BG_COLOR_BLACK, "   "},
                 {EscapeSequences.SET_BG_COLOR_DARK_GREY, "   "}
         };
         var pieceMap = new HashMap<String, List<String>>();
