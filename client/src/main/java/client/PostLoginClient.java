@@ -79,7 +79,10 @@ public class PostLoginClient implements Client {
             if (Integer.parseInt(gameIndex) > games.size()) {
                 throw new NoExistingGameException("No existing game");
             }
-            var gameID = games.get(Integer.parseInt(gameIndex)).gameID();
+            if (Integer.parseInt(gameIndex) < 0) {
+                throw new BadRequestException("No existing game");
+            }
+            var gameID = games.get(Integer.parseInt(gameIndex) - 1).gameID();
             var body = Map.of(
                     "gameID", gameID,
                     "playerColor", playerColor);
@@ -99,9 +102,13 @@ public class PostLoginClient implements Client {
             if (Character.isLetter(inputWords[1].charAt(0))) {
                 return "Invalid game index provided. Please use numerals (e.g. \"1\" instead of \"one\"";
             };
+            var gameIndex = Integer.parseInt(inputWords[1]);
             ArrayList<GameData> games = facade.list();
-            if (Integer.parseInt(inputWords[1]) > games.size()) {
+            if (gameIndex > games.size()) {
                 throw new NoExistingGameException("No existing game");
+            }
+            if (gameIndex < 0) {
+                throw new BadRequestException("No existing game");
             }
             String board = String.format("Successfully observing in game %s!\n", inputWords[1]);
             board += facade.display("WHITE");
