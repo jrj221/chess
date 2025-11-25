@@ -22,6 +22,9 @@ public class Repl {
                     client = new PostLoginClient();
                 } else if (result.equals("Logout successful!") || result.equals("Database cleared")) {
                     client = new PreLoginClient();
+                } else if (result.split(" ")[1].equals("observing") ||
+                        result.split(" ")[1].equals("joined")) {
+                    client = new GameplayClient();
                 }
 
             } catch (Throwable e) {

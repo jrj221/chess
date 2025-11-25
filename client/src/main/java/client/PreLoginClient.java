@@ -11,12 +11,14 @@ import serverfacade.ServerFacade;
 
 public class PreLoginClient implements Client {
 
+    static ServerFacade facade = new ServerFacade(8080);
+
+
     public void printPrompt() {
         System.out.print(EscapeSequences.SET_TEXT_COLOR_YELLOW + "[LOGGED_OUT] " +
                 EscapeSequences.RESET_TEXT_COLOR + ">>> ");
     }
 
-    static ServerFacade facade = new ServerFacade(8080);
 
     public String eval(String command)  throws Exception {
         var inputWords = command.toLowerCase().split(" ");
