@@ -30,6 +30,11 @@ public class Server {
         server.put("game", ctx -> joinGame(ctx));
         server.delete("db", ctx -> clear(ctx));
         // Register your endpoints and exception handlers here.
+        server.ws("/ws", ws -> {
+            ws.onConnect(ctx -> System.out.println("Client connected"));
+            ws.onMessage(ctx -> ctx.send(ctx.message())); // repeat for now
+            ws.onClose(ctx -> System.out.println("Client disconnected"));
+        });
 
 
     }

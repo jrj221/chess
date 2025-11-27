@@ -1,11 +1,22 @@
 package client;
 
+import jakarta.websocket.ContainerProvider;
+import jakarta.websocket.Endpoint;
+import jakarta.websocket.EndpointConfig;
+import jakarta.websocket.MessageHandler;
+import jakarta.websocket.Session;
+import jakarta.websocket.WebSocketContainer;
 import serverfacade.ServerFacade;
 import ui.EscapeSequences;
+import websocketfacade.WebsocketFacade;
 
-public class GameplayClient implements Client{
+import java.net.URI;
+
+public class GameplayClient implements Client {
 
     static ServerFacade facade = new ServerFacade(8080);
+    public WebsocketFacade websocketFacade = new WebsocketFacade(8080); // websocket session
+
 
     public void printPrompt() {
         System.out.print(EscapeSequences.SET_TEXT_COLOR_MAGENTA + "[IN_GAME] " +
@@ -18,9 +29,15 @@ public class GameplayClient implements Client{
         return switch (inputWords[0]) {
             case "clear" -> clear(); // FOR TESTING ONLY, REMOVE BEFORE COMPLETION
             case "help", "h" -> help();
-            case "quit", "q", "exit" -> "quit"; // best way to quit?
+            case "quit", "q", "exit" -> "quit";
+            case "redraw" -> redraw();
             default -> String.format("%s is not a valid command", inputWords[0]);
         };
+    }
+
+    private String redraw() throws Exception {
+        websocketFacade.send("testing");
+        return "just did redraw";
     }
 
     private String clear() throws Exception {
