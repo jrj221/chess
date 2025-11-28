@@ -16,11 +16,13 @@ public class Server {
     private final Javalin server;
     private final UserService userService;
     private final GameService gameService;
+    private final GameplayService gameplayService;
 
     public Server() {
         var dataAccess = new SQLDataAccess();
         userService = new UserService(dataAccess);
         gameService = new GameService(dataAccess);
+        gameplayService = new GameplayService(dataAccess);
         server = Javalin.create(config -> config.staticFiles.add("web"));
         server.post("user", ctx -> register(ctx));
         server.post("session", ctx -> login(ctx));
@@ -32,7 +34,12 @@ public class Server {
         // Register your endpoints and exception handlers here.
         server.ws("/ws", ws -> {
             ws.onConnect(ctx -> System.out.println("Client connected"));
-            ws.onMessage(ctx -> ctx.send(ctx.message())); // repeat for now
+            ws.onMessage((ctx) -> {
+                switch (ctx.message()) {
+                    case "redraw" -> ctx.send(redraw());
+                    default -> ctx.send("Invalid command");
+                }
+            });
             ws.onClose(ctx -> System.out.println("Client disconnected"));
         });
 
@@ -166,6 +173,13 @@ public class Server {
             var message = String.format("{\"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(500).result(message);
         }
+    }
+
+    // WEBSOCKET SEND HANDLERS
+
+    private String redraw() throws Exception{
+            String board = gameplayService.redraw();
+            return board;
     }
 
     public int run(int desiredPort) {

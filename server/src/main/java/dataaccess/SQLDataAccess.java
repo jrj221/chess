@@ -134,15 +134,23 @@ public class SQLDataAccess implements DataAccess {
                 throw new DataAccessException("gameName cannot be null");
             }
             var statement = connection.prepareStatement("INSERT INTO games " +
-                    "(gameID, gameName) " +
-                    "VALUES (?,?)");
+                    "(gameID, gameName, game) " +
+                    "VALUES (?,?, ?)");
             int gameID = countGames() + 1;
             statement.setInt(1, gameID);
             statement.setString(2, gameName);
+            var game = new Gson().toJson(new ChessGame()); // default chess board? if it works
+            statement.setString(3, game);
             statement.executeUpdate();
             return gameID;
         }
     }
+
+//    public void updateGame() throws Exception {
+//        try (var connection = DatabaseManager.getConnection()) {
+//            //
+//        }
+//    }
 
     @Override
     public GameData getGame(int gameID) throws Exception {

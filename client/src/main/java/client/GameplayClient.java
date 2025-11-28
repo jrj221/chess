@@ -15,14 +15,17 @@ import java.net.URI;
 public class GameplayClient implements Client {
 
     static ServerFacade facade = new ServerFacade(8080);
-    public WebsocketFacade websocketFacade = new WebsocketFacade(8080); // websocket session
+    static WebsocketFacade websocketFacade = new WebsocketFacade(8080); // websocket session
+    public String teamColor;
 
+    public GameplayClient(String teamColor) {
+        this.teamColor = teamColor;
+    }
 
     public void printPrompt() {
         System.out.print(EscapeSequences.SET_TEXT_COLOR_MAGENTA + "[IN_GAME] " +
                 EscapeSequences.RESET_TEXT_COLOR + ">>> ");
     }
-
 
     public String eval(String command) throws Exception {
         var inputWords = command.toLowerCase().split(" ");
@@ -36,8 +39,8 @@ public class GameplayClient implements Client {
     }
 
     private String redraw() throws Exception {
-        websocketFacade.send("testing");
-        return "just did redraw";
+        websocketFacade.send("redraw");
+        return "";
     }
 
     private String clear() throws Exception {
