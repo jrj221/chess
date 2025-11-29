@@ -81,6 +81,9 @@ public class GameplayClient implements Client, ServerMessageHandler {
 
     @Override
     public void notify(String message) {
+        System.out.println(); // newline to get off of the prompt line
+        System.out.println(SET_TEXT_COLOR_RED + message + RESET_TEXT_COLOR); // print game
+        printPrompt();
     }
 
 

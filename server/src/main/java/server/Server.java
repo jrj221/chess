@@ -10,6 +10,7 @@ import org.eclipse.jetty.server.Authentication;
 import service.*;
 import websocket.commands.UserGameCommand;
 import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.sql.SQLException;
@@ -23,8 +24,10 @@ public class Server {
     private final GameService gameService;
     private final GameplayService gameplayService;
 
+
     public Server() {
         var dataAccess = new SQLDataAccess();
+        var connectionsManager = new ConnectionsManager();
         userService = new UserService(dataAccess);
         gameService = new GameService(dataAccess);
         gameplayService = new GameplayService(dataAccess);
@@ -44,8 +47,13 @@ public class Server {
                 switch (command.getCommandType()) {
                     // this probably needs to be expanded to have a broadcast group (the sender gets a laodgame,
                     // the others get a notification)
-                    case CONNECT -> ctx.send(connect(command));
-                    default -> ctx.send("Invalid command");
+                    case CONNECT:
+                        ctx.enableAutomaticPings(); // is this where I turn it on?
+                        connectionsManager.add(ctx.session);
+                        ctx.send(connect(command));
+                        connectionsManager.broadcast(ctx.session, new NotificationMessage("SOMEONE connected to the game"));
+                    default:
+                        ctx.send("Invalid command");
                 }
             });
             ws.onClose(ctx -> System.out.println("Client disconnected"));

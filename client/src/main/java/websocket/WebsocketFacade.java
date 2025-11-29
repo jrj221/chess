@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import jakarta.websocket.*;
 import websocket.commands.UserGameCommand;
 import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.net.URI;
@@ -31,7 +32,12 @@ public class WebsocketFacade extends Endpoint {
                             var loadGameMessage = serializer.fromJson(msg, LoadGameMessage.class);
                             var game = loadGameMessage.game;
                             serverMessageHandler.loadGame(game);
-
+                            break;
+                        case NOTIFICATION:
+                            var notificationMessage = serializer.fromJson(msg, NotificationMessage.class);
+                            var message = notificationMessage.message;
+                            serverMessageHandler.notify(message);
+                            break;
                     }
                 }
             });
