@@ -1,11 +1,16 @@
 package server;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.*;
 import datamodel.*;
 import io.javalin.*;
 import io.javalin.http.Context;
+import org.eclipse.jetty.server.Authentication;
 import service.*;
+import websocket.commands.UserGameCommand;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.ServerMessage;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -35,8 +40,11 @@ public class Server {
         server.ws("/ws", ws -> {
             ws.onConnect(ctx -> System.out.println("Client connected"));
             ws.onMessage((ctx) -> {
-                switch (ctx.message()) {
-                    case "redraw" -> ctx.send(redraw());
+                UserGameCommand command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+                switch (command.getCommandType()) {
+                    // this probably needs to be expanded to have a broadcast group (the sender gets a laodgame,
+                    // the others get a notification)
+                    case CONNECT -> ctx.send(connect(command));
                     default -> ctx.send("Invalid command");
                 }
             });
@@ -177,9 +185,11 @@ public class Server {
 
     // WEBSOCKET SEND HANDLERS
 
-    private String redraw() throws Exception{
-            String board = gameplayService.redraw();
-            return board;
+    private ServerMessage connect(UserGameCommand command) throws Exception {
+        var gameID = command.getGameID();
+        var authToken = command.getAuthToken();
+        ChessGame game = gameplayService.getGame(command.getGameID());
+        return new LoadGameMessage(game);
     }
 
     public int run(int desiredPort) {

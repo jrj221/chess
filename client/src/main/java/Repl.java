@@ -24,7 +24,7 @@ public class Repl {
                     client = new PreLoginClient();
                 } else if (result.split(" ").length > 1 && (result.split(" ")[1].equals("observing") ||
                         result.split(" ")[1].equals("joined"))) {
-                    client = new GameplayClient(result.split(" ")[3]);
+                    client = new GameplayClient(result.split(" ")[6]);
                 }
 
             } catch (Throwable e) {
