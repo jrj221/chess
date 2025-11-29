@@ -8,6 +8,7 @@ import io.javalin.*;
 import io.javalin.http.Context;
 import org.eclipse.jetty.server.Authentication;
 import service.*;
+import websocket.commands.ConnectCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
@@ -43,15 +44,19 @@ public class Server {
         server.ws("/ws", ws -> {
             ws.onConnect(ctx -> System.out.println("Client connected"));
             ws.onMessage((ctx) -> {
-                UserGameCommand command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+                var serializer = new Gson();
+                UserGameCommand command = serializer.fromJson(ctx.message(), UserGameCommand.class);
                 switch (command.getCommandType()) {
                     // this probably needs to be expanded to have a broadcast group (the sender gets a laodgame,
                     // the others get a notification)
                     case CONNECT:
+                        ConnectCommand connectCommand = serializer.fromJson(ctx.message(), ConnectCommand.class);
                         ctx.enableAutomaticPings(); // is this where I turn it on?
                         connectionsManager.add(ctx.session);
-                        ctx.send(connect(command));
-                        connectionsManager.broadcast(ctx.session, new NotificationMessage("SOMEONE connected to the game"));
+                        ctx.send(connect(connectCommand));
+                        connectionsManager.broadcast(ctx.session,
+                                new NotificationMessage(String.format("%s connected to the game on team %s",
+                                        connectCommand.username, connectCommand.teamColor)));
                     default:
                         ctx.send("Invalid command");
                 }

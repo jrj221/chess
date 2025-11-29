@@ -7,6 +7,7 @@ import chess.ChessPosition;
 import serverfacade.ServerFacade;
 import ui.EscapeSequences;
 import websocket.WebsocketFacade;
+import websocket.commands.ConnectCommand;
 import websocket.commands.UserGameCommand;
 
 import java.util.HashMap;
@@ -23,13 +24,15 @@ public class GameplayClient implements Client, ServerMessageHandler {
     private String teamColor;
     private int gameID;
     private String authToken;
+    private String username;
     private ChessGame game;
 
     public GameplayClient(String stringGameID, String teamColor) throws Exception {
-        this.gameID = Integer.parseInt(stringGameID.replace("!\n", ""));
+        gameID = Integer.parseInt(stringGameID.replace("!\n", ""));
         this.teamColor = teamColor;
         authToken = facade.getAuthToken();
-        websocketFacade.send(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID));
+        username = facade.getUsername();
+        websocketFacade.send(new ConnectCommand(username, authToken, gameID, teamColor));
     }
 
     public void printPrompt() {
@@ -44,6 +47,7 @@ public class GameplayClient implements Client, ServerMessageHandler {
             case "help", "h" -> help();
             case "quit", "q", "exit" -> "quit";
             case "redraw" -> redraw();
+            case "leave" -> leave();
             default -> String.format("%s is not a valid command", inputWords[0]);
         };
     }
@@ -82,10 +86,13 @@ public class GameplayClient implements Client, ServerMessageHandler {
     @Override
     public void notify(String message) {
         System.out.println(); // newline to get off of the prompt line
-        System.out.println(SET_TEXT_COLOR_RED + message + RESET_TEXT_COLOR); // print game
+        System.out.println(SET_TEXT_COLOR_RED + message + RESET_TEXT_COLOR);
         printPrompt();
     }
 
+    private String leave() {
+        return "leave thingy";
+    }
 
     private String redraw() {
         return parseChessGame(game);
