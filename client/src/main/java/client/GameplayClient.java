@@ -10,9 +10,6 @@ import websocket.commands.*;
 import java.util.HashMap;
 
 import static ui.EscapeSequences.*;
-import static ui.EscapeSequences.SET_BG_COLOR_BLACK;
-import static ui.EscapeSequences.SET_BG_COLOR_DARK_GREY;
-import static ui.EscapeSequences.SET_BG_COLOR_WHITE;
 
 public class GameplayClient implements Client, ServerMessageHandler {
 
@@ -23,6 +20,7 @@ public class GameplayClient implements Client, ServerMessageHandler {
     private String authToken;
     private String username;
     private ChessGame game;
+
 
     public GameplayClient(String stringGameID, String teamColor) throws Exception {
         gameID = Integer.parseInt(stringGameID.replace("!\n", ""));
@@ -45,6 +43,7 @@ public class GameplayClient implements Client, ServerMessageHandler {
             case "quit", "q", "exit" -> "quit";
             case "redraw" -> redraw();
             case "leave" -> leave();
+            case "highlight" -> highlight(inputWords);
             default -> String.format("%s is not a valid command", inputWords[0]);
         };
     }
@@ -91,6 +90,49 @@ public class GameplayClient implements Client, ServerMessageHandler {
         websocketFacade.send(new LeaveCommand(username, authToken, gameID));
         return "Successfully left the game!";
     }
+
+    private String highlight(String[] inputWords) throws Exception {
+        if (inputWords.length == 2) {
+            String position = inputWords[1];
+            if (!isValidPosition(position)) {
+                throw new Exception("Invalid position.\nA position takes the form \"A1\"");
+            }
+            var board = game.getBoard();
+            return String.format("Highlighted legal moves for piece at %s", position);
+        }
+        throw new Exception("Invalid command.\n" +
+                "Highlighting legal moves takes the form \"highlight POSITION\"");
+
+    }
+
+    private boolean isValidPosition(String position) {
+        // check length
+        if (position.length() != 2) {return false;}
+
+        // check letter
+        boolean isValidLetter = false;
+        for (char character : "ABCDEFGH".toCharArray()) {
+            if (Character.toUpperCase(position.charAt(0)) == character) {
+                isValidLetter = true;
+                break;
+            }
+        }
+        if (!isValidLetter) {return false;}
+
+        // check number
+        boolean isValidNumber = false;
+        for (char character : "12345678".toCharArray()) {
+            if (position.charAt(1) == character) {
+                isValidNumber= true;
+                break;
+            }
+        }
+        if (!isValidNumber) {return false;}
+
+        // passed all tests
+        return true;
+    }
+
 
     private String redraw() {
         return parseChessGame(game);
