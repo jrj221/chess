@@ -185,11 +185,9 @@ public class Server {
 
     // WEBSOCKET SEND HANDLERS
 
-    private ServerMessage connect(UserGameCommand command) throws Exception {
-        var gameID = command.getGameID();
-        var authToken = command.getAuthToken();
+    private String connect(UserGameCommand command) throws Exception {
         ChessGame game = gameplayService.getGame(command.getGameID());
-        return new LoadGameMessage(game);
+        return new Gson().toJson(new LoadGameMessage(game));
     }
 
     public int run(int desiredPort) {

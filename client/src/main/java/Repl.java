@@ -16,15 +16,16 @@ public class Repl {
             String command = scanner.nextLine(); // READ
             try {
                 result = client.eval(command); // EVAL
+                var parts = result.split(" ");
                 if (!result.equals("quit")) {System.out.println(result);} // PRINT
                 if (result.equals("Account successfully registered. You are now logged in.")
                     || result.equals("Login successful!")) {
                     client = new PostLoginClient();
                 } else if (result.equals("Logout successful!") || result.equals("Database cleared")) {
                     client = new PreLoginClient();
-                } else if (result.split(" ").length > 1 && (result.split(" ")[1].equals("observing") ||
-                        result.split(" ")[1].equals("joined"))) {
-                    client = new GameplayClient(result.split(" ")[6]);
+                } else if (parts.length > 1 && parts[1].equals("observing") ||
+                        parts[1].equals("joined")) {
+                    client = new GameplayClient(parts[6], parts[3]);
                 }
 
             } catch (Throwable e) {

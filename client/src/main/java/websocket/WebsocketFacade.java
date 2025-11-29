@@ -27,7 +27,10 @@ public class WebsocketFacade extends Endpoint {
                     var serializer = new Gson();
                     ServerMessage serverMessage = serializer.fromJson(msg, ServerMessage.class);
                     switch (serverMessage.getServerMessageType()) {
-                        case LOAD_GAME -> serverMessageHandler.loadGame(serializer.fromJson(msg, LoadGameMessage.class).game);
+                        case LOAD_GAME:
+                            var loadGameMessage = serializer.fromJson(msg, LoadGameMessage.class);
+                            var game = loadGameMessage.game;
+                            serverMessageHandler.loadGame(game);
 
                     }
                 }

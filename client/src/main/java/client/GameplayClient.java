@@ -25,8 +25,9 @@ public class GameplayClient implements Client, ServerMessageHandler {
     private String authToken;
     private ChessGame game;
 
-    public GameplayClient(String stringGameID) throws Exception {
-        this.gameID = Integer.parseInt(stringGameID);
+    public GameplayClient(String stringGameID, String teamColor) throws Exception {
+        this.gameID = Integer.parseInt(stringGameID.replace("!\n", ""));
+        this.teamColor = teamColor;
         authToken = facade.getAuthToken();
         websocketFacade.send(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID));
     }
@@ -80,7 +81,6 @@ public class GameplayClient implements Client, ServerMessageHandler {
 
     @Override
     public void notify(String message) {
-
     }
 
 
@@ -99,12 +99,12 @@ public class GameplayClient implements Client, ServerMessageHandler {
             for (int j = 1; j < 9; j++) {
                 ChessPiece piece = board.getPiece(new ChessPosition(i, j));
                 var pieceType = piece == null ? "   " : switch (piece.getPieceType()) {
-                    case KING -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? " " : " ♔ ";
-                    case QUEEN -> " ♕ ";
-                    case BISHOP -> " ♗ ";
-                    case KNIGHT -> " ♘ ";
-                    case ROOK -> " ♖ ";
-                    case PAWN -> " ♙ ";
+                    case KING   -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? " ♔ " : " ♚ ";
+                    case QUEEN  -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? " ♕ " : " ♛ ";
+                    case BISHOP -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? " ♗ " : " ♝ ";
+                    case KNIGHT -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? " ♘ " : " ♞ ";
+                    case ROOK   -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? " ♖ " : " ♜ ";
+                    case PAWN   -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? " ♙ " : " ♟ ";
                 };
                 // need to figure out square color
                 var position = String.format("%d:%d", i, j);
@@ -128,12 +128,22 @@ public class GameplayClient implements Client, ServerMessageHandler {
         }
 
         var boardString = new StringBuilder();
-        for (int i = 9; i > -1; i--) {
-            for (int j = 0; j < 10; j++) {
-                var position = String.format("%d:%d", i, j);
-                boardString.append(pieceMap.get(position));
+        if (teamColor.equals("WHITE")) {
+            for (int i = 9; i > -1; i--) {
+                for (int j = 0; j < 10; j++) {
+                    var position = String.format("%d:%d", i, j);
+                    boardString.append(pieceMap.get(position));
+                }
+                boardString.append(RESET_BG_COLOR + "\n");
             }
-            boardString.append(RESET_BG_COLOR + "\n");
+        } else {
+            for (int i = 0; i < 10; i++) {
+                for (int j = 9; j > -1; j--) {
+                    var position = String.format("%d:%d", i, j);
+                    boardString.append(pieceMap.get(position));
+                }
+                boardString.append(RESET_BG_COLOR + "\n");
+            }
         }
         return boardString.toString();
     }

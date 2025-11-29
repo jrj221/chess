@@ -88,10 +88,7 @@ public class PostLoginClient implements Client {
                     "playerColor", playerColor);
             var jsonBody = new Gson().toJson(body);
             facade.play(jsonBody);
-            String board = String.format("Successfully joined team %s in game %s!\n", playerColor, gameID);
-            board += facade.display(playerColor);
-            // this is weird, but it's so the client prints the message and the board
-            return board;
+            return String.format("Successfully joined team %s in game %s!\n", playerColor, gameID);
         }
         throw new Exception("Invalid command.\nJoining a game takes the form \"play|join GAME_ID, PLAYER_COLOR\"");
     }
@@ -110,10 +107,7 @@ public class PostLoginClient implements Client {
             if (gameIndex < 0) {
                 throw new BadRequestException("No existing game");
             }
-            String board = String.format("Successfully observing in game %s!\n", inputWords[1]);
-            board += facade.display("WHITE");
-            // this is weird, but it's so the client prints the message and the board
-            return board;
+            return String.format("Successfully observing in game %s!\n", inputWords[1]);
         }
         throw new Exception("Invalid command.\nObserving a game takes the form \"observe GAME_ID\"");
     }
