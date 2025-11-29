@@ -1,14 +1,11 @@
 package client;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import serverfacade.ServerFacade;
 import ui.EscapeSequences;
 import websocket.WebsocketFacade;
-import websocket.commands.ConnectCommand;
-import websocket.commands.UserGameCommand;
+import websocket.commands.*;
+
 
 import java.util.HashMap;
 
@@ -90,8 +87,9 @@ public class GameplayClient implements Client, ServerMessageHandler {
         printPrompt();
     }
 
-    private String leave() {
-        return "leave thingy";
+    private String leave() throws Exception {
+        websocketFacade.send(new LeaveCommand(username, authToken, gameID));
+        return "Successfully left the game!";
     }
 
     private String redraw() {

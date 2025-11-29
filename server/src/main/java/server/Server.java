@@ -9,6 +9,7 @@ import io.javalin.http.Context;
 import org.eclipse.jetty.server.Authentication;
 import service.*;
 import websocket.commands.ConnectCommand;
+import websocket.commands.LeaveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
@@ -57,6 +58,13 @@ public class Server {
                         connectionsManager.broadcast(ctx.session,
                                 new NotificationMessage(String.format("%s connected to the game on team %s",
                                         connectCommand.username, connectCommand.teamColor)));
+                        break;
+                    case LEAVE:
+                        LeaveCommand leaveCommand = serializer.fromJson(ctx.message(), LeaveCommand.class);
+                        connectionsManager.remove(ctx.session);
+                        connectionsManager.broadcast(ctx.session,
+                                new NotificationMessage(String.format("%s left the game", leaveCommand.username)));
+                        break;
                     default:
                         ctx.send("Invalid command");
                 }
