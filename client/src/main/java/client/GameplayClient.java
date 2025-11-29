@@ -31,8 +31,8 @@ public class GameplayClient implements Client, ServerMessageHandler {
     }
 
     public void printPrompt() {
-        System.out.print(EscapeSequences.SET_TEXT_COLOR_MAGENTA + "[IN_GAME] " +
-                EscapeSequences.RESET_TEXT_COLOR + ">>> ");
+        System.out.print(SET_TEXT_COLOR_MAGENTA + "[IN_GAME] " +
+                RESET_TEXT_COLOR + ">>> ");
     }
 
     public String eval(String command) throws Exception {
@@ -93,12 +93,14 @@ public class GameplayClient implements Client, ServerMessageHandler {
 
     private String highlight(String[] inputWords) throws Exception {
         if (inputWords.length == 2) {
-            String position = inputWords[1];
-            if (!isValidPosition(position)) {
+            String positionString = inputWords[1];
+            if (!isValidPosition(positionString)) {
                 throw new Exception("Invalid position.\nA position takes the form \"A1\"");
             }
+            String convertedPosition = convertPosition(positionString);
+            System.out.println(convertedPosition);
             var board = game.getBoard();
-            return String.format("Highlighted legal moves for piece at %s", position);
+            return String.format("Highlighted legal moves for piece at %s", positionString);
         }
         throw new Exception("Invalid command.\n" +
                 "Highlighting legal moves takes the form \"highlight POSITION\"");
@@ -131,6 +133,24 @@ public class GameplayClient implements Client, ServerMessageHandler {
 
         // passed all tests
         return true;
+    }
+
+
+    private String convertPosition(String position) throws Exception {
+        char letter = position.charAt(0);
+        char number = switch (letter) {
+            case 'a' -> '1';
+            case 'b' -> '2';
+            case 'c' -> '3';
+            case 'd' -> '4';
+            case 'e' -> '5';
+            case 'f' -> '6';
+            case 'g' -> '7';
+            case 'h' -> '8';
+            default -> throw new Exception("Invalid letter in position");
+            // this will never happen but it wants a default branch
+        };
+        return String.format("%c%c", number, position.charAt(1));
     }
 
 
