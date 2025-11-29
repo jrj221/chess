@@ -7,10 +7,7 @@ import websocket.WebsocketFacade;
 import websocket.commands.*;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import static ui.EscapeSequences.*;
 
@@ -44,7 +41,7 @@ public class GameplayClient implements Client, ServerMessageHandler {
             case "clear" -> clear(); // FOR TESTING ONLY, REMOVE BEFORE COMPLETION
             case "help", "h" -> help();
             case "quit", "q", "exit" -> "quit";
-            case "redraw" -> redraw();
+            case "redraw" -> redraw(null, null);
             case "leave" -> leave();
             case "highlight" -> highlight(inputWords);
             default -> String.format("%s is not a valid command", inputWords[0]);
@@ -72,7 +69,7 @@ public class GameplayClient implements Client, ServerMessageHandler {
     public void loadGame(ChessGame game) {
         this.game = game; // update game
         System.out.println(); // newline to get off of the prompt line
-        System.out.println(redraw()); // print game
+        System.out.println(redraw(null, null)); // print game
         printPrompt();
     }
 
@@ -94,6 +91,7 @@ public class GameplayClient implements Client, ServerMessageHandler {
         return "Successfully left the game!";
     }
 
+
     private String highlight(String[] inputWords) throws Exception {
         if (inputWords.length == 2) {
             String positionString = inputWords[1];
@@ -102,18 +100,11 @@ public class GameplayClient implements Client, ServerMessageHandler {
             }
 
             String convertedPosition = convertPosition(positionString);
-            int start = convertedPosition.charAt(0) - '0';
-            int end = convertedPosition.charAt(1) - '0';
+            String pieceToHighlight = String.format("%c:%c", convertedPosition.charAt(0), convertedPosition.charAt(1));
+            HashSet<ChessMove> moves = getChessMoves(convertedPosition, positionString);
+            List<String> positionsToHighlight = convertMoves(moves);
+            System.out.println(redraw(pieceToHighlight, positionsToHighlight));
 
-            ChessPosition position = new ChessPosition(start, end);
-            var board = game.getBoard();
-            ChessPiece piece = board.getPiece(position);
-            if (piece == null) {
-                throw new Exception(String.format("No piece at %s to highlight moves for", positionString));
-            }
-
-            HashSet<ChessMove> moves = piece.pieceMoves(board, position);
-            List<String> stringMoves = convertMoves(moves);
             return String.format("Highlighted legal moves for piece at %s", positionString);
         }
         throw new Exception("Invalid command.\n" +
@@ -121,6 +112,34 @@ public class GameplayClient implements Client, ServerMessageHandler {
 
     }
 
+
+    /**
+     * Gets the moves available for a certain position
+     *
+     * @param convertedPosition String position like "13" (was A3)
+     * @param positionString Original position string like "A3"
+     * @return HashSet of legal ChessMoves from the given position
+     */
+    private HashSet<ChessMove> getChessMoves(String convertedPosition, String positionString) throws Exception {
+        int start = convertedPosition.charAt(0) - '0';
+        int end = convertedPosition.charAt(1) - '0';
+
+        ChessPosition position = new ChessPosition(start, end);
+        var board = game.getBoard();
+        ChessPiece piece = board.getPiece(position);
+        if (piece == null) {
+            throw new Exception(String.format("No piece at %s to highlight moves for", positionString));
+        }
+
+        return piece.pieceMoves(board, position);
+    }
+
+
+    /**
+     * Verifies valid syntax by checking that length is 2, if it has a letter A-H, and if it has a number 1-8.
+     * @param position String position like "A3"
+     * @return true or false depending on if it is in correct syntax
+     */
     private boolean isValidPosition(String position) {
         // check length
         if (position.length() != 2) {return false;}
@@ -150,6 +169,11 @@ public class GameplayClient implements Client, ServerMessageHandler {
     }
 
 
+    /**
+     * Converts a position like "A3" to "31". We flip them since a ChessPosition is row:column, not column:row
+     * @param position String position like "A3"
+     * @return String position like "31"
+     */
     private String convertPosition(String position) throws Exception {
         char letter = position.charAt(0);
         char number = switch (letter) {
@@ -164,32 +188,52 @@ public class GameplayClient implements Client, ServerMessageHandler {
             default -> throw new Exception("Invalid letter in position");
             // this will never happen but it wants a default branch
         };
-        return String.format("%c%c", number, position.charAt(1));
+        // the repl has them give positions as A3 which is col:row, but ChessPositions are row:col, so we need to swap
+        return String.format("%c%c", position.charAt(1), number);
     }
 
 
+    /**
+     * Converts a HashSet of ChessMoves into a list of legal end positions in string form
+     * ex. ChessMove(1:1, 3:1) -> "3:1"
+     * @param moves A HashSet of ChessMoves
+     * @return A list of legal end positions in string form
+     */
     private List<String> convertMoves(HashSet<ChessMove> moves) {
-        List<String> stringMoves = new ArrayList<>(); // ChessMove(1:1, 3:4) -> "3:4"
+        List<String> stringMoves = new ArrayList<>();
         for (ChessMove move : moves) {
             var endPosition = move.getEndPosition();
             int row = endPosition.getRow();
             int col = endPosition.getColumn();
-            if (teamColor.equals("BLACK")) {
-                row = 9 - row;
-                col = 9 - col;
-            }
             stringMoves.add(String.format("%d:%d", row, col));
         }
         return stringMoves;
     }
 
 
-    private String redraw() {
-        return parseChessGame(game);
+    /**
+     * Redraws the board (and optionally highlights legal moves)
+     *
+     * @param highlightedPiece (optional) piece which you want to highlight moves for.
+     *                         Use null if you don't want to do this
+     * @param highlightedPositions (optional) positions to highlight when redrawing.
+     *                             Use null if you don't want to do this
+     * @return Stringified board (optionally with highlighted squares)
+     */
+    private String redraw(String highlightedPiece, List<String> highlightedPositions) {
+        return parseChessGame(game, highlightedPiece, highlightedPositions);
     }
 
-
-    private String parseChessGame(ChessGame game) {
+    /**
+     * Parses a ChessGame into a string representing the board
+     * @param game A ChessGame to parse
+     * @param highlightedPiece (optional) piece which you want to highlight moves for.
+     *                         Use null if you don't want to do this
+     * @param highlightedPositions (optional) positions to highlight when redrawing.
+     *                             Use null if you don't want to do this
+     * @return Stringified board (optionally with highlighted squares)
+     */
+    private String parseChessGame(ChessGame game, String highlightedPiece, List<String> highlightedPositions) {
         ChessBoard board = game.getBoard();
         var pieceMap = new HashMap<String, String>();
         var emptyBoard = initEmptyBoard();
@@ -208,8 +252,14 @@ public class GameplayClient implements Client, ServerMessageHandler {
                 };
                 // need to figure out square color
                 var position = String.format("%d:%d", i, j);
-                //
-                pieceMap.put(position, emptyBoard.get(position) + pieceType);
+                var color = emptyBoard.get(position);
+                if (highlightedPositions != null && highlightedPositions.contains(position)) {
+                    color = color.equals(SET_BG_COLOR_WHITE) ? SET_BG_COLOR_GREEN : SET_BG_COLOR_DARK_GREEN;
+                }
+                if (position.equals(highlightedPiece)) {
+                    color = SET_BG_COLOR_YELLOW;
+                }
+                pieceMap.put(position, color + pieceType);
             }
         }
 
@@ -250,7 +300,10 @@ public class GameplayClient implements Client, ServerMessageHandler {
     }
 
 
-    //used to grab colors for parseChessGame
+    /**
+     * Gets a map representing the colors of squares on an empty board
+     * @return A map of Position->Color where Color is the EscapeSequence needed to paint the square at Position
+     */
     private static HashMap<String, String> initEmptyBoard() {
         String[] emptyBlackFirstRow = {
                 SET_BG_COLOR_DARK_GREY,
