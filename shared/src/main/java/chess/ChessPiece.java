@@ -138,13 +138,15 @@ public class ChessPiece {
         }
         return endPositions;
     }
+
+
     /**
      * Calculates all the positions a chess piece can move to
      * Does not take into account moves that are illegal due to leaving the king in
      * danger
-     * @return Collection of valid moves
+     * @return HashSet of valid moves
      */
-    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+    public HashSet<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         var moves = new HashSet<ChessMove>();
         var directions = new HashSet<ChessPosition>();
         var endPositions = new HashSet<ChessPosition>();

@@ -7,7 +7,10 @@ import websocket.WebsocketFacade;
 import websocket.commands.*;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 
 import static ui.EscapeSequences.*;
 
@@ -97,9 +100,20 @@ public class GameplayClient implements Client, ServerMessageHandler {
             if (!isValidPosition(positionString)) {
                 throw new Exception("Invalid position.\nA position takes the form \"A1\"");
             }
+
             String convertedPosition = convertPosition(positionString);
-            System.out.println(convertedPosition);
+            int start = convertedPosition.charAt(0) - '0';
+            int end = convertedPosition.charAt(1) - '0';
+
+            ChessPosition position = new ChessPosition(start, end);
             var board = game.getBoard();
+            ChessPiece piece = board.getPiece(position);
+            if (piece == null) {
+                throw new Exception(String.format("No piece at %s to highlight moves for", positionString));
+            }
+
+            HashSet<ChessMove> moves = piece.pieceMoves(board, position);
+            List<String> stringMoves = convertMoves(moves);
             return String.format("Highlighted legal moves for piece at %s", positionString);
         }
         throw new Exception("Invalid command.\n" +
@@ -154,6 +168,22 @@ public class GameplayClient implements Client, ServerMessageHandler {
     }
 
 
+    private List<String> convertMoves(HashSet<ChessMove> moves) {
+        List<String> stringMoves = new ArrayList<>(); // ChessMove(1:1, 3:4) -> "3:4"
+        for (ChessMove move : moves) {
+            var endPosition = move.getEndPosition();
+            int row = endPosition.getRow();
+            int col = endPosition.getColumn();
+            if (teamColor.equals("BLACK")) {
+                row = 9 - row;
+                col = 9 - col;
+            }
+            stringMoves.add(String.format("%d:%d", row, col));
+        }
+        return stringMoves;
+    }
+
+
     private String redraw() {
         return parseChessGame(game);
     }
@@ -178,6 +208,7 @@ public class GameplayClient implements Client, ServerMessageHandler {
                 };
                 // need to figure out square color
                 var position = String.format("%d:%d", i, j);
+                //
                 pieceMap.put(position, emptyBoard.get(position) + pieceType);
             }
         }
