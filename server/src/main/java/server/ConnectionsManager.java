@@ -2,6 +2,7 @@ package server;
 
 import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,6 +25,16 @@ public class ConnectionsManager {
             if (session != sender) {
                 session.getRemote().sendString(notificationMessageString);
             }
+        }
+    }
+
+
+    // alternative broadcast that sends everyone (including sender) the new game board (ex. after a move is made)
+    public void broadcast(LoadGameMessage loadGameMessage) throws Exception {
+        var loadGameMessageString = new Gson().toJson(loadGameMessage);
+        for (Session session : connections.values()) {
+            // petshop checks to see if the session is open first, not sure what that means
+            session.getRemote().sendString(loadGameMessageString);
         }
     }
 }

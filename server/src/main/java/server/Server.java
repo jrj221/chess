@@ -1,6 +1,7 @@
 package server;
 
 import chess.ChessGame;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.*;
 import datamodel.*;
@@ -8,12 +9,8 @@ import io.javalin.*;
 import io.javalin.http.Context;
 import org.eclipse.jetty.server.Authentication;
 import service.*;
-import websocket.commands.ConnectCommand;
-import websocket.commands.LeaveCommand;
-import websocket.commands.UserGameCommand;
-import websocket.messages.LoadGameMessage;
-import websocket.messages.NotificationMessage;
-import websocket.messages.ServerMessage;
+import websocket.commands.*;
+import websocket.messages.*;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -56,14 +53,29 @@ public class Server {
                         connectionsManager.add(ctx.session);
                         ctx.send(connect(connectCommand));
                         connectionsManager.broadcast(ctx.session,
-                                new NotificationMessage(String.format("%s connected to the game on team %s",
+                                new NotificationMessage(String.format("%s connected to the game on team %s.",
                                         connectCommand.username, connectCommand.teamColor)));
                         break;
                     case LEAVE:
                         LeaveCommand leaveCommand = serializer.fromJson(ctx.message(), LeaveCommand.class);
                         connectionsManager.remove(ctx.session);
                         connectionsManager.broadcast(ctx.session,
-                                new NotificationMessage(String.format("%s left the game", leaveCommand.username)));
+                                new NotificationMessage(String.format("%s left the game.", leaveCommand.username)));
+                        break;
+                    case MAKE_MOVE:
+                        MakeMoveCommand makeMoveCommand = serializer.fromJson(ctx.message(), MakeMoveCommand.class);
+                        try {
+                            connectionsManager.broadcast(new LoadGameMessage(makeMove(makeMoveCommand)));
+                            connectionsManager.broadcast(ctx.session,
+                                    new NotificationMessage(String.format("%s moved from %s to %s.",
+                                            makeMoveCommand.username,
+                                            makeMoveCommand.move.startPosition.toString(),
+                                            makeMoveCommand.move.endPosition.toString())));
+                        } catch (InvalidMoveException ex) {
+                            var errorMessage = new ErrorMessage(ex.getMessage());
+                            var errorMessageString = serializer.toJson(errorMessage);
+                            ctx.send(errorMessageString);
+                        }
                         break;
                     default:
                         ctx.send("Invalid command");
@@ -206,9 +218,14 @@ public class Server {
 
     // WEBSOCKET SEND HANDLERS
 
-    private String connect(UserGameCommand command) throws Exception {
+    private String connect(ConnectCommand command) throws Exception {
         ChessGame game = gameplayService.getGame(command.getGameID());
         return new Gson().toJson(new LoadGameMessage(game));
+    }
+
+    private ChessGame makeMove(MakeMoveCommand command) throws Exception {
+        ChessGame updatedGame = gameplayService.makeMove(command.getGameID(), command.move);
+        return updatedGame;
     }
 
     public int run(int desiredPort) {

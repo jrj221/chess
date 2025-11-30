@@ -5,6 +5,7 @@ import client.ServerMessageHandler;
 import com.google.gson.Gson;
 import jakarta.websocket.*;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
@@ -38,6 +39,10 @@ public class WebsocketFacade extends Endpoint {
                             var message = notificationMessage.message;
                             serverMessageHandler.notify(message);
                             break;
+                        case ERROR:
+                            var errorMessage = serializer.fromJson(msg, ErrorMessage.class);
+                            var errorMessageString = errorMessage.errorMessage;
+                            serverMessageHandler.sendError(errorMessageString);
                     }
                 }
             });

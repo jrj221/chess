@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import datamodel.*;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -136,6 +137,13 @@ public class MemoryDataAccess implements DataAccess {
     @Override
     public Integer countGames() throws Exception {
         return games.size();
+    }
+
+    @Override
+    public void updateGame(int gameID, ChessGame game) throws Exception {
+        var gameData = games.get(gameID);
+        gameData = new GameData(gameID, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game);
+        games.put(gameID, gameData);
     }
 
     private String generateAuthToken() {

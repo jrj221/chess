@@ -44,6 +44,7 @@ public class GameplayClient implements Client, ServerMessageHandler {
             case "redraw" -> redraw(null, null);
             case "leave" -> leave();
             case "highlight" -> highlight(inputWords);
+            case "move" -> makeMove(inputWords);
             default -> String.format("%s is not a valid command", inputWords[0]);
         };
     }
@@ -76,19 +77,44 @@ public class GameplayClient implements Client, ServerMessageHandler {
 
     @Override
     public void sendError(String errorMessage) {
+        System.out.println(); // newline to get off of the prompt line
+        System.out.println(SET_TEXT_COLOR_RED + errorMessage + RESET_TEXT_COLOR);
+        printPrompt();
     }
 
 
     @Override
     public void notify(String message) {
         System.out.println(); // newline to get off of the prompt line
-        System.out.println(SET_TEXT_COLOR_RED + message + RESET_TEXT_COLOR);
+        System.out.println(SET_TEXT_COLOR_MAGENTA + message + RESET_TEXT_COLOR);
         printPrompt();
     }
 
     private String leave() throws Exception {
         websocketFacade.send(new LeaveCommand(username, authToken, gameID));
         return "Successfully left the game!";
+    }
+
+    private String makeMove(String[] inputWords) throws Exception {
+        if (inputWords.length ==3) {
+            var start = inputWords[1];
+            var end = inputWords[2];
+            if (!isValidPosition(start) || !isValidPosition(end)) {
+                throw new Exception("Either your START or END position is invalid.\n" +
+                        "Positions should take the form \"A3\"");
+            }
+            var convertedStart = convertPosition(start); //11
+            var convertedEnd = convertPosition(end); //31
+            var startPosition = new ChessPosition(convertedStart.charAt(0) - '0', convertedStart.charAt(1) - '0');
+            var endPosition = new ChessPosition(convertedEnd.charAt(0) - '0', convertedEnd.charAt(1) - '0');
+            var move = new ChessMove(startPosition, endPosition, null);
+            // fix PROMOTION PIECE
+            websocketFacade.send(new MakeMoveCommand(move, username, authToken, gameID));
+            return String.format("Attempted move from %s to %s", start, end);
+            // not the best way to handle this since it could fail
+        }
+        throw new Exception("Invalid command.\n" +
+                "Making a move takes the form \"move START END\"");
     }
 
 

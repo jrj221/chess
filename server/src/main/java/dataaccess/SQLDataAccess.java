@@ -146,11 +146,15 @@ public class SQLDataAccess implements DataAccess {
         }
     }
 
-//    public void updateGame() throws Exception {
-//        try (var connection = DatabaseManager.getConnection()) {
-//            //
-//        }
-//    }
+    public void updateGame(int gameID, ChessGame game) throws Exception {
+        try (var connection = DatabaseManager.getConnection()) {
+
+            var statement = connection.prepareStatement("UPDATE games SET game = ? WHERE gameID = ?");
+            statement.setString(1, new Gson().toJson(game));
+            statement.setInt(2, gameID);
+            statement.executeUpdate();
+        }
+    }
 
     @Override
     public GameData getGame(int gameID) throws Exception {

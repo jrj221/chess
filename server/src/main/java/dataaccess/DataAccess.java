@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import datamodel.*;
 
 import java.util.ArrayList;
@@ -17,4 +18,5 @@ public interface DataAccess {
     void joinGame(String username, int gameID, String playerColor) throws Exception;
     String generateHashedPassword(String password) throws Exception;
     Integer countGames() throws Exception;
+    void updateGame(int gameID, ChessGame game) throws Exception;
 }
