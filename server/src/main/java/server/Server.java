@@ -53,11 +53,11 @@ public class Server {
                         connectionsManager.add(ctx.session);
                         ctx.send(connect(connectCommand));
                         if (connectCommand.state.equals("player")) {
-                            connectionsManager.broadcast(ctx.session,
+                            connectionsManager.broadcastNotif(
                                     new NotificationMessage(String.format("%s connected to the game on team %s.",
                                             connectCommand.username, connectCommand.teamColor)));
                         } else {
-                            connectionsManager.broadcast(ctx.session,
+                            connectionsManager.broadcastNotif(
                                     new NotificationMessage(String.format("%s connected to the game as an observer",
                                             connectCommand.username)));
                         }
@@ -65,17 +65,33 @@ public class Server {
                     case LEAVE:
                         LeaveCommand leaveCommand = serializer.fromJson(ctx.message(), LeaveCommand.class);
                         connectionsManager.remove(ctx.session);
-                        connectionsManager.broadcast(ctx.session,
+                        connectionsManager.broadcastNotif(
                                 new NotificationMessage(String.format("%s left the game.", leaveCommand.username)));
                         break;
                     case MAKE_MOVE:
                         MakeMoveCommand makeMoveCommand = serializer.fromJson(ctx.message(), MakeMoveCommand.class);
                         try {
-                            connectionsManager.broadcastGame(new LoadGameMessage(makeMove(makeMoveCommand)));
-                            connectionsManager.broadcast(ctx.session,
+                            var updatedGame = makeMove(makeMoveCommand);
+                            connectionsManager.broadcastGame(new LoadGameMessage(updatedGame));
+                            connectionsManager.broadcastNotif(
                                     new NotificationMessage(String.format("%s moved %s.",
                                             makeMoveCommand.username,
                                             makeMoveCommand.moveString)));
+
+                            // send notif if a team is in check.
+                            if (updatedGame.isInCheck(ChessGame.TeamColor.WHITE)) {
+                                var player = gameplayService.getPlayer(command.getGameID(), "WHITE");
+                                connectionsManager.broadcastNotif(
+                                        new NotificationMessage(String.format("%s is in check! " +
+                                                "Moves that do not get them out of check are considered illegal."
+                                                , player)));
+                            } else if (updatedGame.isInCheck(ChessGame.TeamColor.BLACK)) {
+                                var player = gameplayService.getPlayer(command.getGameID(), "BLACK");
+                                connectionsManager.broadcastNotif(
+                                        new NotificationMessage(String.format("%s is in check! " +
+                                                "Moves that do not get them out of check are considered illegal."
+                                                , player)));
+                            }
                         } catch (InvalidMoveException ex) {
                             var errorMessage = new ErrorMessage(ex.getMessage());
                             var errorMessageString = serializer.toJson(errorMessage);
@@ -86,7 +102,7 @@ public class Server {
                         ResignCommand resignCommand = serializer.fromJson(ctx.message(), ResignCommand.class);
                         connectionsManager.broadcastGame(new LoadGameMessage(resign(resignCommand)));
                         var winner = resignCommand.teamColor.equals("WHITE") ? "BLACK" : "WHITE";
-                        connectionsManager.broadcast(ctx.session,
+                        connectionsManager.broadcastNotif(
                                 new NotificationMessage(String.format("%s has resigned. Team %s wins by default!",
                                         resignCommand.username, winner)));
                         break;

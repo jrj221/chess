@@ -43,6 +43,15 @@ public class GameplayService {
         }
     }
 
+    public String getPlayer(int gameID, String teamColor) throws Exception {
+        try {
+            GameData gameData = dataAccess.getGame(gameID);
+            return teamColor.equals("WHITE") ? gameData.whiteUsername() : gameData.blackUsername();
+        } catch (DataAccessException ex) {
+            throw new NoExistingGameException("No existing game");
+        }
+    }
+
 
     public ChessGame endGame(int gameID) throws Exception {
         try {

@@ -18,13 +18,12 @@ public class ConnectionsManager {
         connections.remove(session);
     }
 
-    public void broadcast(Session sender, NotificationMessage notificationMessage) throws Exception{
+    public void broadcastNotif(NotificationMessage notificationMessage) throws Exception {
         var notificationMessageString = new Gson().toJson(notificationMessage);
+        // do notifs need to go to the sender as well? instructions are vague
         for (Session session : connections.values()) {
             // petshop checks to see if the session is open first, not sure what that means
-            if (session != sender) {
-                session.getRemote().sendString(notificationMessageString);
-            }
+            session.getRemote().sendString(notificationMessageString);
         }
     }
 
