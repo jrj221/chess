@@ -84,7 +84,7 @@ public class MemoryDataAccess implements DataAccess {
             }
         }
         games.put(gameID, new GameData(gameID, null, null, gameName,
-                null, false));
+                null));
         return gameID;
     }
 
@@ -119,13 +119,13 @@ public class MemoryDataAccess implements DataAccess {
                 throw new AlreadyTakenException("Team taken");
             }
             gameData = new GameData(gameID, username, gameData.blackUsername(),
-                    gameData.gameName(), gameData.game(), gameData.isGameOver());
+                    gameData.gameName(), gameData.game());
         } else if (playerColor.equals("BLACK")) {
             if (games.get(gameID).blackUsername() != null) {
                 throw new AlreadyTakenException("Team taken");
             }
             gameData = new GameData(gameID, gameData.whiteUsername(), username,
-                    gameData.gameName(), gameData.game(), gameData.isGameOver());
+                    gameData.gameName(), gameData.game());
         } else {
             throw new DataAccessException("Invalid playerColor");
         }
@@ -146,9 +146,10 @@ public class MemoryDataAccess implements DataAccess {
     public void updateGame(int gameID, ChessGame game) throws Exception {
         var gameData = games.get(gameID);
         gameData = new GameData(gameID, gameData.whiteUsername(), gameData.blackUsername(),
-                gameData.gameName(), game, gameData.isGameOver());
+                gameData.gameName(), game);
         games.put(gameID, gameData);
     }
+
 
     private String generateAuthToken() {
         return UUID.randomUUID().toString();

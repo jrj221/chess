@@ -101,8 +101,15 @@ public class GameplayClient implements Client, ServerMessageHandler {
         return "Successfully left the game!";
     }
 
-    private String resign() {
-        return "resign";
+    private String resign() throws Exception {
+        if (!resignPromtedOnce) {
+            resignPromtedOnce = true;
+            return "Enter the command again if you are sure you want to resign and forfeit the game.";
+        }
+        resignPromtedOnce = false;
+        websocketFacade.send(new ResignCommand(username, authToken, gameID, teamColor));
+        var winner = teamColor.equals("WHITE") ? "BLACK" : "WHITE";
+        return String.format("Successfully resigned. Team %s wins!", winner);
     }
 
     private String makeMove(String[] inputWords) throws Exception {

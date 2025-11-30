@@ -42,4 +42,17 @@ public class GameplayService {
             throw new NoExistingGameException("No existing game");
         }
     }
+
+
+    public ChessGame endGame(int gameID) throws Exception {
+        try {
+            GameData gameData = dataAccess.getGame(gameID);
+            var game = gameData.game();
+            game.endGame();
+            dataAccess.updateGame(gameID, game);
+            return game;
+        } catch (DataAccessException ex) {
+            throw new NoExistingGameException("No existing game");
+        }
+    }
 }

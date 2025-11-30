@@ -82,8 +82,16 @@ public class Server {
                             ctx.send(errorMessageString);
                         }
                         break;
+                    case RESIGN:
+                        ResignCommand resignCommand = serializer.fromJson(ctx.message(), ResignCommand.class);
+                        connectionsManager.broadcastGame(new LoadGameMessage(resign(resignCommand)));
+                        var winner = resignCommand.teamColor.equals("WHITE") ? "BLACK" : "WHITE";
+                        connectionsManager.broadcast(ctx.session,
+                                new NotificationMessage(String.format("%s has resigned. Team %s wins by default!",
+                                        resignCommand.username, winner)));
+                        break;
                     default:
-                        ctx.send("Invalid command");
+                        ctx.send(serializer.toJson(new ErrorMessage("Invalid command")));
                 }
             });
             ws.onClose(ctx -> System.out.println("Client disconnected"));
@@ -230,6 +238,11 @@ public class Server {
 
     private ChessGame makeMove(MakeMoveCommand command) throws Exception {
         ChessGame updatedGame = gameplayService.makeMove(command.getGameID(), command.move, command.teamColor);
+        return updatedGame;
+    }
+
+    private ChessGame resign(ResignCommand command) throws Exception {
+        ChessGame updatedGame = gameplayService.endGame(command.getGameID());
         return updatedGame;
     }
 

@@ -14,10 +14,16 @@ import java.util.Objects;
 public class ChessGame {
     ChessBoard board;
     ChessGame.TeamColor currentTurn = TeamColor.WHITE;
+    boolean isGameOver = false;
 
     public ChessGame() {
         this.board = new ChessBoard();
         board.resetBoard(); //creating a game object will start with a default board
+    }
+
+
+    public void endGame() {
+        isGameOver = true;
     }
 
     /**
