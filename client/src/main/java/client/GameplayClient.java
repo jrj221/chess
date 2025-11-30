@@ -311,23 +311,23 @@ public class GameplayClient implements Client, ServerMessageHandler {
                 ChessPiece piece = board.getPiece(new ChessPosition(i, j));
                 var pieceType = piece == null ? "   " : switch (piece.getPieceType()) { // can we make this different?
                     case KING   -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
-                            ? SET_TEXT_COLOR_BLUE + " ♚ "  : SET_TEXT_COLOR_RED + " ♚ " ;
+                            ? SET_TEXT_COLOR_WHITE + " ♚ "  : SET_TEXT_COLOR_BLACK + " ♚ " ;
                     case QUEEN  -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
-                            ? SET_TEXT_COLOR_BLUE + " ♛ "  : SET_TEXT_COLOR_RED + " ♛ " ;
+                            ? SET_TEXT_COLOR_WHITE + " ♛ "  : SET_TEXT_COLOR_BLACK + " ♛ " ;
                     case BISHOP -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
-                            ? SET_TEXT_COLOR_BLUE + " ♝ "  : SET_TEXT_COLOR_RED + " ♝ " ;
+                            ? SET_TEXT_COLOR_WHITE + " ♝ "  : SET_TEXT_COLOR_BLACK + " ♝ " ;
                     case KNIGHT -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
-                            ? SET_TEXT_COLOR_BLUE + " ♞ "  : SET_TEXT_COLOR_RED + " ♞ ";
+                            ? SET_TEXT_COLOR_WHITE + " ♞ "  : SET_TEXT_COLOR_BLACK + " ♞ ";
                     case ROOK   -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
-                            ? SET_TEXT_COLOR_BLUE + " ♜ "  : SET_TEXT_COLOR_RED + " ♜ " ;
+                            ? SET_TEXT_COLOR_WHITE + " ♜ "  : SET_TEXT_COLOR_BLACK + " ♜ " ;
                     case PAWN   -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
-                            ? SET_TEXT_COLOR_BLUE + " ♟ "  : SET_TEXT_COLOR_RED + " ♟ ";
+                            ? SET_TEXT_COLOR_WHITE + " ♟ "  : SET_TEXT_COLOR_BLACK + " ♟ ";
                 };
                 pieceType += RESET_TEXT_COLOR;
                 var position = String.format("%d:%d", i, j);
                 var color = emptyBoard.get(position);
                 if (highlightedPositions != null && highlightedPositions.contains(position)) {
-                    color = color.equals(SET_BG_COLOR_WHITE) ? SET_BG_COLOR_GREEN : SET_BG_COLOR_DARK_GREEN;
+                    color = color.equals(SET_BG_COLOR_BROWN) ? SET_BG_COLOR_GREEN : SET_BG_COLOR_DARK_GREEN;
                 }
                 if (position.equals(highlightedPiece)) {
                     color = SET_BG_COLOR_YELLOW;
@@ -381,26 +381,26 @@ public class GameplayClient implements Client, ServerMessageHandler {
     private static HashMap<String, String> initEmptyBoard() {
         String[] emptyBlackFirstRow = {
                 SET_BG_COLOR_DARK_GREY,
-                SET_BG_COLOR_BLACK,
-                SET_BG_COLOR_WHITE,
-                SET_BG_COLOR_BLACK,
-                SET_BG_COLOR_WHITE,
-                SET_BG_COLOR_BLACK,
-                SET_BG_COLOR_WHITE,
-                SET_BG_COLOR_BLACK,
-                SET_BG_COLOR_WHITE,
+                SET_BG_COLOR_DARK_BROWN,
+                SET_BG_COLOR_BROWN,
+                SET_BG_COLOR_DARK_BROWN,
+                SET_BG_COLOR_BROWN,
+                SET_BG_COLOR_DARK_BROWN,
+                SET_BG_COLOR_BROWN,
+                SET_BG_COLOR_DARK_BROWN,
+                SET_BG_COLOR_BROWN,
                 SET_BG_COLOR_DARK_GREY
         };
         String[] emptyWhiteFirstRow = {
                 SET_BG_COLOR_DARK_GREY,
-                SET_BG_COLOR_WHITE,
-                SET_BG_COLOR_BLACK,
-                SET_BG_COLOR_WHITE,
-                SET_BG_COLOR_BLACK,
-                SET_BG_COLOR_WHITE,
-                SET_BG_COLOR_BLACK,
-                SET_BG_COLOR_WHITE,
-                SET_BG_COLOR_BLACK,
+                SET_BG_COLOR_BROWN,
+                SET_BG_COLOR_DARK_BROWN,
+                SET_BG_COLOR_BROWN,
+                SET_BG_COLOR_DARK_BROWN,
+                SET_BG_COLOR_BROWN,
+                SET_BG_COLOR_DARK_BROWN,
+                SET_BG_COLOR_BROWN,
+                SET_BG_COLOR_DARK_BROWN,
                 SET_BG_COLOR_DARK_GREY
         };
         var pieceMap = new HashMap<String, String>();
