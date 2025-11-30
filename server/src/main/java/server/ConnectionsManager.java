@@ -28,9 +28,8 @@ public class ConnectionsManager {
         }
     }
 
-
     // alternative broadcast that sends everyone (including sender) the new game board (ex. after a move is made)
-    public void broadcast(LoadGameMessage loadGameMessage) throws Exception {
+    public void broadcastGame(LoadGameMessage loadGameMessage) throws Exception {
         var loadGameMessageString = new Gson().toJson(loadGameMessage);
         for (Session session : connections.values()) {
             // petshop checks to see if the session is open first, not sure what that means

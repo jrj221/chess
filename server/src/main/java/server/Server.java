@@ -65,7 +65,7 @@ public class Server {
                     case MAKE_MOVE:
                         MakeMoveCommand makeMoveCommand = serializer.fromJson(ctx.message(), MakeMoveCommand.class);
                         try {
-                            connectionsManager.broadcast(new LoadGameMessage(makeMove(makeMoveCommand)));
+                            connectionsManager.broadcastGame(new LoadGameMessage(makeMove(makeMoveCommand)));
                             connectionsManager.broadcast(ctx.session,
                                     new NotificationMessage(String.format("%s moved from %s to %s.",
                                             makeMoveCommand.username,
