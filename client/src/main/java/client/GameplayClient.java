@@ -101,20 +101,27 @@ public class GameplayClient implements Client, ServerMessageHandler {
         return "Successfully left the game!";
     }
 
+
     private String resign() throws Exception {
+        if (game.getIsGameOver()) {
+            return "Game already over";
+        }
         if (!resignPromtedOnce) {
             resignPromtedOnce = true;
             return "Enter the command again if you are sure you want to resign and forfeit the game.";
         }
         resignPromtedOnce = false;
         websocketFacade.send(new ResignCommand(username, authToken, gameID, teamColor));
-        var winner = teamColor.equals("WHITE") ? "BLACK" : "WHITE";
-        return String.format("Successfully resigned. Team %s wins!", winner);
+        return "Successfully resigned";
     }
+
 
     private String makeMove(String[] inputWords) throws Exception {
         if (state.equals("observer")) {
             throw new Exception("Observers cannot make moves");
+        }
+        if (game.getIsGameOver()) {
+            return "Game is over, no more moves can be made";
         }
         if (inputWords.length == 3 || inputWords.length == 4) {
             var start = inputWords[1];
@@ -376,7 +383,9 @@ public class GameplayClient implements Client, ServerMessageHandler {
                 boardString.append(RESET_BG_COLOR + "\n");
             }
         }
-        boardString.append(String.format("Team %s is now playing", game.getTeamTurn()));
+        if (!game.getIsGameOver()) { // only print while the game is ongoing
+            boardString.append(String.format("Team %s is now playing", game.getTeamTurn()));
+        }
         return boardString.toString();
     }
 

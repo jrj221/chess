@@ -26,6 +26,10 @@ public class ChessGame {
         isGameOver = true;
     }
 
+    public boolean getIsGameOver() {
+        return isGameOver;
+    }
+
     /**
      * @return Which team's turn it is
      */
