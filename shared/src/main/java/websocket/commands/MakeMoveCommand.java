@@ -6,10 +6,12 @@ import chess.ChessPosition;
 public class MakeMoveCommand extends UserGameCommand {
     public ChessMove move;
     public String username;
+    public String moveString;
 
-    public MakeMoveCommand(ChessMove move, String username, String authToken, Integer gameID) {
+    public MakeMoveCommand(ChessMove move, String moveString, String username, String authToken, Integer gameID) {
         super(CommandType.MAKE_MOVE, authToken, gameID);
         this.move = move;
+        this.moveString = moveString;
         this.username = username;
     }
 }

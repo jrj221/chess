@@ -83,10 +83,10 @@ public class ChessGame {
         ChessPosition startPosition = move.getStartPosition();
         ChessPosition endPosition = move.getEndPosition();
         var piece = board.getPiece(startPosition);
-        if (piece == null) { // no piece there
-            throw new InvalidMoveException("No piece found");
-        } else if (piece.getTeamColor() != currentTurn) { // not your turn
+        if (piece != null && piece.getTeamColor() != currentTurn) { // not your turn
             throw new InvalidMoveException("Not your turn");
+        } else if (piece == null) { // no piece there
+            throw new InvalidMoveException("No piece found");
         }
         var validMoves = validMoves(startPosition);
         for (ChessMove validMove : validMoves) {
@@ -99,6 +99,9 @@ public class ChessGame {
                 setTeamTurn(piece.getTeamColor() == TeamColor.BLACK ? TeamColor.WHITE : TeamColor.BLACK);
                 return;
             }
+        }
+        if (piece.getPieceType() == ChessPiece.PieceType.PAWN && move.getPromotionPiece() == null) {
+            throw new InvalidMoveException("Move requires pawn promotion piece");
         }
         throw new InvalidMoveException("Illegal move"); // not valid move
 

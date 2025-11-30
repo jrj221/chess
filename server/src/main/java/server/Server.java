@@ -67,10 +67,9 @@ public class Server {
                         try {
                             connectionsManager.broadcastGame(new LoadGameMessage(makeMove(makeMoveCommand)));
                             connectionsManager.broadcast(ctx.session,
-                                    new NotificationMessage(String.format("%s moved from %s to %s.",
+                                    new NotificationMessage(String.format("%s moved %s.",
                                             makeMoveCommand.username,
-                                            makeMoveCommand.move.startPosition.toString(),
-                                            makeMoveCommand.move.endPosition.toString())));
+                                            makeMoveCommand.moveString)));
                         } catch (InvalidMoveException ex) {
                             var errorMessage = new ErrorMessage(ex.getMessage());
                             var errorMessageString = serializer.toJson(errorMessage);

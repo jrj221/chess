@@ -78,7 +78,7 @@ public class GameplayClient implements Client, ServerMessageHandler {
     @Override
     public void sendError(String errorMessage) {
         System.out.println(); // newline to get off of the prompt line
-        System.out.println(SET_TEXT_COLOR_RED + errorMessage + RESET_TEXT_COLOR);
+        System.out.println(SET_TEXT_COLOR_RED + "ERROR: " + errorMessage + RESET_TEXT_COLOR);
         printPrompt();
     }
 
@@ -96,9 +96,25 @@ public class GameplayClient implements Client, ServerMessageHandler {
     }
 
     private String makeMove(String[] inputWords) throws Exception {
-        if (inputWords.length ==3) {
+        if (inputWords.length == 3 || inputWords.length == 4) {
             var start = inputWords[1];
             var end = inputWords[2];
+            ChessPiece.PieceType promotionPiece = null; // default
+
+            if (inputWords.length == 4) {
+                var promotionPieceString = inputWords[3];
+                if (!isValidPromotionPiece(promotionPieceString)) {
+                    throw new Exception("Promotion piece is invalid.\n" +
+                            "Must be ROOK, KNIGHT, BISHOP, or QUEEN");
+                }
+                promotionPiece = switch (promotionPieceString.toUpperCase()) {
+                    case "KNIGHT" -> ChessPiece.PieceType.KNIGHT;
+                    case "QUEEN" -> ChessPiece.PieceType.QUEEN;
+                    case "ROOK" -> ChessPiece.PieceType.ROOK;
+                    case "BISHOP" -> ChessPiece.PieceType.BISHOP;
+                    default -> null; // shouldn't trigger but it needs a default
+                };
+            }
             if (!isValidPosition(start) || !isValidPosition(end)) {
                 throw new Exception("Either your START or END position is invalid.\n" +
                         "Positions should take the form \"A3\"");
@@ -107,14 +123,25 @@ public class GameplayClient implements Client, ServerMessageHandler {
             var convertedEnd = convertPosition(end); //31
             var startPosition = new ChessPosition(convertedStart.charAt(0) - '0', convertedStart.charAt(1) - '0');
             var endPosition = new ChessPosition(convertedEnd.charAt(0) - '0', convertedEnd.charAt(1) - '0');
-            var move = new ChessMove(startPosition, endPosition, null);
-            // fix PROMOTION PIECE
-            websocketFacade.send(new MakeMoveCommand(move, username, authToken, gameID));
+
+            var moveString = String.format("%s to %s", start, end);
+            var move = new ChessMove(startPosition, endPosition, promotionPiece);
+            websocketFacade.send(new MakeMoveCommand(move, moveString, username, authToken, gameID));
             return String.format("Attempted move from %s to %s", start, end);
             // not the best way to handle this since it could fail
         }
-        throw new Exception("Invalid command.\n" +
-                "Making a move takes the form \"move START END\"");
+        throw new Exception("""
+                Invalid command.
+                Making a move takes the form "move START END PROMOTION_PIECE"
+                (note: PROMOTION_PIECE is only necessary if you are moving a pawn to the final row)""");
+    }
+
+
+    private boolean isValidPromotionPiece(String promotionPiece) {
+        return switch (promotionPiece.toUpperCase()) {
+            case "KNIGHT", "QUEEN", "ROOK", "BISHOP" -> true;
+            default -> false;
+        };
     }
 
 
@@ -250,6 +277,7 @@ public class GameplayClient implements Client, ServerMessageHandler {
         return parseChessGame(game, highlightedPiece, highlightedPositions);
     }
 
+
     /**
      * Parses a ChessGame into a string representing the board
      * @param game A ChessGame to parse
@@ -268,13 +296,19 @@ public class GameplayClient implements Client, ServerMessageHandler {
         for (int i = 1; i < 9; i++) {
             for (int j = 1; j < 9; j++) {
                 ChessPiece piece = board.getPiece(new ChessPosition(i, j));
-                var pieceType = piece == null ? "   " : switch (piece.getPieceType()) {
-                    case KING   -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? " ♔ " : " ♚ ";
-                    case QUEEN  -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? " ♕ " : " ♛ ";
-                    case BISHOP -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? " ♗ " : " ♝ ";
-                    case KNIGHT -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? " ♘ " : " ♞ ";
-                    case ROOK   -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? " ♖ " : " ♜ ";
-                    case PAWN   -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? " ♙ " : " ♟ ";
+                var pieceType = piece == null ? "   " : switch (piece.getPieceType()) { // can we make this different?
+                    case KING   -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
+                            ? SET_TEXT_COLOR_BLUE + " ♔ " + RESET_TEXT_COLOR : SET_TEXT_COLOR_RED + " ♚ " + RESET_TEXT_COLOR;
+                    case QUEEN  -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
+                            ? SET_TEXT_COLOR_BLUE + " ♕ " + RESET_TEXT_COLOR : SET_TEXT_COLOR_RED + " ♛ " + RESET_TEXT_COLOR;
+                    case BISHOP -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
+                            ? SET_TEXT_COLOR_BLUE + " ♗ " + RESET_TEXT_COLOR : SET_TEXT_COLOR_RED + " ♝ " + RESET_TEXT_COLOR;
+                    case KNIGHT -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
+                            ? SET_TEXT_COLOR_BLUE + " ♘ " + RESET_TEXT_COLOR : SET_TEXT_COLOR_RED + " ♞ " + RESET_TEXT_COLOR;
+                    case ROOK   -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
+                            ? SET_TEXT_COLOR_BLUE + " ♖ " + RESET_TEXT_COLOR : SET_TEXT_COLOR_RED + " ♜ " + RESET_TEXT_COLOR;
+                    case PAWN   -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
+                            ? SET_TEXT_COLOR_BLUE + " ♙ " + RESET_TEXT_COLOR : SET_TEXT_COLOR_RED + " ♟ " + RESET_TEXT_COLOR;
                 };
                 // need to figure out square color
                 var position = String.format("%d:%d", i, j);
@@ -322,6 +356,7 @@ public class GameplayClient implements Client, ServerMessageHandler {
                 boardString.append(RESET_BG_COLOR + "\n");
             }
         }
+        boardString.append(String.format("Team %s is now playing", game.getTeamTurn()));
         return boardString.toString();
     }
 
