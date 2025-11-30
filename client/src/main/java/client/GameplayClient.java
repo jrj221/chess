@@ -20,14 +20,17 @@ public class GameplayClient implements Client, ServerMessageHandler {
     private String authToken;
     private String username;
     private ChessGame game;
+    private String state;
+    private boolean resignPromtedOnce = false;
 
 
-    public GameplayClient(String stringGameID, String teamColor) throws Exception {
+    public GameplayClient(String stringGameID, String teamColor, String joinedOrObserved) throws Exception {
         gameID = Integer.parseInt(stringGameID.replace("!\n", ""));
         this.teamColor = teamColor;
         authToken = facade.getAuthToken();
         username = facade.getUsername();
-        websocketFacade.send(new ConnectCommand(username, authToken, gameID, teamColor));
+        state = joinedOrObserved;
+        websocketFacade.send(new ConnectCommand(username, authToken, gameID, teamColor, state));
     }
 
     public void printPrompt() {
@@ -45,6 +48,7 @@ public class GameplayClient implements Client, ServerMessageHandler {
             case "leave" -> leave();
             case "highlight" -> highlight(inputWords);
             case "move" -> makeMove(inputWords);
+            case "resign" -> resign();
             default -> String.format("%s is not a valid command", inputWords[0]);
         };
     }
@@ -78,7 +82,8 @@ public class GameplayClient implements Client, ServerMessageHandler {
     @Override
     public void sendError(String errorMessage) {
         System.out.println(); // newline to get off of the prompt line
-        System.out.println(SET_TEXT_COLOR_RED + "ERROR: " + errorMessage + RESET_TEXT_COLOR);
+        System.out.println(SET_TEXT_ITALIC + SET_TEXT_COLOR_RED
+                + "ERROR: " + errorMessage + RESET_TEXT_COLOR + RESET_TEXT_ITALIC);
         printPrompt();
     }
 
@@ -86,7 +91,8 @@ public class GameplayClient implements Client, ServerMessageHandler {
     @Override
     public void notify(String message) {
         System.out.println(); // newline to get off of the prompt line
-        System.out.println(SET_TEXT_COLOR_MAGENTA + message + RESET_TEXT_COLOR);
+        System.out.println(SET_TEXT_ITALIC + SET_TEXT_COLOR_MAGENTA
+                + "NOTIFICATION: " + message + RESET_TEXT_COLOR + RESET_TEXT_ITALIC);
         printPrompt();
     }
 
@@ -95,7 +101,14 @@ public class GameplayClient implements Client, ServerMessageHandler {
         return "Successfully left the game!";
     }
 
+    private String resign() {
+        return "resign";
+    }
+
     private String makeMove(String[] inputWords) throws Exception {
+        if (state.equals("observer")) {
+            throw new Exception("Observers cannot make moves");
+        }
         if (inputWords.length == 3 || inputWords.length == 4) {
             var start = inputWords[1];
             var end = inputWords[2];
@@ -126,7 +139,7 @@ public class GameplayClient implements Client, ServerMessageHandler {
 
             var moveString = String.format("%s to %s", start, end);
             var move = new ChessMove(startPosition, endPosition, promotionPiece);
-            websocketFacade.send(new MakeMoveCommand(move, moveString, username, authToken, gameID));
+            websocketFacade.send(new MakeMoveCommand(move, moveString, username, authToken, gameID, teamColor));
             return String.format("Attempted move from %s to %s", start, end);
             // not the best way to handle this since it could fail
         }
@@ -298,19 +311,19 @@ public class GameplayClient implements Client, ServerMessageHandler {
                 ChessPiece piece = board.getPiece(new ChessPosition(i, j));
                 var pieceType = piece == null ? "   " : switch (piece.getPieceType()) { // can we make this different?
                     case KING   -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
-                            ? SET_TEXT_COLOR_BLUE + " ♔ " + RESET_TEXT_COLOR : SET_TEXT_COLOR_RED + " ♚ " + RESET_TEXT_COLOR;
+                            ? SET_TEXT_COLOR_BLUE + " ♚ "  : SET_TEXT_COLOR_RED + " ♚ " ;
                     case QUEEN  -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
-                            ? SET_TEXT_COLOR_BLUE + " ♕ " + RESET_TEXT_COLOR : SET_TEXT_COLOR_RED + " ♛ " + RESET_TEXT_COLOR;
+                            ? SET_TEXT_COLOR_BLUE + " ♛ "  : SET_TEXT_COLOR_RED + " ♛ " ;
                     case BISHOP -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
-                            ? SET_TEXT_COLOR_BLUE + " ♗ " + RESET_TEXT_COLOR : SET_TEXT_COLOR_RED + " ♝ " + RESET_TEXT_COLOR;
+                            ? SET_TEXT_COLOR_BLUE + " ♝ "  : SET_TEXT_COLOR_RED + " ♝ " ;
                     case KNIGHT -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
-                            ? SET_TEXT_COLOR_BLUE + " ♘ " + RESET_TEXT_COLOR : SET_TEXT_COLOR_RED + " ♞ " + RESET_TEXT_COLOR;
+                            ? SET_TEXT_COLOR_BLUE + " ♞ "  : SET_TEXT_COLOR_RED + " ♞ ";
                     case ROOK   -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
-                            ? SET_TEXT_COLOR_BLUE + " ♖ " + RESET_TEXT_COLOR : SET_TEXT_COLOR_RED + " ♜ " + RESET_TEXT_COLOR;
+                            ? SET_TEXT_COLOR_BLUE + " ♜ "  : SET_TEXT_COLOR_RED + " ♜ " ;
                     case PAWN   -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
-                            ? SET_TEXT_COLOR_BLUE + " ♙ " + RESET_TEXT_COLOR : SET_TEXT_COLOR_RED + " ♟ " + RESET_TEXT_COLOR;
+                            ? SET_TEXT_COLOR_BLUE + " ♟ "  : SET_TEXT_COLOR_RED + " ♟ ";
                 };
-                // need to figure out square color
+                pieceType += RESET_TEXT_COLOR;
                 var position = String.format("%d:%d", i, j);
                 var color = emptyBoard.get(position);
                 if (highlightedPositions != null && highlightedPositions.contains(position)) {

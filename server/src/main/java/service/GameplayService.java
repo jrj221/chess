@@ -27,10 +27,14 @@ public class GameplayService {
         }
     }
 
-    public ChessGame makeMove(int gameID, ChessMove move) throws Exception {
+    public ChessGame makeMove(int gameID, ChessMove move, ChessGame.TeamColor teamColor) throws Exception {
         try {
             GameData gameData = dataAccess.getGame(gameID);
             var game = gameData.game();
+            var piece = game.getBoard().getPiece(move.getStartPosition());
+            if (piece.getTeamColor() != teamColor) { // attempting to move an enemy piece
+                throw new InvalidMoveException("Can't move enemy piece");
+            }
             game.makeMove(move); // modifies the ChessGame object itself
             dataAccess.updateGame(gameID, game);
             return game;

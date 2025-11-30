@@ -52,9 +52,15 @@ public class Server {
                         ctx.enableAutomaticPings(); // is this where I turn it on?
                         connectionsManager.add(ctx.session);
                         ctx.send(connect(connectCommand));
-                        connectionsManager.broadcast(ctx.session,
-                                new NotificationMessage(String.format("%s connected to the game on team %s.",
-                                        connectCommand.username, connectCommand.teamColor)));
+                        if (connectCommand.state.equals("player")) {
+                            connectionsManager.broadcast(ctx.session,
+                                    new NotificationMessage(String.format("%s connected to the game on team %s.",
+                                            connectCommand.username, connectCommand.teamColor)));
+                        } else {
+                            connectionsManager.broadcast(ctx.session,
+                                    new NotificationMessage(String.format("%s connected to the game as an observer",
+                                            connectCommand.username)));
+                        }
                         break;
                     case LEAVE:
                         LeaveCommand leaveCommand = serializer.fromJson(ctx.message(), LeaveCommand.class);
@@ -223,7 +229,7 @@ public class Server {
     }
 
     private ChessGame makeMove(MakeMoveCommand command) throws Exception {
-        ChessGame updatedGame = gameplayService.makeMove(command.getGameID(), command.move);
+        ChessGame updatedGame = gameplayService.makeMove(command.getGameID(), command.move, command.teamColor);
         return updatedGame;
     }
 
