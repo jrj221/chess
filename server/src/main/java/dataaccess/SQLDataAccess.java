@@ -134,13 +134,14 @@ public class SQLDataAccess implements DataAccess {
                 throw new DataAccessException("gameName cannot be null");
             }
             var statement = connection.prepareStatement("INSERT INTO games " +
-                    "(gameID, gameName, game) " +
-                    "VALUES (?,?, ?)");
+                    "(gameID, gameName, game, isGameOver) " +
+                    "VALUES (?,?,?,?)");
             int gameID = countGames() + 1;
             statement.setInt(1, gameID);
             statement.setString(2, gameName);
             var game = new Gson().toJson(new ChessGame()); // default chess board? if it works
             statement.setString(3, game);
+            statement.setString(4, "false");
             statement.executeUpdate();
             return gameID;
         }
@@ -167,9 +168,10 @@ public class SQLDataAccess implements DataAccess {
                     var blackUsername = rs.getString("blackUsername");
                     var gameName = rs.getString("gameName");
                     var gameJson = rs.getString("game");
+                    boolean isGameOver = Boolean.parseBoolean(rs.getString("isGameOver"));
                     var serializer = new Gson();
                     var game = serializer.fromJson(gameJson, ChessGame.class);
-                    return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
+                    return new GameData(gameID, whiteUsername, blackUsername, gameName, game, isGameOver);
                 }
             }
             throw new DataAccessException("Game not found");
@@ -188,9 +190,10 @@ public class SQLDataAccess implements DataAccess {
                 var blackUsername = rs.getString("blackUsername");
                 var gameName = rs.getString("gameName");
                 var gameJson = rs.getString("game");
+                var isGameOver = Boolean.parseBoolean(rs.getString("isGameOver"));
                 var serializer = new Gson();
                 var game = serializer.fromJson(gameJson, ChessGame.class);
-                var gameData = new GameData(gameID, whiteUsername, blackUsername, gameName, game);
+                var gameData = new GameData(gameID, whiteUsername, blackUsername, gameName, game, isGameOver);
                 allGames.add(gameData);
             }
             return allGames;

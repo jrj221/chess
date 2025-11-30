@@ -83,7 +83,8 @@ public class MemoryDataAccess implements DataAccess {
                 break; // usable gameID
             }
         }
-        games.put(gameID, new GameData(gameID, null, null, gameName, null));
+        games.put(gameID, new GameData(gameID, null, null, gameName,
+                null, false));
         return gameID;
     }
 
@@ -117,12 +118,14 @@ public class MemoryDataAccess implements DataAccess {
             if (games.get(gameID).whiteUsername() != null) {
                 throw new AlreadyTakenException("Team taken");
             }
-            gameData = new GameData(gameID, username, gameData.blackUsername(), gameData.gameName(), gameData.game());
+            gameData = new GameData(gameID, username, gameData.blackUsername(),
+                    gameData.gameName(), gameData.game(), gameData.isGameOver());
         } else if (playerColor.equals("BLACK")) {
             if (games.get(gameID).blackUsername() != null) {
                 throw new AlreadyTakenException("Team taken");
             }
-            gameData = new GameData(gameID, gameData.whiteUsername(), username, gameData.gameName(), gameData.game());
+            gameData = new GameData(gameID, gameData.whiteUsername(), username,
+                    gameData.gameName(), gameData.game(), gameData.isGameOver());
         } else {
             throw new DataAccessException("Invalid playerColor");
         }
@@ -142,7 +145,8 @@ public class MemoryDataAccess implements DataAccess {
     @Override
     public void updateGame(int gameID, ChessGame game) throws Exception {
         var gameData = games.get(gameID);
-        gameData = new GameData(gameID, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game);
+        gameData = new GameData(gameID, gameData.whiteUsername(), gameData.blackUsername(),
+                gameData.gameName(), game, gameData.isGameOver());
         games.put(gameID, gameData);
     }
 
