@@ -7,8 +7,6 @@ import datamodel.GameData;
 import datamodel.UserData;
 import org.mindrot.jbcrypt.BCrypt;
 
-import javax.xml.crypto.Data;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -173,6 +171,21 @@ public class SQLDataAccess implements DataAccess {
                 }
             }
             throw new DataAccessException("Game not found");
+        }
+    }
+
+    @Override
+    public void updateGamePlayers(int gameID, String teamColor) throws Exception {
+        try (var connection = DatabaseManager.getConnection()) {
+            if (teamColor.equals("WHITE")) {
+                var statement = connection.prepareStatement("UPDATE games SET whiteUsername = NULL WHERE gameID = ?");
+                statement.setInt(1, gameID);
+                statement.executeUpdate();
+            } else {
+                var statement = connection.prepareStatement("UPDATE games SET blackUsername = NULL WHERE gameID = ?");
+                statement.setInt(1, gameID);
+                statement.executeUpdate();
+            }
         }
     }
 

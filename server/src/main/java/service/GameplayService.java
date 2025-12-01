@@ -27,6 +27,10 @@ public class GameplayService {
         }
     }
 
+    public void leave(int gameID, String teamColor) throws Exception {
+        dataAccess.updateGamePlayers(gameID, teamColor);
+    }
+
     public ChessGame makeMove(int gameID, ChessMove move, ChessGame.TeamColor teamColor) throws Exception {
         try {
             GameData gameData = dataAccess.getGame(gameID);

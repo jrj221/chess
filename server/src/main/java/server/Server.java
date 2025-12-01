@@ -65,6 +65,7 @@ public class Server {
                     case LEAVE:
                         LeaveCommand leaveCommand = serializer.fromJson(ctx.message(), LeaveCommand.class);
                         connectionsManager.remove(ctx.session);
+                        gameplayService.leave(leaveCommand.getGameID(), leaveCommand.teamColor);
                         connectionsManager.broadcastNotif(
                                 new NotificationMessage(String.format("%s left the game.", leaveCommand.username)));
                         break;

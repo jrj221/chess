@@ -14,6 +14,9 @@ public interface DataAccess {
     void deleteAuth(String authToken) throws Exception;
     int createGameData(String gameName) throws Exception;
     GameData getGame(int gameID) throws Exception;
+
+    void updateGamePlayers(int gameID, String teamColor) throws Exception;
+
     ArrayList<GameData> getAllGames() throws Exception;
     void joinGame(String username, int gameID, String playerColor) throws Exception;
     String generateHashedPassword(String password) throws Exception;

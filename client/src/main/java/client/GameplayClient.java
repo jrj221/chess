@@ -97,7 +97,7 @@ public class GameplayClient implements Client, ServerMessageHandler {
     }
 
     private String leave() throws Exception {
-        websocketFacade.send(new LeaveCommand(username, authToken, gameID));
+        websocketFacade.send(new LeaveCommand(username, authToken, gameID, teamColor));
         return "Successfully left the game!";
     }
 

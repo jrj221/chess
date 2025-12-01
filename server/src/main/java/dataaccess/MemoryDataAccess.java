@@ -99,6 +99,18 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
+    public void updateGamePlayers(int gameID, String teamColor) throws Exception {
+        var gameData = games.get(gameID);
+        if (teamColor.equals("WHITE")) {
+            games.put(gameID, new GameData(gameID, null,
+                    gameData.blackUsername(), gameData.gameName(), gameData.game()));
+        } else {
+            games.put(gameID, new GameData(gameID, gameData.whiteUsername(),
+                    null, gameData.gameName(), gameData.game()));
+        }
+    }
+
+    @Override
     public ArrayList<GameData> getAllGames() throws Exception {
         var allGames = new ArrayList<GameData>();
         var keys = games.keySet();
