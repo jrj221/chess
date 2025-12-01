@@ -32,7 +32,7 @@ public class GameplayService {
             GameData gameData = dataAccess.getGame(gameID);
             var game = gameData.game();
             var piece = game.getBoard().getPiece(move.getStartPosition());
-            if (piece.getTeamColor() != teamColor) { // attempting to move an enemy piece
+            if (piece != null && piece.getTeamColor() != teamColor) { // attempting to move an enemy piece
                 throw new InvalidMoveException("Can't move enemy piece");
             }
             game.makeMove(move); // modifies the ChessGame object itself
@@ -43,10 +43,10 @@ public class GameplayService {
         }
     }
 
-    public String getPlayer(int gameID, String teamColor) throws Exception {
+    public String getPlayer(int gameID, ChessGame.TeamColor teamColor) throws Exception {
         try {
             GameData gameData = dataAccess.getGame(gameID);
-            return teamColor.equals("WHITE") ? gameData.whiteUsername() : gameData.blackUsername();
+            return teamColor.equals(ChessGame.TeamColor.WHITE) ? gameData.whiteUsername() : gameData.blackUsername();
         } catch (DataAccessException ex) {
             throw new NoExistingGameException("No existing game");
         }

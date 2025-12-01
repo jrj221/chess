@@ -103,6 +103,9 @@ public class GameplayClient implements Client, ServerMessageHandler {
 
 
     private String resign() throws Exception {
+        if (state.equals("observer")) {
+            return "Observers cannot resign";
+        }
         if (game.getIsGameOver()) {
             return "Game already over";
         }
@@ -211,7 +214,7 @@ public class GameplayClient implements Client, ServerMessageHandler {
             throw new Exception(String.format("No piece at %s to highlight moves for", positionString));
         }
 
-        return piece.pieceMoves(board, position);
+        return game.validMoves(position);
     }
 
 
@@ -385,6 +388,8 @@ public class GameplayClient implements Client, ServerMessageHandler {
         }
         if (!game.getIsGameOver()) { // only print while the game is ongoing
             boardString.append(String.format("Team %s is now playing", game.getTeamTurn()));
+        } else {
+            boardString.append("Game Over!");
         }
         return boardString.toString();
     }

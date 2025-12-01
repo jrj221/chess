@@ -11,8 +11,9 @@ import java.util.*;
 public class ChessBoard {
 
     final private ChessPiece[][] board = new ChessPiece[8][8];
+
     public ChessBoard() {
-        
+
     }
 
     /**
@@ -26,9 +27,10 @@ public class ChessBoard {
     }
 
 
-    public void removePiece(ChessPosition position, ChessPiece piece) {
+    public void removePiece(ChessPosition position) {
         board[position.getRow() - 1][position.getColumn() - 1] = null;
     }
+
     /**
      * Gets a chess piece on the chessboard
      *
@@ -56,7 +58,7 @@ public class ChessBoard {
         }
         var teams = List.of(ChessGame.TeamColor.WHITE, ChessGame.TeamColor.BLACK);
         for (ChessGame.TeamColor team : teams) {
-            int row = (team == ChessGame.TeamColor.WHITE ?  1 : 8);
+            int row = (team == ChessGame.TeamColor.WHITE ? 1 : 8);
             addPiece(new ChessPosition(row, 1), new ChessPiece(team, ChessPiece.PieceType.ROOK));
             addPiece(new ChessPosition(row, 2), new ChessPiece(team, ChessPiece.PieceType.KNIGHT));
             addPiece(new ChessPosition(row, 3), new ChessPiece(team, ChessPiece.PieceType.BISHOP));
@@ -66,19 +68,19 @@ public class ChessBoard {
             addPiece(new ChessPosition(row, 7), new ChessPiece(team, ChessPiece.PieceType.KNIGHT));
             addPiece(new ChessPosition(row, 8), new ChessPiece(team, ChessPiece.PieceType.ROOK));
         }
-    }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ChessBoard that = (ChessBoard) o;
-        return Objects.deepEquals(board, that.board);
-    }
-
-    @Override
-    public int hashCode() {
-        return Arrays.deepHashCode(board);
+        // for testing
+//        removePiece(new ChessPosition(8, 5)); // white queen
+//        removePiece(new ChessPosition(1, 4)); // black king
+//        removePiece(new ChessPosition(1, 1));
+//        removePiece(new ChessPosition(1, 2));
+//        removePiece(new ChessPosition(1, 3));
+//        removePiece(new ChessPosition(2, 3));
+//        addPiece(new ChessPosition(2,1), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+//        addPiece(new ChessPosition(2,2), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK));
+//        removePiece(new ChessPosition(1, 4));
+//        removePiece(new ChessPosition(2, 4));
+//        addPiece(new ChessPosition(1,2), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING));
+//        addPiece(new ChessPosition(5,4), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN));
     }
 }

@@ -7,6 +7,7 @@ public class MakeMoveCommand extends UserGameCommand {
     public String username;
     public String moveString;
     public ChessGame.TeamColor teamColor;
+    public ChessGame.TeamColor enemyColor;
 
 
     public MakeMoveCommand(ChessMove move, String moveString, String username,
@@ -15,6 +16,7 @@ public class MakeMoveCommand extends UserGameCommand {
         this.move = move;
         this.moveString = moveString;
         this.username = username;
+        this.enemyColor = teamColor.equals("WHITE") ? ChessGame.TeamColor.BLACK :  ChessGame.TeamColor.WHITE;
         this.teamColor = teamColor.equals("WHITE") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
     }
 }

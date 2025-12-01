@@ -1,12 +1,14 @@
 package websocket.commands;
 
+import chess.ChessGame;
+
 public class ResignCommand extends UserGameCommand {
     public String username;
-    public String teamColor;
+    public ChessGame.TeamColor enemyColor;
 
     public ResignCommand(String username, String authToken, Integer gameID, String teamColor) {
         super(CommandType.RESIGN, authToken, gameID);
         this.username = username;
-        this.teamColor = teamColor;
+        this.enemyColor = teamColor.equals("WHITE") ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
     }
 }

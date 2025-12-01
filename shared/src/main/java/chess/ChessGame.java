@@ -1,5 +1,6 @@
 package chess;
 
+import javax.swing.*;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -56,13 +57,13 @@ public class ChessGame {
     }
 
     /**
-     * Gets a valid moves for a piece at the given location
+     * Gets a valid moves (legal moves that do not leave the king in danger) for a piece at the given location
      *
      * @param startPosition the piece to get valid moves for
      * @return Set of valid moves for requested piece, or null if no piece at
      * startPosition
      */
-    public Collection<ChessMove> validMoves(ChessPosition startPosition) {
+    public HashSet<ChessMove> validMoves(ChessPosition startPosition) {
         if (board.getPiece(startPosition) == null) {
             return null;
         }
@@ -70,18 +71,19 @@ public class ChessGame {
         Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition);
         var validMoves = new HashSet<ChessMove>();
         for (ChessMove possibleMove : possibleMoves) { // test move, add if safe
-            board.removePiece(startPosition, piece);
+            board.removePiece(startPosition);
             var currPiece = board.getPiece(possibleMove.getEndPosition()); // test move might eliminate an enemy
             board.addPiece(possibleMove.getEndPosition(), piece);
             if (!isInCheck(piece.getTeamColor())) {
                 validMoves.add(possibleMove);
             }
-            board.removePiece(possibleMove.getEndPosition(), piece);
+            board.removePiece(possibleMove.getEndPosition());
             board.addPiece(possibleMove.getEndPosition(), currPiece);
             board.addPiece(startPosition, piece);
         }
         return validMoves;
     }
+
 
     /**
      * Makes a move in a chess game
@@ -101,7 +103,7 @@ public class ChessGame {
         var validMoves = validMoves(startPosition);
         for (ChessMove validMove : validMoves) {
             if (validMove.equals(move)) { // if valid, make move
-                board.removePiece(startPosition, piece);
+                board.removePiece(startPosition);
                 board.addPiece(endPosition, piece);
                 if (piece.getPieceType() == ChessPiece.PieceType.PAWN && move.getPromotionPiece() != null) {
                     board.addPiece(endPosition, new ChessPiece(piece.getTeamColor(), move.getPromotionPiece()));
@@ -110,33 +112,41 @@ public class ChessGame {
                 return;
             }
         }
-        if (piece.getPieceType() == ChessPiece.PieceType.PAWN && move.getPromotionPiece() == null) {
+        if (piece.getPieceType() == ChessPiece.PieceType.PAWN && move.getPromotionPiece() == null
+            && (move.endPosition.getRow() == 1 || move.endPosition.getRow() == 8)) {
             throw new InvalidMoveException("Move requires pawn promotion piece");
         }
-        throw new InvalidMoveException("Illegal move"); // not valid move
-
+        throw new InvalidMoveException("Invalid move"); // not valid move
     }
 
 
-    public List<Object> getTeam(ChessGame.TeamColor myTeamColor, boolean wantAllies) {
-        ChessPosition kingPosition = null;
+    public HashSet<ChessPosition> getTeamPositions(ChessGame.TeamColor myTeamColor) {
         var teamPositions = new HashSet<ChessPosition>();
-        for (int i = 1; i < 9; i++) { // find king and also all pieces (enemy or allies)
+        for (int i = 1; i < 9; i++) {
             for (int j = 1; j < 9; j++) {
                 var piece = board.getPiece(new ChessPosition(i, j));
-                if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING &&  piece.getTeamColor() == myTeamColor) {
-                    kingPosition = new ChessPosition(i, j);
-                }
-                else if (wantAllies && piece != null && piece.getTeamColor() == myTeamColor) { // ally piece
-                    teamPositions.add(new ChessPosition(i, j));
-                }
-                else if (!wantAllies && piece != null && piece.getTeamColor() != myTeamColor) { // enemy piece
+                if (piece != null && piece.getTeamColor() == myTeamColor) {
                     teamPositions.add(new ChessPosition(i, j));
                 }
             }
         }
-        return List.of(kingPosition, teamPositions);
+        return teamPositions;
     }
+
+    public ChessPosition getKingPosition(ChessGame.TeamColor teamColor) {
+        for (int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; j++) {
+                var piece = board.getPiece(new ChessPosition(i, j));
+                if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING &&
+                        piece.getTeamColor() == teamColor) {
+                    return new ChessPosition(i, j);
+                }
+            }
+        }
+        return null; // won't trigger since there's always a king
+    }
+
+
     /**Determines if the given team is in check
      *
      * @param teamColor which team to check for check
@@ -144,9 +154,9 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         // find king and also all enemy pieces
-        var kingAndEnemies = getTeam(teamColor, false);
-        var kingPosition = (ChessPosition) kingAndEnemies.get(0);
-        var enemyPositions = (HashSet<ChessPosition>) kingAndEnemies.get(1);
+        ChessPosition kingPosition = getKingPosition(teamColor);
+        TeamColor enemyColor = teamColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
+        HashSet<ChessPosition> enemyPositions = getTeamPositions(enemyColor);
 
         for (ChessPosition enemyPosition : enemyPositions) {
             var enemyPiece = board.getPiece(enemyPosition);
@@ -160,6 +170,7 @@ public class ChessGame {
         return false; // not in check
     }
 
+
     /**
      * Determines if the given team is in checkmate
      *
@@ -167,27 +178,26 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        var kingAndAllies = getTeam(teamColor, true);
-        var allyPositions = (HashSet<ChessPosition>) kingAndAllies.get(1);
+        var allyPositions = getTeamPositions(teamColor);
 
         for (ChessPosition allyPosition : allyPositions) {
             var allyPiece = board.getPiece(allyPosition);
             var allyMoves = allyPiece.pieceMoves(board, allyPosition);
             for (ChessMove allyMove : allyMoves) {
                 var startPosition = allyMove.getStartPosition();
-                board.removePiece(startPosition, allyPiece);
+                board.removePiece(startPosition);
                 var currPiece = board.getPiece(allyMove.getEndPosition()); // test move might eliminate an enemy
                 board.addPiece(allyMove.getEndPosition(), allyPiece);
-                if (!isInCheck(allyPiece.getTeamColor())) {
+                if (!isInCheck(teamColor)) {
                     return false; // there exists a move where you aren't in check
                 }
-                board.removePiece(allyMove.getEndPosition(), allyPiece);
                 board.addPiece(allyMove.getEndPosition(), currPiece);
                 board.addPiece(startPosition, allyPiece);
             }
         }
         return true; // no move found that doesn't put you in check
     }
+
 
     /**
      * Determines if the given team is in stalemate, which here is defined as having
@@ -200,17 +210,17 @@ public class ChessGame {
         if (isInCheck(teamColor)) {
             return false; // no stalemate if in danger
         }
-        var kingAndAllies = getTeam(teamColor, true);
-        var allyPositions = (HashSet<ChessPosition>) kingAndAllies.get(1);
+        var allyPositions = getTeamPositions(teamColor);
 
         for (ChessPosition allyPosition : allyPositions) {
             var allyMoves = validMoves(allyPosition);
-                if (allyMoves.size() > 0) {
+                if (!allyMoves.isEmpty()) {
                     return false; // possible moves, no stalemate
                 }
         }
         return true; // no moves, no danger = stalemate
     }
+
 
     /**
      * Sets this game's chessboard with a given board
@@ -221,6 +231,7 @@ public class ChessGame {
         this.board = board;
     }
 
+
     /**
      * Gets the current chessboard
      *
@@ -230,6 +241,7 @@ public class ChessGame {
         return board;
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
@@ -238,6 +250,7 @@ public class ChessGame {
         ChessGame chessGame = (ChessGame) o;
         return Objects.equals(board, chessGame.board) && currentTurn == chessGame.currentTurn;
     }
+
 
     @Override
     public int hashCode() {

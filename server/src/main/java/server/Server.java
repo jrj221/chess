@@ -78,19 +78,34 @@ public class Server {
                                             makeMoveCommand.username,
                                             makeMoveCommand.moveString)));
 
-                            // send notif if a team is in check.
-                            if (updatedGame.isInCheck(ChessGame.TeamColor.WHITE)) {
-                                var player = gameplayService.getPlayer(command.getGameID(), "WHITE");
+                            var enemy = makeMoveCommand.enemyColor;
+                            // send notif if a team is in checkmate and end the game
+                            if (updatedGame.isInCheckmate(enemy)) {
+                                var player = gameplayService.getPlayer(makeMoveCommand.getGameID(), enemy);
                                 connectionsManager.broadcastNotif(
-                                        new NotificationMessage(String.format("%s is in check! " +
+                                        new NotificationMessage(String.format("Checkmate! %s loses!\n", player)));
+                                connectionsManager.broadcastGame(
+                                        new LoadGameMessage(gameplayService.endGame(makeMoveCommand.getGameID())));
+                                break; // break so inCheck stuff doesn't trigger too
+                            }
+
+                            // send notif if enemy team is in check.
+                            if (updatedGame.isInCheck(enemy)) {
+                                var player = gameplayService.getPlayer(makeMoveCommand.getGameID(), enemy);
+                                connectionsManager.broadcastNotif(
+                                        new NotificationMessage(String.format("%s is in check!\n " +
                                                 "Moves that do not get them out of check are considered illegal."
                                                 , player)));
-                            } else if (updatedGame.isInCheck(ChessGame.TeamColor.BLACK)) {
-                                var player = gameplayService.getPlayer(command.getGameID(), "BLACK");
+                            }
+
+                            // send notif if there is a stalemate.
+                            if (updatedGame.isInStalemate(enemy)) {
+                                var player = gameplayService.getPlayer(makeMoveCommand.getGameID(), enemy);
                                 connectionsManager.broadcastNotif(
-                                        new NotificationMessage(String.format("%s is in check! " +
-                                                "Moves that do not get them out of check are considered illegal."
-                                                , player)));
+                                        new NotificationMessage(
+                                                String.format("Draw! %s is in a stalemate!\n ", player)));
+                                connectionsManager.broadcastGame(
+                                        new LoadGameMessage(gameplayService.endGame(makeMoveCommand.getGameID())));
                             }
                         } catch (InvalidMoveException ex) {
                             var errorMessage = new ErrorMessage(ex.getMessage());
@@ -100,8 +115,9 @@ public class Server {
                         break;
                     case RESIGN:
                         ResignCommand resignCommand = serializer.fromJson(ctx.message(), ResignCommand.class);
-                        connectionsManager.broadcastGame(new LoadGameMessage(resign(resignCommand)));
-                        var winner = resignCommand.teamColor.equals("WHITE") ? "BLACK" : "WHITE";
+                        connectionsManager.broadcastGame(
+                                new LoadGameMessage(gameplayService.endGame(resignCommand.getGameID())));
+                        var winner = gameplayService.getPlayer(resignCommand.getGameID(), resignCommand.enemyColor);
                         connectionsManager.broadcastNotif(
                                 new NotificationMessage(String.format("%s has resigned. Team %s wins by default!",
                                         resignCommand.username, winner)));
@@ -254,11 +270,6 @@ public class Server {
 
     private ChessGame makeMove(MakeMoveCommand command) throws Exception {
         ChessGame updatedGame = gameplayService.makeMove(command.getGameID(), command.move, command.teamColor);
-        return updatedGame;
-    }
-
-    private ChessGame resign(ResignCommand command) throws Exception {
-        ChessGame updatedGame = gameplayService.endGame(command.getGameID());
         return updatedGame;
     }
 
