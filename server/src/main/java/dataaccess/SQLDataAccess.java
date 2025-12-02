@@ -29,6 +29,7 @@ public class SQLDataAccess implements DataAccess {
         }
     }
 
+
     @Override
     public void createUser(UserData user) throws Exception {
         try (var connection = DatabaseManager.getConnection()) {
@@ -51,10 +52,12 @@ public class SQLDataAccess implements DataAccess {
         }
     }
 
+
     @Override
     public String generateHashedPassword(String password) {
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
+
 
     @Override
     public Integer countGames() throws Exception {
@@ -69,6 +72,7 @@ public class SQLDataAccess implements DataAccess {
         }
     }
 
+
     @Override
     public void clear() throws Exception {
         try (var connection = DatabaseManager.getConnection()) {
@@ -76,6 +80,7 @@ public class SQLDataAccess implements DataAccess {
             statement.executeUpdate();
         }
     }
+
 
     @Override
     public AuthData createAuth(String username) throws Exception {
@@ -93,9 +98,11 @@ public class SQLDataAccess implements DataAccess {
         }
     }
 
+
     private String generateAuthToken() {
         return UUID.randomUUID().toString();
     }
+
 
     @Override
     public AuthData getAuth(String authToken) throws Exception {
@@ -112,6 +119,7 @@ public class SQLDataAccess implements DataAccess {
         }
     }
 
+
     @Override
     public void deleteAuth(String authToken) throws Exception {
         try (var connection = DatabaseManager.getConnection()) {
@@ -124,6 +132,7 @@ public class SQLDataAccess implements DataAccess {
             // wouldn't happen since it's handled by service, but I need a fail test
         }
     }
+
 
     @Override
     public int createGameData(String gameName) throws Exception {
@@ -144,6 +153,7 @@ public class SQLDataAccess implements DataAccess {
         }
     }
 
+
     public void updateGame(int gameID, ChessGame game) throws Exception {
         try (var connection = DatabaseManager.getConnection()) {
 
@@ -153,6 +163,7 @@ public class SQLDataAccess implements DataAccess {
             statement.executeUpdate();
         }
     }
+
 
     @Override
     public GameData getGame(int gameID) throws Exception {
@@ -174,6 +185,7 @@ public class SQLDataAccess implements DataAccess {
         }
     }
 
+
     @Override
     public void updateGamePlayers(int gameID, String teamColor) throws Exception {
         try (var connection = DatabaseManager.getConnection()) {
@@ -188,6 +200,7 @@ public class SQLDataAccess implements DataAccess {
             }
         }
     }
+
 
     @Override
     public ArrayList<GameData> getAllGames() throws Exception {
@@ -209,6 +222,7 @@ public class SQLDataAccess implements DataAccess {
             return allGames;
         }
     }
+
 
     @Override
     public void joinGame(String username, int gameID, String playerColor) throws Exception {

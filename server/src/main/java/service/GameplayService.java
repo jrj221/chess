@@ -2,7 +2,7 @@ package service;
 
 import chess.*;
 import dataaccess.*;
-import datamodel.GameData;
+import datamodel.*;
 
 public class GameplayService {
     private final DataAccess dataAccess;
@@ -13,12 +13,16 @@ public class GameplayService {
     }
 
 
-    public ChessGame getGame(int gameID) throws Exception {
+    public GameData getGame(String authToken, int gameID) throws Exception {
         try {
-            GameData gameData = dataAccess.getGame(gameID);
-            return gameData.game();
+            AuthData authData = dataAccess.getAuth(authToken);
+            return dataAccess.getGame(gameID);
         } catch (DataAccessException ex) {
-            throw new NoExistingGameException("No existing game");
+            if (ex.getMessage().equals("Game not found")) {
+                throw new NoExistingGameException("Game not found");
+            } else {
+                throw new UnauthorizedException("Unauthorized");
+            }
         }
     }
 
@@ -45,12 +49,12 @@ public class GameplayService {
     }
 
 
-    public String getPlayer(int gameID, ChessGame.TeamColor teamColor) throws Exception {
+    public UserData getPlayer(String authToken) throws Exception {
         try {
-            GameData gameData = dataAccess.getGame(gameID);
-            return teamColor.equals(ChessGame.TeamColor.WHITE) ? gameData.whiteUsername() : gameData.blackUsername();
+            AuthData authData = dataAccess.getAuth(authToken);
+            return dataAccess.getUser(authData.username());
         } catch (DataAccessException ex) {
-            throw new NoExistingGameException("No existing game");
+            throw new UnauthorizedException("Unauthorized");
         }
     }
 

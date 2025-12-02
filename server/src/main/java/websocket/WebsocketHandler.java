@@ -4,6 +4,7 @@ import chess.ChessGame;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
+import datamodel.*;
 import io.javalin.websocket.WsContext;
 import io.javalin.websocket.WsMessageContext;
 import service.GameplayService;
@@ -32,20 +33,17 @@ public class WebsocketHandler {
         UserGameCommand command = serializer.fromJson(ctx.message(), UserGameCommand.class);
         switch (command.getCommandType()) {
             case CONNECT:
-                ConnectCommand connectCommand = serializer.fromJson(ctx.message(), ConnectCommand.class);
-                connect(connectCommand, ctx);
+                connect(command, ctx);
                 break;
             case LEAVE:
-                LeaveCommand leaveCommand = serializer.fromJson(ctx.message(), LeaveCommand.class);
-                leave(leaveCommand, ctx);
+                leave(command, ctx);
                 break;
             case MAKE_MOVE:
                 MakeMoveCommand makeMoveCommand = serializer.fromJson(ctx.message(), MakeMoveCommand.class);
                 makeMove(makeMoveCommand, ctx);
                 break;
             case RESIGN:
-                ResignCommand resignCommand = serializer.fromJson(ctx.message(), ResignCommand.class);
-                resign(resignCommand);
+                resign(command);
                 break;
             default:
                 ctx.send(serializer.toJson(new ErrorMessage("Invalid command")));
@@ -53,23 +51,37 @@ public class WebsocketHandler {
     }
 
 
-    private void connect(ConnectCommand command, WsMessageContext ctx) throws Exception {
-        ConnectCommand connectCommand = new Gson().fromJson(ctx.message(), ConnectCommand.class);
-        ctx.enableAutomaticPings(); // is this where I turn it on?
-        connectionsManager.add(ctx.session);
+    private void connect(UserGameCommand command, WsMessageContext ctx) throws Exception {
+        try {
+            ctx.enableAutomaticPings(); // is this where I turn it on?
+            connectionsManager.add(ctx.session);
 
-        if (connectCommand.state.equals("player")) {
-            connectionsManager.broadcastNotif(
-                    new NotificationMessage(String.format("%s connected to the game on team %s.",
-                            connectCommand.username, connectCommand.teamColor)));
-        } else {
-            connectionsManager.broadcastNotif(
-                    new NotificationMessage(String.format("%s connected to the game as an observer",
-                            connectCommand.username)));
+            UserData userData = gameplayService.getPlayer(command.getAuthToken());
+            GameData gameData = gameplayService.getGame(command.getAuthToken(), command.getGameID());
+            boolean isPlayer = false;
+            String teamColor = null;
+            String username = userData.username();
+            if (username.equals(gameData.whiteUsername())) {
+                teamColor = "WHITE";
+                isPlayer = true;
+            } else if (username.equals(gameData.blackUsername())) {
+                teamColor = "BLACK";
+                isPlayer = true;
+            }
+
+            if (isPlayer) {
+                connectionsManager.broadcastNotif(
+                        new NotificationMessage(String.format("%s connected to the game on team %s.",
+                                username, teamColor)));
+            } else {
+                connectionsManager.broadcastNotif(
+                        new NotificationMessage(String.format("%s connected to the game as an observer",
+                                username)));
+            }
+            ctx.send(new Gson().toJson(new LoadGameMessage(gameData.game())));
+        } catch (Exception ex) {
+            ctx.send(new ErrorMessage(ex.getMessage()));
         }
-
-        ChessGame game = gameplayService.getGame(command.getGameID());
-        ctx.send(new Gson().toJson(new LoadGameMessage(game)));
     }
 
 
@@ -118,7 +130,7 @@ public class WebsocketHandler {
     }
 
 
-    private void leave(LeaveCommand command, WsMessageContext ctx) throws Exception {
+    private void leave(UserGameCommand command, WsMessageContext ctx) throws Exception {
         connectionsManager.remove(ctx.session);
         gameplayService.leave(command.getGameID(), command.teamColor);
         connectionsManager.broadcastNotif(
@@ -126,7 +138,7 @@ public class WebsocketHandler {
     }
 
 
-    private void resign(ResignCommand command) throws Exception {
+    private void resign(UserGameCommand command) throws Exception {
         // end game and broadcast game object where you can't do moves anymore
         connectionsManager.broadcastGame(
                 new LoadGameMessage(gameplayService.endGame(command.getGameID())));
