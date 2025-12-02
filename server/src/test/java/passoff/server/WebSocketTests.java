@@ -162,16 +162,16 @@ public class WebSocketTests {
         setupNormalGame();
 
         //Fools mate setup
-        ChessMove move = new ChessMove(new ChessPosition(2, 7), new ChessPosition(4, 7), null);
+        ChessMove move = new ChessMove(new ChessPosition(2, 7), new ChessPosition(4, 7), null); // g2 g4
         makeMove(white, gameID, move, true, false, Set.of(black, observer), Set.of(), "first move");
-        move = new ChessMove(new ChessPosition(7, 5), new ChessPosition(6, 5), null);
+        move = new ChessMove(new ChessPosition(7, 5), new ChessPosition(6, 5), null); // e7 e6
         makeMove(black, gameID, move, true, false, Set.of(white, observer), Set.of(), "second move");
-        move = new ChessMove(new ChessPosition(2, 6), new ChessPosition(3, 6), null);
+        move = new ChessMove(new ChessPosition(2, 6), new ChessPosition(3, 6), null); // f2 f3
         makeMove(white, gameID, move, true, false, Set.of(black, observer), Set.of(), "third move");
-        move = new ChessMove(new ChessPosition(8, 4), new ChessPosition(4, 8), null);
+        move = new ChessMove(new ChessPosition(8, 4), new ChessPosition(4, 8), null); // d8 h4
         makeMove(black, gameID, move, true, true, Set.of(white, observer), Set.of(), "checkmate move");
         //checkmate--attempt another move
-        move = new ChessMove(new ChessPosition(2, 5), new ChessPosition(4, 5), null);
+        move = new ChessMove(new ChessPosition(2, 5), new ChessPosition(4, 5), null); // e2 e4
         makeMove(white, gameID, move, false, false, Set.of(black, observer), Set.of(), "invalid move");
     }
 

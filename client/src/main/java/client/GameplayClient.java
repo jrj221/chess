@@ -18,7 +18,6 @@ public class GameplayClient implements Client, ServerMessageHandler {
     private String teamColor;
     private int gameID;
     private String authToken;
-    private String username;
     private ChessGame game;
     private String state;
     private boolean resignPromtedOnce = false;
@@ -28,9 +27,8 @@ public class GameplayClient implements Client, ServerMessageHandler {
         gameID = Integer.parseInt(stringGameID.replace("!\n", ""));
         this.teamColor = teamColor;
         authToken = facade.getAuthToken();
-        username = facade.getUsername();
         state = joinedOrObserved;
-        websocketFacade.send(new ConnectCommand(username, authToken, gameID, teamColor, state));
+        websocketFacade.send(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID));
     }
 
     public void printPrompt() {
@@ -97,7 +95,7 @@ public class GameplayClient implements Client, ServerMessageHandler {
     }
 
     private String leave() throws Exception {
-        websocketFacade.send(new LeaveCommand(username, authToken, gameID, teamColor));
+        websocketFacade.send(new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID));
         return "Successfully left the game!";
     }
 
@@ -114,7 +112,7 @@ public class GameplayClient implements Client, ServerMessageHandler {
             return "Enter the command again if you are sure you want to resign and forfeit the game.";
         }
         resignPromtedOnce = false;
-        websocketFacade.send(new ResignCommand(username, authToken, gameID, teamColor));
+        websocketFacade.send(new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID));
         return "Successfully resigned";
     }
 
@@ -122,9 +120,6 @@ public class GameplayClient implements Client, ServerMessageHandler {
     private String makeMove(String[] inputWords) throws Exception {
         if (state.equals("observer")) {
             throw new Exception("Observers cannot make moves");
-        }
-        if (game.getIsGameOver()) {
-            return "Game is over, no more moves can be made";
         }
         if (inputWords.length == 3 || inputWords.length == 4) {
             var start = inputWords[1];
@@ -154,9 +149,8 @@ public class GameplayClient implements Client, ServerMessageHandler {
             var startPosition = new ChessPosition(convertedStart.charAt(0) - '0', convertedStart.charAt(1) - '0');
             var endPosition = new ChessPosition(convertedEnd.charAt(0) - '0', convertedEnd.charAt(1) - '0');
 
-            var moveString = String.format("%s to %s", start, end);
             var move = new ChessMove(startPosition, endPosition, promotionPiece);
-            websocketFacade.send(new MakeMoveCommand(move, moveString, username, authToken, gameID, teamColor));
+            websocketFacade.send(new MakeMoveCommand(move, authToken, gameID));
             return String.format("Attempted move from %s to %s", start, end);
             // not the best way to handle this since it could fail
         }

@@ -188,6 +188,9 @@ public class SQLDataAccess implements DataAccess {
 
     @Override
     public void updateGamePlayers(int gameID, String teamColor) throws Exception {
+        if (teamColor == null) {
+            return;
+        }
         try (var connection = DatabaseManager.getConnection()) {
             if (teamColor.equals("WHITE")) {
                 var statement = connection.prepareStatement("UPDATE games SET whiteUsername = NULL WHERE gameID = ?");
