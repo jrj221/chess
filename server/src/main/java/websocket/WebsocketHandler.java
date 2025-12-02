@@ -1,8 +1,6 @@
 package websocket;
 
-import chess.ChessGame;
-import chess.ChessMove;
-import chess.InvalidMoveException;
+import chess.*;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import datamodel.*;
@@ -10,11 +8,8 @@ import io.javalin.websocket.WsContext;
 import io.javalin.websocket.WsMessageContext;
 import service.GameplayService;
 import websocket.commands.*;
-import websocket.messages.ErrorMessage;
-import websocket.messages.LoadGameMessage;
-import websocket.messages.NotificationMessage;
+import websocket.messages.*;
 
-import javax.xml.crypto.Data;
 
 public class WebsocketHandler {
     private final GameplayService gameplayService;
@@ -46,7 +41,7 @@ public class WebsocketHandler {
                 makeMove(makeMoveCommand, ctx);
                 break;
             case RESIGN:
-                resign(command);
+                resign(command, ctx);
                 break;
             default:
                 ctx.send(serializer.toJson(new ErrorMessage("Invalid command")));
@@ -54,7 +49,7 @@ public class WebsocketHandler {
     }
 
 
-    private void connect(UserGameCommand command, WsMessageContext ctx) throws Exception {
+    private void connect(UserGameCommand command, WsMessageContext ctx) {
         try {
             ctx.enableAutomaticPings(); // is this where I turn it on?
             connectionsManager.add(ctx.session);
@@ -89,7 +84,7 @@ public class WebsocketHandler {
     }
 
 
-    private void makeMove(MakeMoveCommand command, WsMessageContext ctx) throws Exception {
+    private void makeMove(MakeMoveCommand command, WsMessageContext ctx) {
         try {
             UserData userData = gameplayService.getPlayer(command.getAuthToken());
             GameData gameData = gameplayService.getGame(command.getAuthToken(), command.getGameID());
@@ -148,7 +143,7 @@ public class WebsocketHandler {
     }
 
 
-    private void leave(UserGameCommand command, WsMessageContext ctx) throws Exception {
+    private void leave(UserGameCommand command, WsMessageContext ctx) {
         try {
             UserData userData = gameplayService.getPlayer(command.getAuthToken());
             GameData gameData = gameplayService.getGame(command.getAuthToken(), command.getGameID());
@@ -172,14 +167,30 @@ public class WebsocketHandler {
     }
 
 
-    private void resign(UserGameCommand command) throws Exception {
-        // end game and broadcast game object where you can't do moves anymore
-        connectionsManager.broadcastGame(
-                new LoadGameMessage(gameplayService.endGame(command.getGameID())));
-        var winner = gameplayService.getPlayer(command.getGameID(), command.enemyColor);
-        connectionsManager.broadcastNotif(
-                new NotificationMessage(String.format("%s has resigned. Team %s wins by default!",
-                        command.username, winner)));
+    private void resign(UserGameCommand command, WsMessageContext ctx) {
+        try {
+            // end game and broadcast game object where you can't do moves anymore
+
+            UserData userData = gameplayService.getPlayer(command.getAuthToken());
+            GameData gameData = gameplayService.getGame(command.getAuthToken(), command.getGameID());
+
+            String enemyColor = null;
+            String username = userData.username();
+            if (username.equals(gameData.whiteUsername())) {
+                enemyColor = "BLACK";
+            } else if (username.equals(gameData.blackUsername())) {
+                enemyColor = "WHITE";
+            }
+
+            connectionsManager.broadcastGame(
+                    new LoadGameMessage(gameplayService.endGame(command.getAuthToken(), command.getGameID())));
+            connectionsManager.broadcastNotif(
+                    new NotificationMessage(String.format("%s has resigned. Team %s wins by default!",
+                            username, enemyColor)));
+        } catch (Exception ex) {
+            var errorMessageString = new Gson().toJson(new ErrorMessage(ex.getMessage()));
+            ctx.send(errorMessageString);
+        }
     }
 
 
