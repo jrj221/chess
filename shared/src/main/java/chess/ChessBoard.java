@@ -69,4 +69,46 @@ public class ChessBoard {
             addPiece(new ChessPosition(row, 8), new ChessPiece(team, ChessPiece.PieceType.ROOK));
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessBoard that = (ChessBoard) o;
+        return Objects.deepEquals(board, that.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(board);
+    }
+
+    @Override
+    public String toString() {
+        var boardString = new StringBuilder();
+        boardString.append("\n");
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                var piece = board[i][j];
+                var pieceType = piece == null ? "   " : switch (piece.getPieceType()) { // can we make this different?
+                    case KING   -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
+                            ? "\u001b[38;5;15m" + " ♚ "  : "\u001B[38;5;0M" + " ♚ " ;
+                    case QUEEN  -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
+                            ? "\u001b[38;5;15m" + " ♛ "  : "\u001B[38;5;0M" + " ♛ " ;
+                    case BISHOP -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
+                            ? "\u001b[38;5;15m" + " ♝ "  : "\u001B[38;5;0M" + " ♝ " ;
+                    case KNIGHT -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
+                            ? "\u001b[38;5;15m" + " ♞ "  : "\u001B[38;5;0M" + " ♞ ";
+                    case ROOK   -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
+                            ? "\u001b[38;5;15m" + " ♜ "  : "\u001B[38;5;0M" + " ♜ " ;
+                    case PAWN   -> piece.getTeamColor() == ChessGame.TeamColor.WHITE
+                            ? "\u001b[38;5;15m" + " ♟ "  : "\u001B[38;5;0M" + " ♟ ";
+                };
+                boardString.append(pieceType);
+            }
+            boardString.append("\n");
+        }
+        return boardString.toString();
+    }
 }

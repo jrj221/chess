@@ -18,7 +18,7 @@ public class ChessGame {
     boolean isGameOver = false;
 
     public ChessGame() {
-        this.board = new ChessBoard();
+        board = new ChessBoard();
         board.resetBoard(); //creating a game object will start with a default board
     }
 
@@ -132,6 +132,7 @@ public class ChessGame {
         }
         return teamPositions;
     }
+
 
     public ChessPosition getKingPosition(ChessGame.TeamColor teamColor) {
         for (int i = 1; i < 9; i++) {
@@ -248,12 +249,17 @@ public class ChessGame {
             return false;
         }
         ChessGame chessGame = (ChessGame) o;
-        return Objects.equals(board, chessGame.board) && currentTurn == chessGame.currentTurn;
+        return isGameOver == chessGame.isGameOver && Objects.equals(board, chessGame.board)
+                && currentTurn.equals(chessGame.currentTurn);
     }
-
 
     @Override
     public int hashCode() {
-        return Objects.hash(board, currentTurn);
+        return Objects.hash(board, currentTurn, isGameOver);
+    }
+
+    @Override
+    public String toString() {
+        return board.toString();
     }
 }
