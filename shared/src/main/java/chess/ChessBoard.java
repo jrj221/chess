@@ -68,19 +68,5 @@ public class ChessBoard {
             addPiece(new ChessPosition(row, 7), new ChessPiece(team, ChessPiece.PieceType.KNIGHT));
             addPiece(new ChessPosition(row, 8), new ChessPiece(team, ChessPiece.PieceType.ROOK));
         }
-
-        // for testing
-//        removePiece(new ChessPosition(8, 5)); // white queen
-//        removePiece(new ChessPosition(1, 4)); // black king
-//        removePiece(new ChessPosition(1, 1));
-//        removePiece(new ChessPosition(1, 2));
-//        removePiece(new ChessPosition(1, 3));
-//        removePiece(new ChessPosition(2, 3));
-//        addPiece(new ChessPosition(2,1), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
-//        addPiece(new ChessPosition(2,2), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK));
-//        removePiece(new ChessPosition(1, 4));
-//        removePiece(new ChessPosition(2, 4));
-//        addPiece(new ChessPosition(1,2), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING));
-//        addPiece(new ChessPosition(5,4), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN));
     }
 }
