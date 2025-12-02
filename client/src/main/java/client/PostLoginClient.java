@@ -5,7 +5,6 @@ import datamodel.BadRequestException;
 import datamodel.GameData;
 import datamodel.NoExistingGameException;
 import serverfacade.ServerFacade;
-import ui.EscapeSequences;
 
 import java.util.ArrayList;
 import java.util.Map;

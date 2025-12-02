@@ -2,7 +2,6 @@ package client;
 
 import chess.*;
 import serverfacade.ServerFacade;
-import ui.EscapeSequences;
 import websocket.WebsocketFacade;
 import websocket.commands.*;
 
