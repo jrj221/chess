@@ -5,15 +5,15 @@ import datamodel.BadRequestException;
 import datamodel.GameData;
 import datamodel.NoExistingGameException;
 import serverfacade.ServerFacade;
-
+import static ui.EscapeSequences.*;
 import java.util.ArrayList;
 import java.util.Map;
 
 public class PostLoginClient implements Client {
 
     public void printPrompt() {
-        System.out.print(EscapeSequences.SET_TEXT_COLOR_GREEN + "[LOGGED_IN] " +
-                EscapeSequences.RESET_TEXT_COLOR + ">>> ");
+        System.out.print(SET_TEXT_COLOR_GREEN + "[LOGGED_IN] " +
+                RESET_TEXT_COLOR + ">>> ");
     }
 
     static ServerFacade facade = new ServerFacade(8080);

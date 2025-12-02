@@ -14,7 +14,6 @@ import java.util.List;
 public class ServerFacade {
     Integer port;
     static String authToken = ""; // static shares it across instances so switching clients doesn't affect it
-    static String username;
 
     public ServerFacade(Integer port) {
         this.port = port;
@@ -25,10 +24,6 @@ public class ServerFacade {
         return authToken;
     }
 
-
-    public String getUsername() {
-        return username;
-    }
 
 
     public void setAuthToken(String string) { authToken = string; } // only used for testing
@@ -47,7 +42,6 @@ public class ServerFacade {
             case 200:
                 var responseJson = new Gson().fromJson(response.body(), RegisterResponse.class);
                 authToken = responseJson.authToken();
-                username = responseJson.username();
                 return;
             case 400:
                 throw new BadRequestException("You are missing one of three fields: " +
@@ -73,7 +67,6 @@ public class ServerFacade {
             case 200: {
                 var responseJson = new Gson().fromJson(response.body(), LoginResponse.class); // refer to GPT if the type casting is being weird
                 authToken = responseJson.authToken();
-                username = responseJson.username();
                 return;
             } case 400: {
                 throw new BadRequestException("You are missing one of two fields: USERNAME or PASSWORD. " +
