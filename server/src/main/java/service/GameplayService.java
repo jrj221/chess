@@ -1,17 +1,12 @@
 package service;
 
 import chess.*;
-import dataaccess.DataAccess;
-import dataaccess.DataAccessException;
-import dataaccess.NoExistingGameException;
+import dataaccess.*;
 import datamodel.GameData;
-import static ui.EscapeSequences.*;
-
-import java.util.HashMap;
-import java.util.List;
 
 public class GameplayService {
     private final DataAccess dataAccess;
+
 
     public GameplayService(DataAccess dataAccess) { // constructor
         this.dataAccess = dataAccess;
@@ -27,9 +22,11 @@ public class GameplayService {
         }
     }
 
+
     public void leave(int gameID, String teamColor) throws Exception {
         dataAccess.updateGamePlayers(gameID, teamColor);
     }
+
 
     public ChessGame makeMove(int gameID, ChessMove move, ChessGame.TeamColor teamColor) throws Exception {
         try {
@@ -46,6 +43,7 @@ public class GameplayService {
             throw new NoExistingGameException("No existing game");
         }
     }
+
 
     public String getPlayer(int gameID, ChessGame.TeamColor teamColor) throws Exception {
         try {
