@@ -1,6 +1,7 @@
 package websocket;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
@@ -80,49 +81,64 @@ public class WebsocketHandler {
             }
             ctx.send(new Gson().toJson(new LoadGameMessage(gameData.game())));
         } catch (Exception ex) {
-            ctx.send(new ErrorMessage(ex.getMessage()));
+            var errorMessageString = new Gson().toJson(new ErrorMessage(ex.getMessage()));
+            ctx.send(errorMessageString);
         }
     }
 
 
     private void makeMove(MakeMoveCommand command, WsMessageContext ctx) throws Exception {
         try {
-            ChessGame updatedGame = gameplayService.makeMove(command.getGameID(), command.move, command.teamColor);
+            UserData userData = gameplayService.getPlayer(command.getAuthToken());
+            GameData gameData = gameplayService.getGame(command.getAuthToken(), command.getGameID());
+
+            ChessGame.TeamColor teamColor = null;
+            ChessGame.TeamColor enemyColor = null;
+            ChessMove move = command.move;
+            String username = userData.username();
+            String enemyUsername = null;
+            if (username.equals(gameData.whiteUsername())) {
+                teamColor = ChessGame.TeamColor.WHITE;
+                enemyColor = ChessGame.TeamColor.BLACK;
+                enemyUsername = gameData.blackUsername();
+            } else if (username.equals(gameData.blackUsername())) {
+                teamColor = ChessGame.TeamColor.BLACK;
+                enemyColor = ChessGame.TeamColor.WHITE;
+                enemyUsername = gameData.whiteUsername();
+            }
+
+            ChessGame updatedGame = gameplayService.makeMove(command.getGameID(), command.move, teamColor);
             connectionsManager.broadcastGame(new LoadGameMessage(updatedGame));
             connectionsManager.broadcastNotif(
                     new NotificationMessage(String.format("%s moved %s.",
-                            command.username,
-                            command.moveString)));
+                            username,
+                            move.toString())));
 
-            var enemy = command.enemyColor;
             // send notif if a team is in checkmate and end the game
-            if (updatedGame.isInCheckmate(enemy)) {
-                var player = gameplayService.getPlayer(command.getGameID(), enemy);
+            if (updatedGame.isInCheckmate(enemyColor)) {
                 connectionsManager.broadcastNotif(
-                        new NotificationMessage(String.format("Checkmate! %s loses!\n", player)));
+                        new NotificationMessage(String.format("Checkmate! %s loses!\n", enemyUsername)));
                 connectionsManager.broadcastGame(
-                        new LoadGameMessage(gameplayService.endGame(command.getGameID())));
+                        new LoadGameMessage(gameplayService.endGame(command.getAuthToken(), command.getGameID())));
             }
 
             // send notif if enemy team is in check.
-            else if (updatedGame.isInCheck(enemy)) {
-                var player = gameplayService.getPlayer(command.getGameID(), enemy);
+            else if (updatedGame.isInCheck(enemyColor)) {
                 connectionsManager.broadcastNotif(
                         new NotificationMessage(String.format("%s is in check!\n " +
                                         "Moves that do not get them out of check are considered illegal."
-                                , player)));
+                                , enemyUsername)));
             }
 
             // send notif if there is a stalemate.
-            else if (updatedGame.isInStalemate(enemy)) {
-                var player = gameplayService.getPlayer(command.getGameID(), enemy);
+            else if (updatedGame.isInStalemate(enemyColor)) {
                 connectionsManager.broadcastNotif(
                         new NotificationMessage(
-                                String.format("Draw! %s is in a stalemate!\n ", player)));
+                                String.format("Draw! %s is in a stalemate!\n ", enemyUsername)));
                 connectionsManager.broadcastGame(
-                        new LoadGameMessage(gameplayService.endGame(command.getGameID())));
+                        new LoadGameMessage(gameplayService.endGame(command.getAuthToken(), command.getGameID())));
             }
-        } catch (InvalidMoveException ex) {
+        } catch (Exception ex) {
             var errorMessage = new ErrorMessage(ex.getMessage());
             var errorMessageString = new Gson().toJson(errorMessage);
             ctx.send(errorMessageString);

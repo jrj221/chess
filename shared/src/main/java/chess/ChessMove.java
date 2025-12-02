@@ -64,8 +64,23 @@ public class ChessMove {
 
     @Override
     public String toString() {
-        //return String.format("Start: %s, End: %s", startPosition, endPosition);
-        return String.format("End: %s", endPosition);
+        String startString = toLetter(startPosition.getColumn()) + startPosition.getRow();
+        String endString = toLetter(endPosition.getColumn()) + endPosition.getRow();
+        return "from " + startString + " to " + endString;
+    }
+
+    private String toLetter(int col) {
+        return switch (col) {
+            case 1 -> "A";
+            case 2 -> "B";
+            case 3 -> "C";
+            case 4 -> "D";
+            case 5 -> "E";
+            case 6 -> "F";
+            case 7 -> "G";
+            case 8 -> "H";
+            default -> null; // won't happen but it wanted one
+        };
     }
 
 

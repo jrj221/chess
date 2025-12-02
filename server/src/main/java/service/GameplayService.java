@@ -15,7 +15,7 @@ public class GameplayService {
 
     public GameData getGame(String authToken, int gameID) throws Exception {
         try {
-            AuthData authData = dataAccess.getAuth(authToken);
+            dataAccess.getAuth(authToken); // will throw error if unauthorized
             return dataAccess.getGame(gameID);
         } catch (DataAccessException ex) {
             if (ex.getMessage().equals("Game not found")) {
@@ -59,15 +59,20 @@ public class GameplayService {
     }
 
 
-    public ChessGame endGame(int gameID) throws Exception {
+    public ChessGame endGame(String authToken, int gameID) throws Exception {
         try {
+            dataAccess.getAuth(authToken); // will throw error if unauthorized
             GameData gameData = dataAccess.getGame(gameID);
             var game = gameData.game();
-            game.endGame();
+            game.endGame(); // sets isGameOver to true
             dataAccess.updateGame(gameID, game);
             return game;
         } catch (DataAccessException ex) {
-            throw new NoExistingGameException("No existing game");
+            if (ex.getMessage().equals("Game not found")) {
+                throw new NoExistingGameException("Game not found");
+            } else {
+                throw new UnauthorizedException("Unauthorized");
+            }
         }
     }
 }
