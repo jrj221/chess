@@ -14,6 +14,8 @@ import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 
+import javax.xml.crypto.Data;
+
 public class WebsocketHandler {
     private final GameplayService gameplayService;
     private final ConnectionsManager connectionsManager;
@@ -147,10 +149,26 @@ public class WebsocketHandler {
 
 
     private void leave(UserGameCommand command, WsMessageContext ctx) throws Exception {
-        connectionsManager.remove(ctx.session);
-        gameplayService.leave(command.getGameID(), command.teamColor);
-        connectionsManager.broadcastNotif(
-                new NotificationMessage(String.format("%s left the game.", command.username)));
+        try {
+            UserData userData = gameplayService.getPlayer(command.getAuthToken());
+            GameData gameData = gameplayService.getGame(command.getAuthToken(), command.getGameID());
+
+            String teamColor = null;
+            String username = userData.username();
+            if (username.equals(gameData.whiteUsername())) {
+                teamColor = "WHITE";
+            } else if (username.equals(gameData.blackUsername())) {
+                teamColor = "BLACK";
+            }
+
+            connectionsManager.remove(ctx.session);
+            gameplayService.leave(command.getGameID(), teamColor);
+            connectionsManager.broadcastNotif(
+                    new NotificationMessage(String.format("%s left the game.", username)));
+        } catch (Exception ex) {
+            var errorMessageString = new Gson().toJson(new ErrorMessage(ex.getMessage()));
+            ctx.send(errorMessageString);
+        }
     }
 
 
