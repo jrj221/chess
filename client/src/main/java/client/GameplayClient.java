@@ -93,6 +93,7 @@ public class GameplayClient implements Client, ServerMessageHandler {
         printPrompt();
     }
 
+
     private String leave() throws Exception {
         websocketFacade.send(new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID));
         return "Successfully left the game!";

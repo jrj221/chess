@@ -190,6 +190,8 @@ public class ChessGame {
                 var currPiece = board.getPiece(allyMove.getEndPosition()); // test move might eliminate an enemy
                 board.addPiece(allyMove.getEndPosition(), allyPiece);
                 if (!isInCheck(teamColor)) {
+                    board.addPiece(allyMove.getEndPosition(), currPiece);
+                    board.addPiece(startPosition, allyPiece);
                     return false; // there exists a move where you aren't in check
                 }
                 board.addPiece(allyMove.getEndPosition(), currPiece);
