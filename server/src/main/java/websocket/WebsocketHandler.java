@@ -132,6 +132,7 @@ public class WebsocketHandler {
                         new NotificationMessage(String.format("%s is in check!\n " +
                                         "Moves that do not get them out of check are considered illegal."
                                 , enemyUsername)), command.getGameID());
+                connectionsManager.broadcastGame(new LoadGameMessage(updatedGame), command.getGameID());
             }
 
             // send notif if there is a stalemate.

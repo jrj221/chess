@@ -19,7 +19,6 @@ public class GameplayClient implements Client, ServerMessageHandler {
     private String authToken;
     private ChessGame game;
     private String state;
-    private boolean resignPromtedOnce = false;
 
 
     public GameplayClient(String stringGameID, String teamColor, String joinedOrObserved) throws Exception {
@@ -107,13 +106,14 @@ public class GameplayClient implements Client, ServerMessageHandler {
         if (game.getIsGameOver()) {
             return "Game already over";
         }
-        if (!resignPromtedOnce) {
-            resignPromtedOnce = true;
-            return "Enter the command again if you are sure you want to resign and forfeit the game.";
+        System.out.println("Enter the command again if you are sure you want to resign and forfeit the game.");
+        Scanner scanner = new Scanner(System.in);
+        var answer = scanner.nextLine();
+        if (answer.equals("yes")) {
+            websocketFacade.send(new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID));
+            return "Successfully resigned";
         }
-        resignPromtedOnce = false;
-        websocketFacade.send(new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID));
-        return "Successfully resigned";
+        return "";
     }
 
 
